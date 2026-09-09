@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --vio: #7429e0;
+
+  /* Cus* komponentlar (components/ui/) ishlatadigan token'lar —
+     ParkOps'dan ko'chirilgan, hozircha faqat light-tema qiymatlari. */
+  --bg-main: #e6e6e8;
+  --bg-second: #ffffff;
+  --bg-hover: #f2f2f3;
+  --bg-input: #ffffff;
+  --bg-tooltip: #1d1f20;
+  --border-default: rgba(29, 31, 32, 0.16);
+  --border-2: rgba(29, 31, 32, 0.28);
+  --border-input: rgba(29, 31, 32, 0.2);
+  --text-default: #1d1f20;
+  --text-2: #3a3d3f;
+  --text-3: #55585a;
+  --text-4: #7a7d80;
+  --text-muted: #8a8d90;
+  --text-dim: #b6b6ba;
+  --color-blue: #3b82f6;
+}
+
+body {
+  margin: 0;
+  font-family: "Barlow", system-ui, sans-serif;
+  background: #e6e6e8;
+}
+
+a {
+  color: var(--vio);
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(29, 31, 32, 0.2);
+}
