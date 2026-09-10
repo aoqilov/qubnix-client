@@ -13,8 +13,8 @@ export function initTelegramWebApp(): void {
   // Header/body oq (#ffffff) — shuni Telegram'ga aytib qo'yamiz, aks holda
   // status-bar soat/ikonalari kontrast rangini noto'g'ri (masalan oq fonda
   // oq matn) tanlab, ko'rinmay qolishi mumkin (Bot API 6.1+).
-  tg?.setHeaderColor?.("#ffffff");
-  tg?.setBackgroundColor?.("#ffffff");
+  tg?.setHeaderColor?.("#ff0000");
+  tg?.setBackgroundColor?.("#3b82f6");
 }
 
 export function getTelegramInitData(): string | null {
