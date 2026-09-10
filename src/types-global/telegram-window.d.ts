@@ -10,6 +10,14 @@ declare global {
         expand: () => void;
         colorScheme: "light" | "dark";
         themeParams: Record<string, string>;
+        // Bot API 8.0+ — eski Telegram klientlarida bo'lmasligi mumkin,
+        // shuning uchun optional (chaqirishda ham `?.()` ishlatiladi).
+        isFullscreen?: boolean;
+        requestFullscreen?: () => void;
+        exitFullscreen?: () => void;
+        setHeaderColor?: (color: string) => void;
+        onEvent?: (eventType: string, callback: () => void) => void;
+        offEvent?: (eventType: string, callback: () => void) => void;
         BackButton: {
           show: () => void;
           hide: () => void;

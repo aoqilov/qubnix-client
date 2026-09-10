@@ -4,6 +4,7 @@ export interface SessionUser {
   id: string;
   fullName: string;
   role: string;
+  phone?: string;
 }
 
 interface SessionState {
