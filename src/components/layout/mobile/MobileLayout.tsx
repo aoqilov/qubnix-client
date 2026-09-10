@@ -1,5 +1,4 @@
 import { Outlet } from "react-router-dom";
-import { Header } from "./header/Header";
 import { BottomTabBar } from "./nav/BottomTabBar";
 
 // Telegram (ayniqsa fullscreen rejimida) --tg-safe-area-inset-* (qurilma
