@@ -24,10 +24,28 @@
   --color-blue: #3b82f6;
 }
 
+.dark {
+  --bg-main: #17181a;
+  --bg-second: #1f2023;
+  --bg-hover: #26282b;
+  --bg-input: #1f2023;
+  --bg-tooltip: #f2f2f3;
+  --border-default: rgba(255, 255, 255, 0.12);
+  --border-2: rgba(255, 255, 255, 0.2);
+  --border-input: rgba(255, 255, 255, 0.16);
+  --text-default: #f2f2f3;
+  --text-2: #d4d4d6;
+  --text-3: #b0b0b3;
+  --text-4: #8a8a8d;
+  --text-muted: #75757a;
+  --text-dim: #55565a;
+}
+
 body {
   margin: 0;
   font-family: "Barlow", system-ui, sans-serif;
-  background: #e6e6e8;
+  background: var(--bg-main);
+  color: var(--text-default);
 }
 
 a {
