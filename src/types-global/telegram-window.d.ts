@@ -17,6 +17,9 @@ declare global {
         exitFullscreen?: () => void;
         setHeaderColor?: (color: string) => void;
         setBackgroundColor?: (color: string) => void;
+        isVerticalSwipesEnabled?: boolean;
+        enableVerticalSwipes?: () => void;
+        disableVerticalSwipes?: () => void;
         onEvent?: (eventType: string, callback: () => void) => void;
         offEvent?: (eventType: string, callback: () => void) => void;
         BackButton: {
