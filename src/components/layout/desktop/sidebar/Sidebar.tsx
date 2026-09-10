@@ -238,6 +238,7 @@ export function Sidebar() {
             </CusPopover>
 
             <div className="mt-4 flex flex-col gap-1 border-t border-neutral-200 pt-3 dark:border-white/10">
+              <SectionLabel>boshqaruv menu</SectionLabel>
               {BOTTOM_ITEMS.map((item) => (
                 <NavLink
                   key={item.to}
