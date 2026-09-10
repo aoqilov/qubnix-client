@@ -1,5 +1,6 @@
 import { Drawer, CloseButton } from "@chakra-ui/react";
 import type { ReactNode } from "react";
+import { LuArrowLeft } from "react-icons/lu";
 
 type DrawerSize = "xs" | "sm" | "md" | "lg" | "xl" | "full";
 type DrawerPlacement = "start" | "end" | "top" | "bottom";
@@ -14,6 +15,8 @@ interface CusDrawerProps {
   size?: DrawerSize;
   placement?: DrawerPlacement;
   closeOnBackdrop?: boolean;
+  closeOnEscape?: boolean;
+  backButton?: boolean;
 }
 
 export function CusDrawer({
@@ -26,6 +29,8 @@ export function CusDrawer({
   size = "md",
   placement = "end",
   closeOnBackdrop = true,
+  closeOnEscape = true,
+  backButton = false,
 }: CusDrawerProps) {
   const isBottom = placement === "bottom";
   const isTop = placement === "top";
@@ -38,7 +43,7 @@ export function CusDrawer({
       placement={placement}
       size={size}
       closeOnInteractOutside={closeOnBackdrop}
-      closeOnEscape
+      closeOnEscape={closeOnEscape}
       lazyMount
       unmountOnExit
     >
@@ -124,13 +129,23 @@ export function CusDrawer({
             </Drawer.Header>
           )}
 
-          {/* Close button */}
-          <Drawer.CloseTrigger asChild position="absolute" top="3.5" right="4">
+          {/* Close/back button */}
+          <Drawer.CloseTrigger
+            asChild
+            position="absolute"
+            top="3.5"
+            {...(backButton ? { left: "4" } : { right: "4" })}
+          >
             <CloseButton
               size="sm"
+              aria-label={backButton ? "Orqaga" : "Yopish"}
               color="var(--text-muted)"
               _hover={{ bg: "var(--bg-hover)", color: "var(--text-default)" }}
-            />
+            >
+              {backButton ? (
+                <LuArrowLeft size={16} color="var(--text-muted)" />
+              ) : undefined}
+            </CloseButton>
           </Drawer.CloseTrigger>
 
           {/* Body */}
@@ -184,6 +199,20 @@ export function CusDrawer({
 // ✅ Pastdan chiqadigan (mobile-friendly action sheet)
 // <CusDrawer placement="bottom" title="Amallar" size="md" ...>
 //   ...
+// </CusDrawer>
+
+// ✅ "Yangi sahifa" kabi to'liq ekran, faqat orqaga tugmasi bilan yopiladi
+// <CusDrawer
+//   open={open}
+//   onClose={() => setOpen(false)}
+//   placement="end"
+//   size="full"
+//   closeOnBackdrop={false}
+//   closeOnEscape={false}
+//   backButton
+//   title="Yangi vazifa"
+// >
+//   <CusInput label="Nomi" />
 // </CusDrawer>
 
 // ✅ Footer bilan
