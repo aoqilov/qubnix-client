@@ -1,20 +1,18 @@
 import type { RouteObject } from "react-router-dom";
-import Home from "@/pages/mobile/Home";
-import Tasks from "@/pages/mobile/Tasks";
-import TaskDetail from "@/pages/mobile/TaskDetail";
-import TaskCreate from "@/pages/mobile/TaskCreate";
-import Calendar from "@/pages/mobile/Calendar";
-import Stats from "@/pages/mobile/Stats";
-import Profile from "@/pages/mobile/Profile";
-import WorkspaceSettings from "@/pages/mobile/WorkspaceSettings";
+import { Navigate } from "react-router-dom";
+import MobileDoska from "@/pages/mobile/MobileDoska";
+import MobileProfile from "@/pages/mobile/MobileProfile";
+import MobileTasks from "@/pages/mobile/MobileTasks";
+import MobileCalendar from "@/pages/mobile/MobileCalendar";
+import MobileStatistics from "@/pages/mobile/MobileStatistics";
+import MobileSettings from "@/pages/mobile/MobileSettings";
 
 export const mobileRoutes: RouteObject[] = [
-  { path: "/", element: <Home /> },
-  { path: "/tasks", element: <Tasks /> },
-  { path: "/tasks/create", element: <TaskCreate /> },
-  { path: "/tasks/:id", element: <TaskDetail /> },
-  { path: "/calendar", element: <Calendar /> },
-  { path: "/stats", element: <Stats /> },
-  { path: "/profile", element: <Profile /> },
-  { path: "/workspace-settings", element: <WorkspaceSettings /> },
+  { path: "/", element: <Navigate to="/doska" replace /> },
+  { path: "/doska", element: <MobileDoska /> },
+  { path: "/profile", element: <MobileProfile /> },
+  { path: "/tasks", element: <MobileTasks /> },
+  { path: "/calendar", element: <MobileCalendar /> },
+  { path: "/statistics", element: <MobileStatistics /> },
+  { path: "/settings", element: <MobileSettings /> },
 ];

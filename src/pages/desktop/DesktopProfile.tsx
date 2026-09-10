@@ -1,5 +1,5 @@
 import FeatureProfile from "@/widgets/features/desktop/profile/FeatureProfile";
 
-export default function Profile() {
+export default function DesktopProfile() {
   return <FeatureProfile />;
 }

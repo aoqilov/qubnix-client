@@ -3,9 +3,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LuChevronDown,
   LuCheck,
-  LuKanban,
   LuUser,
-  LuListTodo,
   LuCalendar,
   LuChartColumn,
   LuSettings,

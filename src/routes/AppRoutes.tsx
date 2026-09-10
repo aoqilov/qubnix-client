@@ -3,7 +3,7 @@ import type { RouteObject } from "react-router-dom";
 import { useLayoutMode } from "@/hooks/useLayoutMode";
 import { AppLayout } from "@/components/layout/desktop/AppLayout";
 import { MobileLayout } from "@/components/layout/mobile/MobileLayout";
-import { webRoutes } from "./routes.web";
+import { desktopRoutes } from "./routes.desktop";
 import { mobileRoutes } from "./routes.mobile";
 import NotFound from "@/pages/NotFound";
 
@@ -15,7 +15,7 @@ export function AppRoutes() {
 
   const platformBranch: RouteObject =
     layoutMode === "desktop"
-      ? { element: <AppLayout />, children: webRoutes }
+      ? { element: <AppLayout />, children: desktopRoutes }
       : { element: <MobileLayout />, children: mobileRoutes };
 
   return useRoutes([platformBranch, { path: "*", element: <NotFound /> }]);

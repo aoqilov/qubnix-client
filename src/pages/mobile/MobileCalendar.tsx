@@ -1,5 +1,5 @@
 import FeatureCalendar from "@/widgets/features/mobile/calendar/FeatureCalendar";
 
-export default function Calendar() {
+export default function MobileCalendar() {
   return <FeatureCalendar />;
 }
