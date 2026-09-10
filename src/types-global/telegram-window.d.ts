@@ -16,6 +16,7 @@ declare global {
         requestFullscreen?: () => void;
         exitFullscreen?: () => void;
         setHeaderColor?: (color: string) => void;
+        setBackgroundColor?: (color: string) => void;
         onEvent?: (eventType: string, callback: () => void) => void;
         offEvent?: (eventType: string, callback: () => void) => void;
         BackButton: {

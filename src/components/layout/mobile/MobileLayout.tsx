@@ -16,7 +16,7 @@ const SAFE_AREA_STYLE = {
 export function MobileLayout() {
   return (
     <div className="flex h-screen flex-col" style={SAFE_AREA_STYLE}>
-      <Header />
+      {/* <Header /> */}
       <main className="flex-1 overflow-auto bg-neutral-100">
         <Outlet />
       </main>

@@ -10,6 +10,11 @@ export function initTelegramWebApp(): void {
   // metod umuman mavjud emas, shuning uchun expand() ham baribir chaqiriladi
   // (u eski klientlar uchun eng yaqin muqobil — maksimal balandlikka ochadi).
   tg?.requestFullscreen?.();
+  // Header/body oq (#ffffff) — shuni Telegram'ga aytib qo'yamiz, aks holda
+  // status-bar soat/ikonalari kontrast rangini noto'g'ri (masalan oq fonda
+  // oq matn) tanlab, ko'rinmay qolishi mumkin (Bot API 6.1+).
+  tg?.setHeaderColor?.("#ffffff");
+  tg?.setBackgroundColor?.("#ffffff");
 }
 
 export function getTelegramInitData(): string | null {
