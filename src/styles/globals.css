@@ -8,7 +8,7 @@
 
   /* Cus* komponentlar (components/ui/) ishlatadigan token'lar —
      ParkOps'dan ko'chirilgan, hozircha faqat light-tema qiymatlari. */
-  --bg-main: #e6e6e8;
+  --bg-main: #f5f5f591;
   --bg-second: #ffffff;
   --bg-hover: #f2f2f3;
   --bg-input: #ffffff;

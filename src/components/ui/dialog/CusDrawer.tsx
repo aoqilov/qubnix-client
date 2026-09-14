@@ -63,7 +63,7 @@ export function CusDrawer({
         }}
       >
         <Drawer.Content
-          bg="var(--bg-second)"
+          bg="var(--bg-main)"
           borderColor="var(--border-default)"
           borderWidth="1px"
           boxShadow="var(--shadow-modal)"
@@ -106,6 +106,7 @@ export function CusDrawer({
               borderColor="var(--border-default)"
               px="6"
               py="4"
+              bg="var(--bg-second)"
               flexShrink={0}
             >
               {title && (
