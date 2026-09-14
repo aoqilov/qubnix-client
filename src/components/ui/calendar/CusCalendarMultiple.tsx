@@ -64,11 +64,11 @@ export function CusCalendarMultiple({
   const [focused, setFocused] = useState(false);
 
   const hasError = !!errorText;
-  const borderColor = hasError ? "#ef4444" : focused ? "#3b82f6" : "var(--border-default)";
+  const borderColor = hasError ? "var(--color-red)" : focused ? "var(--color-blue)" : "var(--border-default)";
   const boxShadow = hasError
-    ? "0 0 0 1px #ef4444"
+    ? "0 0 0 1px var(--color-red)"
     : focused
-    ? "0 0 0 1px #3b82f6"
+    ? "0 0 0 1px var(--color-blue)"
     : "none";
 
   const fmt = (v: DateValue) =>
@@ -89,7 +89,7 @@ export function CusCalendarMultiple({
       {label && (
         <Field.Label fontSize="sm" fontWeight="medium" mb="1" color="var(--text-3)">
           {label}
-          <Field.RequiredIndicator color="#ef4444" ml="0.5" />
+          <Field.RequiredIndicator color="var(--color-red)" ml="0.5" />
         </Field.Label>
       )}
 
@@ -190,7 +190,7 @@ export function CusCalendarMultiple({
               border: "1px solid var(--border-default)",
               borderRadius: 12,
               padding: 12,
-              boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+              boxShadow: "var(--shadow-dropdown)",
             }}
           >
             <DatePicker.View view="day">
@@ -213,7 +213,7 @@ export function CusCalendarMultiple({
       </DatePicker.Root>
 
       {errorText && (
-        <Field.ErrorText fontSize="xs" color="#ef4444" mt="1">
+        <Field.ErrorText fontSize="xs" color="var(--color-red)" mt="1">
           {errorText}
         </Field.ErrorText>
       )}

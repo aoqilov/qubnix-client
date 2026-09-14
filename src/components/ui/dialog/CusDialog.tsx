@@ -35,7 +35,7 @@ export function CusDialog({
       lazyMount
       unmountOnExit
     >
-      <Dialog.Backdrop bg="rgba(0,0,0,0.55)" backdropFilter="blur(2px)" />
+      <Dialog.Backdrop bg="var(--overlay-backdrop)" backdropFilter="blur(2px)" />
 
       <Dialog.Positioner>
         <Dialog.Content
@@ -43,7 +43,7 @@ export function CusDialog({
           borderColor="var(--border-default)"
           borderWidth="1px"
           borderRadius={{ lgDown: "16px 16px 0 0", lg: "16px" }}
-          boxShadow="0 25px 50px rgba(0,0,0,0.4)"
+          boxShadow="var(--shadow-modal)"
           color="var(--text-default)"
           display="flex"
           flexDirection="column"

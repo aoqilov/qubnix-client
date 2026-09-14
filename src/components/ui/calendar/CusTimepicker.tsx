@@ -77,7 +77,7 @@ function TimeColumn({ items, selected, onSelect }: ColProps) {
               width: "100%",
               scrollSnapAlign: "center",
               background: "transparent",
-              color: isSelected ? "#3b82f6" : "var(--text-muted)",
+              color: isSelected ? "var(--color-blue)" : "var(--text-muted)",
               fontWeight: isSelected ? 700 : 400,
               fontSize: 13,
               fontVariantNumeric: "tabular-nums",
@@ -282,9 +282,9 @@ export function CusTimepicker({
           paddingRight: 10,
           fontSize: sz.fontSize,
           background: "var(--bg-input)",
-          border: `1px solid ${hasFocus ? "#3b82f6" : "var(--border-input)"}`,
+          border: `1px solid ${hasFocus ? "var(--color-blue)" : "var(--border-input)"}`,
           borderRadius: 8,
-          boxShadow: hasFocus ? "0 0 0 1px #3b82f6" : "none",
+          boxShadow: hasFocus ? "0 0 0 1px var(--color-blue)" : "none",
           opacity: disabled ? 0.5 : 1,
           transition: "border-color 0.15s, box-shadow 0.15s",
           cursor: disabled ? "not-allowed" : "text",
@@ -349,7 +349,7 @@ export function CusTimepicker({
             background: "var(--bg-second)",
             border: "1px solid var(--border-default)",
             borderRadius: 12,
-            boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+            boxShadow: "var(--shadow-dropdown)",
             overflow: "hidden",
             minWidth: withSeconds ? 210 : 150,
           }}
@@ -433,8 +433,8 @@ export function CusTimepicker({
                 type="button"
                 onClick={handleConfirm}
                 style={{
-                  background: "#3b82f6",
-                  color: "#fff",
+                  background: "var(--color-blue)",
+                  color: "var(--text-on-accent)",
                   border: "none",
                   borderRadius: 6,
                   padding: "4px 14px",

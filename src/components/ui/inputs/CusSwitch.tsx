@@ -68,14 +68,14 @@ export const CusSwitch = forwardRef<HTMLInputElement, CusSwitchProps>(
           <Switch.Control
             mt="0.5"
             bg="var(--border-2)"
-            _checked={{ bg: "#3b82f6" }}
-            _focusVisible={{ boxShadow: "0 0 0 3px #3b82f630" }}
+            _checked={{ bg: "var(--color-blue)" }}
+            _focusVisible={{ boxShadow: "0 0 0 3px var(--focus-ring-blue)" }}
             _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
-            _invalid={{ bg: "#ef444430", outlineColor: "#ef4444", outlineWidth: "1px", outlineStyle: "solid" }}
+            _invalid={{ bg: "var(--color-red-soft)", outlineColor: "var(--color-red)", outlineWidth: "1px", outlineStyle: "solid" }}
           >
             <Switch.Thumb
-              bg="white"
-              boxShadow="0 1px 3px rgba(0,0,0,0.25)"
+              bg="var(--text-on-accent)"
+              boxShadow="var(--shadow-sm)"
             />
           </Switch.Control>
 
@@ -91,7 +91,7 @@ export const CusSwitch = forwardRef<HTMLInputElement, CusSwitchProps>(
                 >
                   {label}
                   {isRequired && (
-                    <span style={{ color: "#ef4444", marginLeft: 3 }}>*</span>
+                    <span style={{ color: "var(--color-red)", marginLeft: 3 }}>*</span>
                   )}
                 </Switch.Label>
               )}
@@ -111,7 +111,7 @@ export const CusSwitch = forwardRef<HTMLInputElement, CusSwitchProps>(
         </Switch.Root>
 
         {errorText && (
-          <Field.ErrorText fontSize="xs" color="#ef4444" mt="1">
+          <Field.ErrorText fontSize="xs" color="var(--color-red)" mt="1">
             {errorText}
           </Field.ErrorText>
         )}

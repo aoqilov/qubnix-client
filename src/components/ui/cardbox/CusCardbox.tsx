@@ -11,7 +11,7 @@ export function CusCardbox({
 }: CusCardboxProps) {
   return (
     <div
-      className={`border border-neutral-300 bg-white p-4 dark:border-white/10 dark:bg-[var(--bg-second)] ${className}`}
+      className={`border border-[var(--border-default)] bg-[var(--bg-second)] p-4 ${className}`}
       {...props}
     >
       {children}

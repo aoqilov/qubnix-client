@@ -32,14 +32,14 @@ export function CusDialogDelete({
       lazyMount
       unmountOnExit
     >
-      <Dialog.Backdrop bg="rgba(0,0,0,0.55)" backdropFilter="blur(2px)" />
+      <Dialog.Backdrop bg="var(--overlay-backdrop)" backdropFilter="blur(2px)" />
       <Dialog.Positioner>
         <Dialog.Content
           bg="var(--bg-second)"
           borderColor="var(--border-default)"
           borderWidth="1px"
           borderRadius="14px"
-          boxShadow="0 20px 40px rgba(0,0,0,0.35)"
+          boxShadow="var(--shadow-modal)"
           color="var(--text-default)"
           maxW="400px"
           w="90vw"
@@ -51,14 +51,14 @@ export function CusDialogDelete({
                   width: 52,
                   height: 52,
                   borderRadius: "50%",
-                  background: "rgba(239,68,68,0.1)",
+                  background: "var(--color-red-soft)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   flexShrink: 0,
                 }}
               >
-                <LuTriangleAlert size={24} color="#ef4444" />
+                <LuTriangleAlert size={24} color="var(--color-red)" />
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <p style={{ fontSize: 15, fontWeight: 600, color: "var(--text-default)" }}>

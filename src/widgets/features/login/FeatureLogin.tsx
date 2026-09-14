@@ -12,12 +12,12 @@ export default function FeatureLogin() {
   const setSession = useSessionStore((s) => s.setSession);
 
   return (
-    <div className="flex h-screen items-center justify-center bg-neutral-100">
-      <div className="w-full max-w-sm bg-white p-8 text-center shadow-sm">
+    <div className="flex h-screen items-center justify-center bg-[var(--bg-main)]">
+      <div className="w-full max-w-sm bg-[var(--bg-second)] p-8 text-center shadow-sm">
         <h1 className="mb-2 font-condensed text-2xl tracking-wide text-vio">
           qubnix
         </h1>
-        <p className="mb-6 text-sm text-neutral-500">
+        <p className="mb-6 text-sm text-[var(--text-muted)]">
           Test rejimi — haqiqiy Telegram login hali ulanmagan
         </p>
         <CusButton

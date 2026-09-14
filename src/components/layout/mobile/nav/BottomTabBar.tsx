@@ -36,12 +36,12 @@ function TabIcon({
   Icon: ComponentType<{ size?: number; className?: string }>;
 }) {
   return isActive ? (
-    <span className="flex flex-row items-center gap-1.5 rounded-[18px] bg-vio px-4 py-2.5 text-white">
+    <span className="flex flex-row items-center gap-1.5 rounded-[18px] bg-vio px-4 py-2.5 text-[var(--text-on-accent)]">
       <Icon size={16} />
       <span className="font-condensed text-[14px] tracking-wide">{label}</span>
     </span>
   ) : (
-    <Icon size={20} className="text-neutral-400" />
+    <Icon size={20} className="text-[var(--text-muted)]" />
   );
 }
 // fix bvo
@@ -64,7 +64,7 @@ function TabBox({
 }) {
   return (
     <nav
-      className={`relative flex h-14 items-center overflow-hidden border border-neutral-200 bg-white px-1.5 ${className}`}
+      className={`relative flex h-14 items-center overflow-hidden border border-[var(--border-default)] bg-[var(--bg-second)] px-1.5 ${className}`}
     >
       <AnimatePresence initial={animateOnMount} custom={direction}>
         <motion.div
@@ -108,7 +108,7 @@ export function BottomTabBar() {
   const box2Tabs = BOX2_TABS[mode];
 
   return (
-    <div className="flex flex-none items-center justify-center gap-2 bg-neutral-100 py-3">
+    <div className="flex flex-none items-center justify-center gap-2 bg-[var(--bg-main)] py-3">
       <TabBox
         tabs={box1Tabs}
         mode={mode}

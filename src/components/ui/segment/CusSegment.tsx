@@ -6,7 +6,7 @@ const SCOPE = "cus-segment";
 
 const segmentStyles = `
   .${SCOPE} [data-part="item"][data-state="checked"] {
-    color: #ffffff !important;
+    color: var(--text-on-accent) !important;
   }
   .${SCOPE} [data-part="item"]:not([data-disabled]):hover {
     color: var(--text-3) !important;
@@ -70,8 +70,7 @@ export const CusSegment = ({
           style={{
             background: "var(--color-blue)",
             borderRadius: "7px",
-            boxShadow:
-              "0 1px 3px rgba(0,0,0,0.10), 0 0 0 1px var(--border-default)",
+            boxShadow: "var(--shadow-sm), 0 0 0 1px var(--border-default)",
           }}
         />
         {items.map((item) => {

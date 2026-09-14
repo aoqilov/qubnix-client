@@ -16,7 +16,7 @@ export function MobileLayout() {
   return (
     <div className="flex h-screen flex-col" style={SAFE_AREA_STYLE}>
       {/* <Header /> */}
-      <main className="flex-1 overflow-auto bg-neutral-100">
+      <main className="flex-1 overflow-auto bg-[var(--bg-main)] text-[var(--text-default)]">
         <Outlet />
       </main>
       <BottomTabBar />

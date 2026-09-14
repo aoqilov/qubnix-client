@@ -49,7 +49,7 @@ export function CusDrawer({
     >
       <Drawer.Backdrop
         h="100%"
-        bg="rgba(0,0,0,0.5)"
+        bg="var(--overlay-backdrop)"
         backdropFilter="blur(2px)"
         style={{ marginTop: 0 }}
       />
@@ -66,7 +66,7 @@ export function CusDrawer({
           bg="var(--bg-second)"
           borderColor="var(--border-default)"
           borderWidth="1px"
-          boxShadow="0 25px 50px rgba(0,0,0,0.4)"
+          boxShadow="var(--shadow-modal)"
           color="var(--text-default)"
           display="flex"
           flexDirection="column"

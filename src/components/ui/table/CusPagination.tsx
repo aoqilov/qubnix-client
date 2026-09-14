@@ -144,7 +144,7 @@ export function CusPagination({
                     variant="outline"
                     style={
                       isActive
-                        ? { background: "#3b82f6", borderColor: "#3b82f6", color: "#fff", fontWeight: 700, borderWidth: 1, borderStyle: "solid" }
+                        ? { background: "var(--color-blue)", borderColor: "var(--color-blue)", color: "var(--text-on-accent)", fontWeight: 700, borderWidth: 1, borderStyle: "solid" }
                         : btnStyle
                     }
                   >
