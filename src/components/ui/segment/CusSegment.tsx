@@ -79,8 +79,7 @@ export const CusSegment = ({
           style={{
             background: "var(--cus-segment-accent)",
             borderRadius: "7px",
-            boxShadow:
-              "0 1px 3px rgba(0,0,0,0.10), 0 0 0 1px var(--border-default)",
+            boxShadow: "var(--shadow-sm), 0 0 0 1px var(--border-default)",
           }}
         />
         {items.map((item) => {

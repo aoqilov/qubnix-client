@@ -33,7 +33,7 @@ const BOTTOM_ITEMS = [
 
 function SectionLabel({ children }: { children: string }) {
   return (
-    <div className="mt-4 px-3 text-[11px] font-semibold uppercase tracking-wide text-neutral-400 first:mt-0 dark:text-[var(--text-dim)]">
+    <div className="mt-4 px-3 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-dim)] first:mt-0">
       {children}
     </div>
   );
@@ -50,7 +50,7 @@ function Avatar({
 }) {
   return (
     <span
-      className="flex flex-none items-center justify-center rounded-full text-[11px] font-semibold text-white"
+      className="flex flex-none items-center justify-center rounded-full text-[11px] font-semibold text-[var(--text-on-accent)]"
       style={{ width: size, height: size, background: color }}
     >
       {initials}
@@ -69,8 +69,8 @@ function navLinkClass({
     collapsed ? "justify-center px-2" : "px-3"
   } ${
     isActive
-      ? "bg-vio text-white"
-      : "text-neutral-700 hover:bg-neutral-100 dark:text-[var(--text-2)] dark:hover:bg-[var(--bg-hover)]"
+      ? "bg-vio text-[var(--text-on-accent)]"
+      : "text-[var(--text-2)] hover:bg-[var(--bg-hover)]"
   }`;
 }
 
@@ -95,7 +95,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`flex flex-none flex-col border-r border-neutral-300 bg-white transition-[width] duration-200 dark:border-white/10 dark:bg-[var(--bg-second)] ${
+      className={`flex flex-none flex-col border-r border-[var(--border-default)] bg-[var(--bg-second)] transition-[width] duration-200 ${
         collapsed ? "w-16" : "w-[260px]"
       }`}
     >
@@ -109,7 +109,7 @@ export function Sidebar() {
         )}
         <button
           onClick={toggleSidebar}
-          className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-[var(--bg-hover)]"
+          className="rounded-lg p-1.5 text-[var(--text-dim)] hover:bg-[var(--bg-hover)]"
         >
           {collapsed ? (
             <LuPanelLeftOpen size={18} />
@@ -142,7 +142,7 @@ export function Sidebar() {
             {!collapsed && (
               <>
                 <SectionLabel>Ish maydoni</SectionLabel>
-                <p className="px-3 text-sm text-neutral-500 dark:text-[var(--text-muted)]">
+                <p className="px-3 text-sm text-[var(--text-muted)]">
                   Davom etish uchun ish maydonlaridan birini tanlang
                 </p>
               </>
@@ -156,7 +156,7 @@ export function Sidebar() {
                     selectWorkspace(w.id);
                     navigate("/tasks");
                   }}
-                  className={`flex items-center gap-2 rounded-lg py-2 text-sm text-neutral-700 hover:bg-neutral-100 dark:text-[var(--text-2)] dark:hover:bg-[var(--bg-hover)] ${
+                  className={`flex items-center gap-2 rounded-lg py-2 text-sm text-[var(--text-2)] hover:bg-[var(--bg-hover)] ${
                     collapsed ? "justify-center px-2" : "px-3"
                   }`}
                 >
@@ -166,7 +166,7 @@ export function Sidebar() {
                       <span className="flex-1 truncate text-left">
                         {w.name}
                       </span>
-                      <span className="text-xs text-neutral-400">
+                      <span className="text-xs text-[var(--text-dim)]">
                         {w.projectsCount}
                       </span>
                     </>
@@ -186,7 +186,7 @@ export function Sidebar() {
               trigger={(open) => (
                 <button
                   title={selectedWorkspace.name}
-                  className={`flex w-full items-center gap-2 rounded-lg py-2 hover:bg-neutral-100 dark:hover:bg-[var(--bg-hover)] ${
+                  className={`flex w-full items-center gap-2 rounded-lg py-2 hover:bg-[var(--bg-hover)] ${
                     collapsed ? "justify-center px-2" : "px-3"
                   }`}
                 >
@@ -201,7 +201,7 @@ export function Sidebar() {
                       </span>
                       <LuChevronDown
                         size={14}
-                        className={`text-neutral-400 transition-transform ${open ? "rotate-180" : ""}`}
+                        className={`text-[var(--text-dim)] transition-transform ${open ? "rotate-180" : ""}`}
                       />
                     </>
                   )}
@@ -217,13 +217,13 @@ export function Sidebar() {
                         selectWorkspace(w.id);
                         close();
                       }}
-                      className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-neutral-100 dark:hover:bg-[var(--bg-hover)]"
+                      className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-[var(--bg-hover)]"
                     >
                       <Avatar initials={w.initials} color={w.color} size={22} />
                       <span className="flex-1 truncate text-left">
                         {w.name}
                       </span>
-                      <span className="text-xs text-neutral-400">
+                      <span className="text-xs text-[var(--text-dim)]">
                         {w.projectsCount}
                       </span>
                       {w.id === selectedWorkspace.id && (
@@ -235,7 +235,7 @@ export function Sidebar() {
               )}
             </CusPopover>
 
-            <div className="mt-4 flex flex-col gap-1 border-t border-neutral-200 pt-3 dark:border-white/10">
+            <div className="mt-4 flex flex-col gap-1 border-t border-[var(--border-default)] pt-3">
               <SectionLabel>boshqaruv menu</SectionLabel>
               {BOTTOM_ITEMS.map((item) => (
                 <NavLink
@@ -265,12 +265,12 @@ export function Sidebar() {
                   onClick={() => setLoyihalarOpen((v) => !v)}
                   className="mt-4 flex w-full items-center justify-between px-3 first:mt-0"
                 >
-                  <span className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-[var(--text-dim)]">
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-[var(--text-dim)]">
                     Loyihalar
                   </span>
                   <LuChevronDown
                     size={13}
-                    className={`text-neutral-400 transition-transform ${loyihalarOpen ? "" : "-rotate-90"}`}
+                    className={`text-[var(--text-dim)] transition-transform ${loyihalarOpen ? "" : "-rotate-90"}`}
                   />
                 </button>
                 {loyihalarOpen &&
@@ -283,7 +283,7 @@ export function Sidebar() {
                         className={`flex items-center gap-2 rounded-lg border-b-2 border-l-2 px-3 py-2 text-sm ${
                           active
                             ? "border-vio font-medium text-vio"
-                            : "border-transparent text-neutral-700 hover:bg-neutral-100 dark:text-[var(--text-2)] dark:hover:bg-[var(--bg-hover)]"
+                            : "border-transparent text-[var(--text-2)] hover:bg-[var(--bg-hover)]"
                         }`}
                       >
                         <span
@@ -293,7 +293,7 @@ export function Sidebar() {
                         <span className="flex-1 truncate text-left">
                           {f.name}
                         </span>
-                        <span className="text-xs text-neutral-400">
+                        <span className="text-xs text-[var(--text-dim)]">
                           {f.count}
                         </span>
                       </button>

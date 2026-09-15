@@ -75,13 +75,16 @@ function ToastCard({
 
   const isLoading = phase === "loading";
   const isSuccess = toast.type === "success";
-  const accent = isSuccess ? "#22c55e" : "#ef4444";
+  const accent = isSuccess ? "var(--color-green)" : "var(--color-red)";
+  const accentSoft = isSuccess ? "var(--color-green-soft)" : "var(--color-red-soft)";
+  const accentBorder = isSuccess ? "var(--color-green-border)" : "var(--color-red-border)";
+  const accentText = isSuccess ? "var(--color-green-text)" : "var(--color-red-text)";
 
   return (
     <>
       <div
         className="fixed inset-0 z-50"
-        style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(3px)" }}
+        style={{ background: "var(--overlay-backdrop)", backdropFilter: "blur(3px)" }}
       />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
         <div
@@ -89,8 +92,8 @@ function ToastCard({
           style={{
             maxWidth: 360,
             background: "var(--bg-second)",
-            borderColor: isLoading ? "var(--border-default)" : `${accent}50`,
-            boxShadow: "0 25px 50px rgba(0,0,0,0.45)",
+            borderColor: isLoading ? "var(--border-default)" : accentBorder,
+            boxShadow: "var(--shadow-modal)",
             animation: "cusToastIn 0.18s cubic-bezier(.2,.8,.4,1)",
           }}
         >
@@ -130,7 +133,7 @@ function ToastCard({
                   <circle
                     cx="20" cy="20" r="16"
                     fill="none"
-                    stroke="#3b82f6"
+                    stroke="var(--color-blue)"
                     strokeWidth="3"
                     strokeDasharray="30 70"
                     strokeLinecap="round"
@@ -147,7 +150,7 @@ function ToastCard({
 
               <ProgressBar
                 key="loader"
-                accent="#3b82f6"
+                accent="var(--color-blue)"
                 duration={toast.loadingDuration ?? 3000}
               />
             </>
@@ -156,7 +159,7 @@ function ToastCard({
             <>
               <div
                 className="w-20 h-20 rounded-3xl flex items-center justify-center"
-                style={{ background: `${accent}18` }}
+                style={{ background: accentSoft }}
               >
                 {isSuccess ? (
                   <LuCircleCheck size={40} style={{ color: accent }} />
@@ -179,9 +182,9 @@ function ToastCard({
                   onClick={() => onRemove(toast.id)}
                   className="w-full py-3 rounded-xl font-semibold text-sm transition-all active:scale-[0.97]"
                   style={{
-                    background: `${accent}20`,
-                    color: isSuccess ? "#4ade80" : "#f87171",
-                    border: `1px solid ${accent}40`,
+                    background: accentSoft,
+                    color: accentText,
+                    border: `1px solid ${accentBorder}`,
                   }}
                 >
                   Закрыть

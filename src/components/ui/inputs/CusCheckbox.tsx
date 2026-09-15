@@ -108,11 +108,11 @@ export const CusCheckbox = forwardRef<HTMLInputElement, CusCheckboxProps>(
             borderWidth="1.5px"
             borderRadius="5px"
             bg="var(--bg-input)"
-            _hover={{ borderColor: "#60a5fa" }}
-            _checked={{ bg: "#3b82f6", borderColor: "#3b82f6", color: "white" }}
-            _indeterminate={{ bg: "#3b82f6", borderColor: "#3b82f6", color: "white" }}
-            _focusVisible={{ boxShadow: "0 0 0 3px #3b82f630" }}
-            _invalid={{ borderColor: "#ef4444" }}
+            _hover={{ borderColor: "var(--color-blue)" }}
+            _checked={{ bg: "var(--color-blue)", borderColor: "var(--color-blue)", color: "var(--text-on-accent)" }}
+            _indeterminate={{ bg: "var(--color-blue)", borderColor: "var(--color-blue)", color: "var(--text-on-accent)" }}
+            _focusVisible={{ boxShadow: "0 0 0 3px var(--focus-ring-blue)" }}
+            _invalid={{ borderColor: "var(--color-red)" }}
             _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
           >
             <Checkbox.Indicator />
@@ -129,7 +129,7 @@ export const CusCheckbox = forwardRef<HTMLInputElement, CusCheckboxProps>(
                 >
                   {label}
                   {isRequired && (
-                    <span style={{ color: "#ef4444", marginLeft: 3 }}>*</span>
+                    <span style={{ color: "var(--color-red)", marginLeft: 3 }}>*</span>
                   )}
                 </Checkbox.Label>
               )}
@@ -149,7 +149,7 @@ export const CusCheckbox = forwardRef<HTMLInputElement, CusCheckboxProps>(
         </Checkbox.Root>
 
         {errorText && (
-          <Field.ErrorText fontSize="xs" color="#ef4444" mt="1">
+          <Field.ErrorText fontSize="xs" color="var(--color-red)" mt="1">
             {errorText}
           </Field.ErrorText>
         )}
@@ -196,7 +196,7 @@ export function CusCheckboxGroup({
             mb="2"
           >
             {label}
-            <Field.RequiredIndicator color="#ef4444" ml="0.5" />
+            <Field.RequiredIndicator color="var(--color-red)" ml="0.5" />
           </Field.Label>
         )}
 
@@ -205,7 +205,7 @@ export function CusCheckboxGroup({
         </div>
 
         {errorText && (
-          <Field.ErrorText fontSize="xs" color="#ef4444" mt="1">
+          <Field.ErrorText fontSize="xs" color="var(--color-red)" mt="1">
             {errorText}
           </Field.ErrorText>
         )}

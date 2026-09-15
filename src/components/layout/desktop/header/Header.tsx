@@ -12,16 +12,16 @@ export function Header() {
   const layoutMode = useLayoutMode();
 
   return (
-    <header className="flex h-14 flex-none items-center justify-end gap-4 border-b border-neutral-300 bg-white px-5 dark:border-white/10 dark:bg-[var(--bg-second)]">
-      <span className="rounded bg-neutral-100 px-2 py-1 font-mono text-xs text-neutral-500 dark:bg-[var(--bg-hover)] dark:text-[var(--text-muted)]">
+    <header className="flex h-14 flex-none items-center justify-end gap-4 border-b border-[var(--border-default)] bg-[var(--bg-second)] px-5">
+      <span className="rounded bg-[var(--bg-hover)] px-2 py-1 font-mono text-xs text-[var(--text-muted)]">
         TG: {String(isTelegramMiniApp())} | Layout: {layoutMode}
       </span>
       <div className="flex items-center gap-2">
-        <LuSun size={15} className="text-neutral-400 dark:text-[var(--text-muted)]" />
+        <LuSun size={15} className="text-[var(--text-muted)]" />
         <CusSwitch size="sm" checked={isDarkMode} onCheckedChange={toggleDarkMode} />
-        <LuMoon size={15} className="text-neutral-400 dark:text-[var(--text-muted)]" />
+        <LuMoon size={15} className="text-[var(--text-muted)]" />
       </div>
-      <span className="text-sm text-neutral-600 dark:text-[var(--text-2)]">
+      <span className="text-sm text-[var(--text-2)]">
         {user?.fullName ?? "..."}
       </span>
     </header>

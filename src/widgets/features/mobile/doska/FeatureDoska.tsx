@@ -26,14 +26,14 @@ export default function FeatureDoska() {
             className="flex cursor-pointer items-center gap-3 hover:border-vio"
           >
             <span
-              className="flex h-10 w-10 flex-none items-center justify-center rounded-full text-sm font-semibold text-white"
+              className="flex h-10 w-10 flex-none items-center justify-center rounded-full text-sm font-semibold text-[var(--text-on-accent)]"
               style={{ background: w.color }}
             >
               {w.initials}
             </span>
             <span className="flex-1">
               <span className="block font-medium">{w.name}</span>
-              <span className="block text-xs text-neutral-500 dark:text-[var(--text-muted)]">
+              <span className="block text-xs text-[var(--text-muted)]">
                 {w.projectsCount} ta loyiha
               </span>
             </span>

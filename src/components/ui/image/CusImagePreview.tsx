@@ -48,7 +48,7 @@ export function CusImagePreview({
               position: "absolute",
               inset: 0,
               border: "none",
-              background: "rgba(0,0,0,0.35)",
+              background: "var(--overlay-hover)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -57,7 +57,7 @@ export function CusImagePreview({
               transition: "opacity 0.15s",
             }}
           >
-            <LuEye size={20} color="white" />
+            <LuEye size={20} color="var(--text-on-accent)" />
           </button>
         )}
       </div>

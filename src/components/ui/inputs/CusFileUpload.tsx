@@ -60,7 +60,7 @@ export function CusFileUpload({
   onFileReject,
 }: CusFileUploadProps) {
   const isInvalid = !!errorText;
-  const borderColor = isInvalid ? "#ef4444" : "var(--border-input)";
+  const borderColor = isInvalid ? "var(--color-red)" : "var(--border-input)";
 
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -83,7 +83,7 @@ export function CusFileUpload({
           color="var(--text-3)"
         >
           {label}
-          <Field.RequiredIndicator color="#ef4444" ml="0.5" />
+          <Field.RequiredIndicator color="var(--color-red)" ml="0.5" />
         </Field.Label>
       )}
       {sublabel && (
@@ -161,7 +161,7 @@ export function CusFileUpload({
                 style={{
                   fontSize: 12,
                   fontWeight: 500,
-                  color: "#3b82f6",
+                  color: "var(--color-blue)",
                   background: "none",
                   border: "none",
                   cursor: "pointer",
@@ -242,8 +242,8 @@ export function CusFileUpload({
                           left: 6,
                           fontSize: 10,
                           fontWeight: 600,
-                          color: "white",
-                          background: "rgba(0,0,0,0.45)",
+                          color: "var(--text-on-accent)",
+                          background: "var(--overlay-hover)",
                           borderRadius: 4,
                           padding: "1px 5px",
                           pointerEvents: "none",
@@ -260,7 +260,7 @@ export function CusFileUpload({
                           inset: 0,
                           borderRadius: 8,
                           border: "none",
-                          background: "rgba(0,0,0,0.25)",
+                          background: "var(--overlay-hover)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -269,7 +269,7 @@ export function CusFileUpload({
                           opacity: hoveredKey === `__current_${i}__` ? 1 : 0,
                         }}
                       >
-                        <LuEye size={20} color="white" />
+                        <LuEye size={20} color="var(--text-on-accent)" />
                       </button>
                       {/* X — delete button */}
                       {onRemoveCurrentImageUrl && (
@@ -290,7 +290,7 @@ export function CusFileUpload({
                             border: "1px solid var(--border-default)",
                             cursor: "pointer",
                             color: "var(--text-2)",
-                            boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
+                            boxShadow: "var(--shadow-sm)",
                           }}
                         >
                           <LuX size={10} />
@@ -325,8 +325,8 @@ export function CusFileUpload({
                         left: 6,
                         fontSize: 10,
                         fontWeight: 600,
-                        color: "white",
-                        background: "rgba(0,0,0,0.45)",
+                        color: "var(--text-on-accent)",
+                        background: "var(--overlay-hover)",
                         borderRadius: 4,
                         padding: "1px 5px",
                         pointerEvents: "none",
@@ -342,7 +342,7 @@ export function CusFileUpload({
                         inset: 0,
                         borderRadius: 8,
                         border: "none",
-                        background: "rgba(0,0,0,0.25)",
+                        background: "var(--overlay-hover)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -351,7 +351,7 @@ export function CusFileUpload({
                         opacity: hoveredKey === "__current__" ? 1 : 0,
                       }}
                     >
-                      <LuEye size={20} color="white" />
+                      <LuEye size={20} color="var(--text-on-accent)" />
                     </button>
                   </div>
                 )}
@@ -403,7 +403,7 @@ export function CusFileUpload({
                               opacity: isHovered ? 1 : 0,
                             }}
                           >
-                            <LuEye size={20} color="white" />
+                            <LuEye size={20} color="var(--text-on-accent)" />
                           </button>
                           {/* X button */}
                           <FileUpload.ItemDeleteTrigger asChild>
@@ -423,7 +423,7 @@ export function CusFileUpload({
                                 border: "1px solid var(--border-default)",
                                 cursor: "pointer",
                                 color: "var(--text-2)",
-                                boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
+                                boxShadow: "var(--shadow-sm)",
                               }}
                             >
                               <LuX size={10} />
@@ -505,7 +505,7 @@ export function CusFileUpload({
       </FileUpload.Root>
 
       {errorText && (
-        <Field.ErrorText fontSize="xs" color="#ef4444" mt="1">
+        <Field.ErrorText fontSize="xs" color="var(--color-red)" mt="1">
           {errorText}
         </Field.ErrorText>
       )}

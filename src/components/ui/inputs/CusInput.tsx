@@ -132,7 +132,7 @@ export const CusInput = forwardRef<HTMLInputElement, CusInputProps>(
             color="var(--text-3)"
           >
             {label}
-            <Field.RequiredIndicator color="#ef4444" ml="0.5" />
+            <Field.RequiredIndicator color="var(--color-red)" ml="0.5" />
           </Field.Label>
         )}
 
@@ -154,13 +154,13 @@ export const CusInput = forwardRef<HTMLInputElement, CusInputProps>(
               ps={leftElementWidth}
               onChange={handleChange}
               bg="var(--bg-input)"
-              borderColor={isFocused ? "#3b82f6" : "var(--border-input)"}
-              boxShadow={isFocused ? "0 0 0 1px #3b82f6" : undefined}
+              borderColor={isFocused ? "var(--color-blue)" : "var(--border-input)"}
+              boxShadow={isFocused ? "0 0 0 1px var(--color-blue)" : undefined}
               color="var(--text-default)"
               _placeholder={{ color: "var(--text-dim)" }}
               _hover={{ borderColor: "var(--border-2)" }}
-              _focus={{ borderColor: "#3b82f6", boxShadow: "0 0 0 1px #3b82f6" }}
-              _invalid={{ borderColor: "#ef4444", boxShadow: "0 0 0 1px #ef4444" }}
+              _focus={{ borderColor: "var(--color-blue)", boxShadow: "0 0 0 1px var(--color-blue)" }}
+              _invalid={{ borderColor: "var(--color-red)", boxShadow: "0 0 0 1px var(--color-red)" }}
               {...inputProps}
             />
           </InputGroup>
@@ -171,19 +171,19 @@ export const CusInput = forwardRef<HTMLInputElement, CusInputProps>(
             variant={variant}
             onChange={handleChange}
             bg="var(--bg-input)"
-            borderColor={isFocused ? "#3b82f6" : "var(--border-input)"}
-            boxShadow={isFocused ? "0 0 0 1px #3b82f6" : undefined}
+            borderColor={isFocused ? "var(--color-blue)" : "var(--border-input)"}
+            boxShadow={isFocused ? "0 0 0 1px var(--color-blue)" : undefined}
             color="var(--text-default)"
             _placeholder={{ color: "var(--text-dim)" }}
             _hover={{ borderColor: "var(--border-2)" }}
-            _focus={{ borderColor: "#3b82f6", boxShadow: "0 0 0 1px #3b82f6" }}
-            _invalid={{ borderColor: "#ef4444", boxShadow: "0 0 0 1px #ef4444" }}
+            _focus={{ borderColor: "var(--color-blue)", boxShadow: "0 0 0 1px var(--color-blue)" }}
+            _invalid={{ borderColor: "var(--color-red)", boxShadow: "0 0 0 1px var(--color-red)" }}
             {...inputProps}
           />
         )}
 
         {errorText && (
-          <Field.ErrorText fontSize={helperFontSize} color="#ef4444" mt="1">
+          <Field.ErrorText fontSize={helperFontSize} color="var(--color-red)" mt="1">
             {errorText}
           </Field.ErrorText>
         )}

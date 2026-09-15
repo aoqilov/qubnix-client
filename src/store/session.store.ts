@@ -5,6 +5,7 @@ export interface SessionUser {
   fullName: string;
   role: string;
   phone?: string;
+  avatarUrl?: string;
 }
 
 interface SessionState {
@@ -12,6 +13,7 @@ interface SessionState {
   user: SessionUser | null;
   status: "idle" | "authenticating" | "authenticated" | "unauthenticated";
   setSession: (token: string, user: SessionUser) => void;
+  updateUser: (patch: Partial<SessionUser>) => void;
   clearSession: () => void;
   setStatus: (status: SessionState["status"]) => void;
 }
@@ -26,6 +28,8 @@ export const useSessionStore = create<SessionState>((set) => ({
     localStorage.setItem(TOKEN_STORAGE_KEY, token);
     set({ token, user, status: "authenticated" });
   },
+  updateUser: (patch) =>
+    set((s) => (s.user ? { user: { ...s.user, ...patch } } : s)),
   clearSession: () => {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     set({ token: null, user: null, status: "unauthenticated" });

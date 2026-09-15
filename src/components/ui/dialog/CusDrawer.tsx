@@ -49,7 +49,7 @@ export function CusDrawer({
     >
       <Drawer.Backdrop
         h="100%"
-        bg="rgba(0,0,0,0.5)"
+        bg="var(--overlay-backdrop)"
         backdropFilter="blur(2px)"
         style={{ marginTop: 0 }}
       />
@@ -63,10 +63,10 @@ export function CusDrawer({
         }}
       >
         <Drawer.Content
-          bg="var(--bg-second)"
+          bg="var(--bg-main)"
           borderColor="var(--border-default)"
           borderWidth="1px"
-          boxShadow="0 25px 50px rgba(0,0,0,0.4)"
+          boxShadow="var(--shadow-modal)"
           color="var(--text-default)"
           display="flex"
           flexDirection="column"
@@ -106,6 +106,7 @@ export function CusDrawer({
               borderColor="var(--border-default)"
               px="6"
               py="4"
+              bg="var(--bg-second)"
               flexShrink={0}
             >
               {title && (

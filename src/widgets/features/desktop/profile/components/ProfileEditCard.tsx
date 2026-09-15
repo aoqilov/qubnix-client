@@ -1,0 +1,119 @@
+import { useRef, useState, type ChangeEvent } from "react";
+import { LuCamera, LuCheck } from "react-icons/lu";
+import { useSessionStore } from "@/store/session.store";
+import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
+import { CusInput } from "@/components/ui/inputs/CusInput";
+import { CusButton } from "@/components/ui/buttons/CusButton";
+import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
+import { useUpdateProfile } from "../hooks/useApiProfile";
+
+function getInitials(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/);
+  return parts
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join("");
+}
+
+interface ProfileEditCardProps {
+  onSaved?: () => void;
+}
+
+export function ProfileEditCard({ onSaved }: ProfileEditCardProps) {
+  const user = useSessionStore((s) => s.user);
+  const updateUser = useSessionStore((s) => s.updateUser);
+  const [fullName, setFullName] = useState(user?.fullName ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const updateProfile = useUpdateProfile();
+
+  if (!user) return null;
+
+  const isDirty =
+    (fullName.trim().length > 0 && fullName.trim() !== user.fullName) ||
+    avatarUrl !== user.avatarUrl;
+
+  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setAvatarUrl((prev) => {
+      if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+      return url;
+    });
+  }
+
+  function handleSave() {
+    const patch = { fullName: fullName.trim(), avatarUrl };
+    updateProfile.mutate(patch, {
+      onSuccess: (response) => {
+        if (response.status === 200) {
+          updateUser(patch);
+          onSaved?.();
+        }
+      },
+    });
+  }
+
+  return (
+    <CusCardbox className="flex flex-col gap-4">
+      <div className="text-sm font-semibold">Profilni tahrirlash</div>
+
+      <div className="flex items-center gap-4">
+        <div className="relative flex-none">
+          {avatarUrl ? (
+            <CusImagePreview
+              src={avatarUrl}
+              alt={fullName}
+              width={56}
+              height={56}
+              objectFit="cover"
+              preview={false}
+            />
+          ) : (
+            <span className="flex h-14 w-14 items-center justify-center bg-vio font-condensed text-xl text-[var(--text-on-accent)]">
+              {getInitials(fullName || user.fullName)}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            aria-label="Rasmni almashtirish"
+            className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[var(--bg-second)] text-[var(--text-on-accent)]"
+            style={{ background: "var(--vio)" }}
+          >
+            <LuCamera size={12} />
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </div>
+        <div className="text-sm text-[var(--text-muted)]">
+          Rasmni almashtirish uchun kamera belgisini bosing
+        </div>
+      </div>
+
+      <CusInput
+        label="Ism familiya"
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+      />
+      <CusInput label="Telefon raqam" value={user.phone ?? ""} disabled />
+      <div className="flex justify-end">
+        <CusButton
+          isDisabled={!isDirty}
+          isLoading={updateProfile.isPending}
+          leftIcon={<LuCheck size={16} />}
+          onClick={handleSave}
+        >
+          Saqlash
+        </CusButton>
+      </div>
+    </CusCardbox>
+  );
+}

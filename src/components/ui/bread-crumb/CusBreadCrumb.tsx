@@ -27,7 +27,7 @@ export function CusBreadCrumb({
             <React.Fragment key={`${item.label}-${i}`}>
               <Breadcrumb.Item>
                 {isLast ? (
-                  <Breadcrumb.CurrentLink style={{ color: "#60a5fa", fontWeight: 500 }}>
+                  <Breadcrumb.CurrentLink style={{ color: "var(--color-blue)", fontWeight: 500 }}>
                     {item.label}
                   </Breadcrumb.CurrentLink>
                 ) : (

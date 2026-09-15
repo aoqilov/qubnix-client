@@ -5,7 +5,6 @@ import DesktopProfile from "@/pages/desktop/DesktopProfile";
 import DesktopTasks from "@/pages/desktop/DesktopTasks";
 import DesktopCalendar from "@/pages/desktop/DesktopCalendar";
 import DesktopStatistics from "@/pages/desktop/DesktopStatistics";
-import DesktopSettings from "@/pages/desktop/DesktopSettings";
 
 export const desktopRoutes: RouteObject[] = [
   { path: "/", element: <Navigate to="/doska" replace /> },
@@ -14,5 +13,4 @@ export const desktopRoutes: RouteObject[] = [
   { path: "/tasks", element: <DesktopTasks /> },
   { path: "/calendar", element: <DesktopCalendar /> },
   { path: "/statistics", element: <DesktopStatistics /> },
-  { path: "/settings", element: <DesktopSettings /> },
 ];

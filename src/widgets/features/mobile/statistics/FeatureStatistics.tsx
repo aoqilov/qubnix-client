@@ -22,7 +22,7 @@ export default function FeatureStatistics() {
         closeOnEscape={false}
         title="Batafsil statistika"
       >
-        <p className="text-sm text-neutral-500 dark:text-[var(--text-muted)]">
+        <p className="text-sm text-[var(--text-muted)]">
           {/* TODO: statistika tarkibi */}
         </p>
         <h1>111111111</h1>
