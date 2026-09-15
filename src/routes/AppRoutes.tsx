@@ -1,4 +1,4 @@
-import { useRoutes } from "react-router-dom";
+import { Navigate, useLocation, useRoutes } from "react-router-dom";
 import type { RouteObject } from "react-router-dom";
 import { useLayoutMode } from "@/hooks/useLayoutMode";
 import { AppLayout } from "@/components/layout/desktop/AppLayout";
@@ -12,20 +12,44 @@ import FeatureLogin from "@/widgets/features/login/FeatureLogin";
 
 // Layout fork: ekran kengligiga qarab (isTma ga emas — Telegram Desktop
 // kabi keng oynalar ham shu yerdan AppLayout'ga tushadi).
-// Auth talabi yo'q — istalgan sahifaga URL orqali to'g'ridan-to'g'ri o'tiladi
-// (faqat web-entry va autentifikatsiya qilinmagan holatda pastdagi gate ishlaydi).
+// Telegram Mini App ichida auth avtomatik (enterWay), shuning uchun gate
+// faqat web-entry va autentifikatsiya qilinmagan holatda /login ga yo'naltiradi.
 export function AppRoutes() {
   const layoutMode = useLayoutMode();
+  const location = useLocation();
   const sessionStatus = useSessionStore((s) => s.status);
-
-  if (!isTelegramMiniApp() && sessionStatus !== "authenticated") {
-    return <FeatureLogin />;
-  }
+  const needsLogin = !isTelegramMiniApp() && sessionStatus !== "authenticated";
 
   const platformBranch: RouteObject =
     layoutMode === "desktop"
       ? { element: <AppLayout />, children: desktopRoutes }
       : { element: <MobileLayout />, children: mobileRoutes };
 
-  return useRoutes([platformBranch, { path: "*", element: <NotFound /> }]);
+  // Muhim: useRoutes har renderda chaqirilishi shart (Rules of Hooks) —
+  // shuning uchun gate early return emas, route jadvalining o'zida hal bo'ladi.
+  const loginRoute: RouteObject = {
+    path: "/login",
+    element: needsLogin ? <FeatureLogin /> : <Navigate to="/doska" replace />,
+  };
+
+  // Autentifikatsiyadan o'tmagan holatda har qanday boshqa URL /login ga
+  // ketadi, lekin qayerdan kelgani `state.from` da saqlanadi.
+  const guardedBranch: RouteObject = needsLogin
+    ? {
+        path: "*",
+        element: (
+          <Navigate
+            to="/login"
+            replace
+            state={{ from: location.pathname + location.search }}
+          />
+        ),
+      }
+    : { path: "*", element: <NotFound /> };
+
+  return useRoutes(
+    needsLogin
+      ? [loginRoute, guardedBranch]
+      : [loginRoute, platformBranch, guardedBranch],
+  );
 }

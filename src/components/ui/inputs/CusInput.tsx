@@ -20,6 +20,16 @@ interface CusInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>
   leftElement?: ReactNode;
   rightElement?: ReactNode;
 
+  /**
+   * Default'dan kengroq leftElement (masalan "+998" prefiksi) matn ustiga
+   * chiqib ketmasligi uchun uning kengligi — "4.5rem" kabi.
+   */
+  leftElementWidth?: string;
+
+  // Label va yordamchi matn o'lchami (login kabi yirikroq formalar uchun)
+  labelFontSize?: string;
+  helperFontSize?: string;
+
   // Chakra size & variant
   inputSize?: "xs" | "sm" | "md" | "lg";
   variant?: "outline" | "subtle" | "flushed";
@@ -41,6 +51,9 @@ export const CusInput = forwardRef<HTMLInputElement, CusInputProps>(
       onClear,
       leftElement,
       rightElement,
+      leftElementWidth,
+      labelFontSize = "sm",
+      helperFontSize = "xs",
       inputSize = "md",
       variant = "outline",
       isFocused = false,
@@ -113,7 +126,7 @@ export const CusInput = forwardRef<HTMLInputElement, CusInputProps>(
       <Field.Root invalid={!!errorText} required={isRequired} width="100%">
         {label && (
           <Field.Label
-            fontSize="sm"
+            fontSize={labelFontSize}
             fontWeight="medium"
             mb="1"
             color="var(--text-3)"
@@ -124,11 +137,21 @@ export const CusInput = forwardRef<HTMLInputElement, CusInputProps>(
         )}
 
         {hasGroup ? (
-          <InputGroup width="100%" startElement={leftElement} endElement={endEl}>
+          <InputGroup
+            width="100%"
+            startElement={leftElement}
+            endElement={endEl}
+            startElementProps={
+              leftElementWidth
+                ? { width: leftElementWidth, justifyContent: "flex-start", ps: "3" }
+                : undefined
+            }
+          >
             <Input
               ref={mergedRef}
               size={inputSize}
               variant={variant}
+              ps={leftElementWidth}
               onChange={handleChange}
               bg="var(--bg-input)"
               borderColor={isFocused ? "#3b82f6" : "var(--border-input)"}
@@ -160,13 +183,13 @@ export const CusInput = forwardRef<HTMLInputElement, CusInputProps>(
         )}
 
         {errorText && (
-          <Field.ErrorText fontSize="xs" color="#ef4444" mt="1">
+          <Field.ErrorText fontSize={helperFontSize} color="#ef4444" mt="1">
             {errorText}
           </Field.ErrorText>
         )}
 
         {helperText && !errorText && (
-          <Field.HelperText fontSize="xs" color="var(--text-muted)" mt="1">
+          <Field.HelperText fontSize={helperFontSize} color="var(--text-muted)" mt="1">
             {helperText}
           </Field.HelperText>
         )}

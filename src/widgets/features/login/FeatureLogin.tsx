@@ -1,32 +1,38 @@
-import { CusButton } from "@/components/ui/buttons/CusButton";
-import { useSessionStore } from "@/store/session.store";
+import { useState } from "react";
+import { LuLogIn, LuUserPlus } from "react-icons/lu";
+import { CusSegment } from "@/components/ui/segment/CusSegment";
+import { LoginPhoneForm } from "./components/LoginPhoneForm";
+import { TelegramRegisterPanel } from "./components/TelegramRegisterPanel";
 
-const MOCK_USER = {
-  id: "mock-akiylov",
-  fullName: "@akiylov",
-  role: "Admin",
-  phone: "97 723 60 24",
-};
+const TABS = [
+  { id: "login", label: "Login", icon: <LuLogIn size={17} /> },
+  { id: "register", label: "Ro'yxatdan o'tish", icon: <LuUserPlus size={17} /> },
+];
 
 export default function FeatureLogin() {
-  const setSession = useSessionStore((s) => s.setSession);
+  const [tab, setTab] = useState("login");
 
   return (
-    <div className="flex h-screen items-center justify-center bg-neutral-100">
-      <div className="w-full max-w-sm bg-white p-8 text-center shadow-sm">
-        <h1 className="mb-2 font-condensed text-2xl tracking-wide text-vio">
-          qubnix
-        </h1>
-        <p className="mb-6 text-sm text-neutral-500">
-          Test rejimi — haqiqiy Telegram login hali ulanmagan
-        </p>
-        <CusButton
-          colorPalette="purple"
+    <div className="flex min-h-screen items-center justify-center bg-[var(--bg-main)] p-4">
+      <div className="w-full max-w-md rounded-2xl border border-[var(--border-default)] bg-[var(--bg-second)] p-6 shadow-sm sm:p-8">
+        <div className="mb-7 text-center">
+          <h1 className="font-condensed text-4xl tracking-wide text-[var(--vio)]">
+            qubnix
+          </h1>
+          <p className="mt-2 text-base leading-relaxed text-[var(--text-muted)]">
+            Hisobingizga kiring yoki Telegram orqali ro'yxatdan o'ting
+          </p>
+        </div>
+
+        <CusSegment
+          items={TABS}
+          value={tab}
+          onValueChange={setTab}
           size="lg"
-          onClick={() => setSession("mock-web-token", MOCK_USER)}
-        >
-          Kirish (test)
-        </CusButton>
+          className="mb-7"
+        />
+
+        {tab === "login" ? <LoginPhoneForm /> : <TelegramRegisterPanel />}
       </div>
     </div>
   );

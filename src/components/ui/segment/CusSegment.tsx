@@ -1,12 +1,15 @@
 import { SegmentGroup } from "@chakra-ui/react";
+import type React from "react";
 import type { ReactNode } from "react";
 import { LuLock } from "react-icons/lu";
 
 const SCOPE = "cus-segment";
 
+// Ranglar globals.css token'laridan keladi: aktiv element `--cus-segment-accent`
+// (default: `--accent`), uning ustidagi matn esa `--text-on-accent`.
 const segmentStyles = `
   .${SCOPE} [data-part="item"][data-state="checked"] {
-    color: #ffffff !important;
+    color: var(--text-on-accent) !important;
   }
   .${SCOPE} [data-part="item"]:not([data-disabled]):hover {
     color: var(--text-3) !important;
@@ -31,6 +34,8 @@ interface CusSegmentProps {
   disabled?: boolean;
   className?: string;
   layout?: "block" | "inline";
+  /** Aktiv element rangi — default globals.css dagi `--accent` token'i. */
+  accent?: string;
 }
 
 export const CusSegment = ({
@@ -43,6 +48,7 @@ export const CusSegment = ({
   disabled,
   className,
   layout = "block",
+  accent = "var(--accent)",
 }: CusSegmentProps) => {
   return (
     <>
@@ -56,19 +62,22 @@ export const CusSegment = ({
         size={size}
         disabled={disabled}
         className={`${SCOPE}${className ? ` ${className}` : ""}`}
-        style={{
-          background: "var(--bg-hover)",
-          borderRadius: "10px",
-          padding: "3px",
-          gap: "2px",
-          border: "1px solid var(--border-default)",
-          display: layout === "block" ? "flex" : "inline-flex",
-          width: layout === "block" ? "100%" : undefined,
-        }}
+        style={
+          {
+            "--cus-segment-accent": accent,
+            background: "var(--bg-hover)",
+            borderRadius: "10px",
+            padding: "3px",
+            gap: "2px",
+            border: "1px solid var(--border-default)",
+            display: layout === "block" ? "flex" : "inline-flex",
+            width: layout === "block" ? "100%" : undefined,
+          } as React.CSSProperties
+        }
       >
         <SegmentGroup.Indicator
           style={{
-            background: "var(--color-blue)",
+            background: "var(--cus-segment-accent)",
             borderRadius: "7px",
             boxShadow:
               "0 1px 3px rgba(0,0,0,0.10), 0 0 0 1px var(--border-default)",

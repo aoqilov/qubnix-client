@@ -10,6 +10,23 @@ export interface TelegramLoginWidgetPayload {
   hash: string;
 }
 
+// Telefon + SMS-siz OTP: kod foydalanuvchiga Telegram bot orqali yuboriladi.
+export interface SendPhoneCodeRequest {
+  /** E.164 formatda: +998901234567 */
+  phone: string;
+}
+
+export interface SendPhoneCodeResponse {
+  /** Kod necha sekunddan keyin eskiradi (timer shu qiymatdan boshlanadi). */
+  expiresIn: number;
+}
+
+export interface VerifyPhoneCodeRequest {
+  phone: string;
+  /** 6 xonali raqam. */
+  code: string;
+}
+
 export interface AuthResponse {
   token: string;
   user: {
