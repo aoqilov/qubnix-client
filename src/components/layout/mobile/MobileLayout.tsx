@@ -20,10 +20,7 @@ export function MobileLayout() {
       style={SAFE_AREA_STYLE}
     >
       {/* <Header /> */}
-      <main
-        className="flex-1 overflow-auto "
-        style={{ borderTop: "1px solid var(--c-neutral-100)" }}
-      >
+      <main className="flex-1 overflow-auto border-t border-subtle">
         <Outlet />
       </main>
       <BottomTabBar />
