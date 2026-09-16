@@ -1,18 +1,16 @@
-import { authApi } from "@/api/auth/auth.api";
+import { usersApi } from "@/api/users/users.api";
 import { useSessionStore } from "@/store/session.store";
 
+// initData header yuborilmaydi (web'da initData har doim null) — bu so'rov
+// faqat qubnix_session HttpOnly cookie orqali (withCredentials: true)
+// autentifikatsiya qilinadi. Cookie yo'q/eskirgan bo'lsa 401 keladi va
+// interceptor sessiyani "unauthenticated"ga tozalaydi.
 export async function enterWayWeb(): Promise<void> {
-  const existingToken = useSessionStore.getState().token;
-  if (!existingToken) {
-    useSessionStore.getState().setStatus("unauthenticated");
-    return;
-  }
-
   useSessionStore.getState().setStatus("authenticating");
   try {
-    const user = await authApi.me();
-    useSessionStore.getState().setSession(existingToken, user);
+    const user = await usersApi.me();
+    useSessionStore.getState().setSession(user);
   } catch {
-    useSessionStore.getState().clearSession();
+    useSessionStore.getState().setStatus("unauthenticated");
   }
 }

@@ -1,8 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
 import { authApi } from "@/api/auth/auth.api";
+import { usersApi } from "@/api/users/users.api";
 import { useSessionStore } from "@/store/session.store";
 import type {
-  SendPhoneCodeRequest,
+  RequestPhoneCodeRequest,
   VerifyPhoneCodeRequest,
 } from "@/types/auth.types";
 
@@ -15,20 +16,35 @@ export function authErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
-/** 1-qadam: raqamga tasdiqlash kodi yuborish. */
+/** 1-qadam: raqamga tasdiqlash kodi yuborish — javobdagi verification_token 2-qadam uchun saqlanadi. */
 export function useSendPhoneCode() {
+  const setVerificationToken = useSessionStore((s) => s.setVerificationToken);
+
   return useMutation({
-    mutationFn: (payload: SendPhoneCodeRequest) => authApi.sendPhoneCode(payload),
+    mutationFn: (payload: RequestPhoneCodeRequest) => authApi.requestPhoneCode(payload),
+    onSuccess: ({ verificationToken }) => setVerificationToken(verificationToken),
   });
 }
 
-/** 2-qadam: kodni tekshirish va sessiyani ochish. */
+/**
+ * 2-qadam: kodni tekshirish. Muvaffaqiyatli bo'lsa backend qubnix_session
+ * HttpOnly cookie'ni o'zi o'rnatadi (javobdagi init_data'ga web'da ehtiyoj
+ * yo'q) — shundan keyingi /users/me so'rovi shu cookie orqali (withCredentials)
+ * avtomatik autentifikatsiya qilinadi.
+ */
 export function useVerifyPhoneCode() {
   const setSession = useSessionStore((s) => s.setSession);
 
   return useMutation({
-    mutationFn: (payload: VerifyPhoneCodeRequest) =>
-      authApi.verifyPhoneCode(payload),
-    onSuccess: ({ token, user }) => setSession(token, user),
+    mutationFn: async (payload: Omit<VerifyPhoneCodeRequest, "verificationToken">) => {
+      const verificationToken = useSessionStore.getState().verificationToken;
+      if (!verificationToken) {
+        throw new Error("Tasdiqlash muddati tugadi, raqamni qaytadan yuboring");
+      }
+
+      await authApi.verifyPhoneCode({ verificationToken, code: payload.code });
+      return usersApi.me();
+    },
+    onSuccess: (user) => setSession(user),
   });
 }

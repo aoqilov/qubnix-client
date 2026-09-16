@@ -66,7 +66,7 @@ export function LoginPhoneForm() {
     }
     setCodeError(null);
     verifyCode.mutate(
-      { phone, code: value },
+      { code: value },
       {
         onSuccess: () => {
           timer.stop();

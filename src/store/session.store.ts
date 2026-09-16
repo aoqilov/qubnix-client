@@ -1,38 +1,47 @@
 import { create } from "zustand";
 
 export interface SessionUser {
-  id: string;
+  id: number;
   fullName: string;
-  role: string;
-  phone?: string;
   avatarUrl?: string;
+  phone?: string;
 }
 
 interface SessionState {
-  token: string | null;
+  // Faqat Telegram uchun — Mini App SDK har ochilishda yangisini beradi,
+  // shuning uchun saqlash shart emas. Web uchun har doim null — sessiya
+  // backend o'rnatadigan qubnix_session HttpOnly cookie orqali ishlaydi
+  // (bu cookie JS'dan ko'rinmaydi/boshqarilmaydi, browser avtomatik yuboradi).
+  initData: string | null;
   user: SessionUser | null;
   status: "idle" | "authenticating" | "authenticated" | "unauthenticated";
-  setSession: (token: string, user: SessionUser) => void;
+  /** /auth/request-code'dan kelgan token — OTP tasdiqlangunча vaqtincha, faqat runtime holatda. */
+  verificationToken: string | null;
+  setVerificationToken: (token: string | null) => void;
+  setInitData: (initData: string) => void;
+  setSession: (user: SessionUser) => void;
   updateUser: (patch: Partial<SessionUser>) => void;
   clearSession: () => void;
   setStatus: (status: SessionState["status"]) => void;
 }
 
-const TOKEN_STORAGE_KEY = "qubnix_token";
-
 export const useSessionStore = create<SessionState>((set) => ({
-  token: localStorage.getItem(TOKEN_STORAGE_KEY),
+  initData: null,
   user: null,
   status: "idle",
-  setSession: (token, user) => {
-    localStorage.setItem(TOKEN_STORAGE_KEY, token);
-    set({ token, user, status: "authenticated" });
-  },
+  verificationToken: null,
+  setVerificationToken: (verificationToken) => set({ verificationToken }),
+  setInitData: (initData) => set({ initData }),
+  setSession: (user) =>
+    set({ user, status: "authenticated", verificationToken: null }),
   updateUser: (patch) =>
     set((s) => (s.user ? { user: { ...s.user, ...patch } } : s)),
-  clearSession: () => {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-    set({ token: null, user: null, status: "unauthenticated" });
-  },
+  clearSession: () =>
+    set({
+      initData: null,
+      user: null,
+      status: "unauthenticated",
+      verificationToken: null,
+    }),
   setStatus: (status) => set({ status }),
 }));

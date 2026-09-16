@@ -1,0 +1,215 @@
+POST
+/api/v1/auth/request-code
+Send a web login code to the registered user's Telegram chat
+
+Codes last 180 seconds. Resend after 60 seconds using this endpoint. Returns the same response for unknown numbers, blocked bots, and delivery failures. Limits: 5 sends per phone and 20 per IP in 15 minutes. No code is returned in the response.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "data": {
+    "phone_number": "+998901234567"
+  }
+}
+Responses
+Code	Description	Links
+200	
+Default Response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "statusCode": 200,
+  "data": {
+    "verification_token": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "expires_in": 180,
+    "retry_after": 60,
+    "message": "string"
+  }
+}
+No links
+400	
+Default Response
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "statusCode": 400,
+  "message": "string",
+  "code": "string",
+  "details": "string"
+}
+No links
+403	
+Default Response
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "statusCode": 403,
+  "message": "string",
+  "code": "string",
+  "details": "string"
+}
+No links
+429	
+Default Response
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "statusCode": 429,
+  "message": "string",
+  "code": "string",
+  "details": "string"
+}
+No links
+503	
+Default Response
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "statusCode": 503,
+  "message": "string",
+  "code": "string",
+  "details": "string"
+}
+No links
+
+POST
+/api/v1/auth/verify-code
+Verify a Telegram code and create a web session without expiration
+
+Accepts a code once, with at most 5 wrong attempts per code. Sets the HttpOnly qubnix_session cookie; the session has no server-side expiry. Use credentials: include in browser requests. Codes are strings, including leading zeroes.
+
+Parameters
+Try it out
+No parameters
+
+Request body
+
+application/json
+Example Value
+Schema
+{
+  "data": {
+    "verification_token": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "code": "048291"
+  }
+}
+Responses
+Code	Description	Links
+200	
+Default Response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "statusCode": 200,
+  "data": {
+    "init_data": "string"
+  }
+}
+No links
+400	
+Default Response
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "statusCode": 400,
+  "message": "string",
+  "code": "string",
+  "details": "string"
+}
+No links
+401	
+Default Response
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "statusCode": 401,
+  "message": "string",
+  "code": "string",
+  "details": "string"
+}
+No links
+403	
+Default Response
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "statusCode": 403,
+  "message": "string",
+  "code": "string",
+  "details": "string"
+}
+No links
+429	
+Default Response
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "statusCode": 429,
+  "message": "string",
+  "code": "string",
+  "details": "string"
+}
+No links
+503	
+Default Response
+
+Media type
+
+application/json
+Example Value
+Schema
+{
+  "statusCode": 503,
+  "message": "string",
+  "code": "string",
+  "details": "string"
+}

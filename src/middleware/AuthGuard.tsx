@@ -7,9 +7,9 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children }: AuthGuardProps) {
   const location = useLocation();
-  const token = useSessionStore((s) => s.token);
+  const status = useSessionStore((s) => s.status);
 
-  if (!token) {
+  if (status !== "authenticated") {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

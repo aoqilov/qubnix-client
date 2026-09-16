@@ -8,6 +8,6 @@ export function useTelegramWidgetLogin() {
 
   return useMutation({
     mutationFn: (payload: TelegramLoginWidgetPayload) => authApi.byTelegramWidget(payload),
-    onSuccess: ({ token, user }) => setSession(token, user),
+    onSuccess: ({ user }) => setSession(user),
   });
 }

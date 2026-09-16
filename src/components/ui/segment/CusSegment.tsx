@@ -1,16 +1,16 @@
 import { SegmentGroup } from "@chakra-ui/react";
 import type React from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { LuLock } from "react-icons/lu";
 
 const SCOPE = "cus-segment";
 
-// Ranglar globals.css token'laridan keladi: aktiv element `--cus-segment-accent`
-// (default: `--accent`), uning ustidagi matn esa `--text-on-accent`.
+// Aktiv (checked) holat rangini CSS `[data-state="checked"]` orqali emas,
+// pastda to'g'ridan-to'g'ri React state asosida beramiz — Chakra'ning o'z
+// segment-group recipe'si bilan `!important` "kurashida" ba'zan checked
+// matn eski (xira) rangda qolib ketardi.
 const segmentStyles = `
-  .${SCOPE} [data-part="item"][data-state="checked"] {
-    color: var(--text-on-accent) !important;
-  }
   .${SCOPE} [data-part="item"]:not([data-disabled]):hover {
     color: var(--text-3) !important;
   }
@@ -50,15 +50,26 @@ export const CusSegment = ({
   layout = "block",
   accent = "var(--accent)",
 }: CusSegmentProps) => {
+  const [activeValue, setActiveValue] = useState(
+    () => value ?? defaultValue ?? items[0]?.id ?? items[0]?.label ?? "",
+  );
+
+  // Controlled ishlatilganda (value prop bilan) tashqi o'zgarishni ham kuzatadi.
+  useEffect(() => {
+    if (value != null) setActiveValue(value);
+  }, [value]);
+
   return (
     <>
       <style>{segmentStyles}</style>
       <SegmentGroup.Root
         value={value}
         defaultValue={defaultValue ?? items[0]?.id ?? items[0]?.label ?? ""}
-        onValueChange={(details) =>
-          details.value != null && onValueChange?.(details.value)
-        }
+        onValueChange={(details) => {
+          if (details.value == null) return;
+          setActiveValue(details.value);
+          onValueChange?.(details.value);
+        }}
         size={size}
         disabled={disabled}
         className={`${SCOPE}${className ? ` ${className}` : ""}`}
@@ -84,6 +95,7 @@ export const CusSegment = ({
         />
         {items.map((item) => {
           const key = item.id ?? item.label;
+          const isActive = key === activeValue;
           return (
             <SegmentGroup.Item
               key={key}
@@ -91,7 +103,7 @@ export const CusSegment = ({
               disabled={item.disabled}
               style={{
                 borderRadius: "7px",
-                color: "var(--text-muted)",
+                color: isActive ? "var(--text-on-accent)" : "var(--text-muted)",
                 fontWeight: 500,
                 transition: "color 0.15s ease",
                 cursor: item.disabled ? "not-allowed" : "pointer",
@@ -119,6 +131,7 @@ export const CusSegment = ({
                     whiteSpace: "normal",
                     textAlign: "center",
                     lineHeight: 1.3,
+                    color: isActive ? "var(--text-on-accent)" : "var(--text-muted)",
                   }}
                 >
                   {item.disabled && (
