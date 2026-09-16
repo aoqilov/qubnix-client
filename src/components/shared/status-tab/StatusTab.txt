@@ -1,0 +1,139 @@
+import { useEffect, useRef } from "react";
+
+export type StatusTabColor = "gray" | "brand" | "success" | "error";
+
+export interface StatusTabItem {
+  id: string;
+  label: string;
+  count: number;
+  color: StatusTabColor;
+}
+
+interface StatusTabProps {
+  items: StatusTabItem[];
+  activeId?: string;
+  onChange?: (id: string) => void;
+  className?: string;
+}
+
+// Har bir rang uchun ikki holat — nofaol (soft fon + rangli matn) va aktiv
+// (to'q/solid fon + oq matn). Barchasi globals.css semantik token'laridan
+// (dark/light avtomatik moslashadi).
+const COLOR_MAP: Record<
+  StatusTabColor,
+  { bgSoft: string; text: string; border: string; bgSolid: string }
+> = {
+  gray: {
+    bgSoft: "var(--bg-surface-secondary)",
+    text: "var(--text-primary)",
+    border: "var(--border-default)",
+    bgSolid: "var(--text-secondary)",
+  },
+  brand: {
+    bgSoft: "var(--brand-subtle-bg)",
+    text: "var(--brand-default)",
+    border: "var(--c-brand-200)",
+    bgSolid: "var(--brand-default)",
+  },
+  success: {
+    bgSoft: "var(--status-success-bg)",
+    text: "var(--status-success-text)",
+    border: "var(--c-success-200)",
+    bgSolid: "var(--status-success-solid)",
+  },
+  error: {
+    bgSoft: "var(--status-error-bg)",
+    text: "var(--status-error-text)",
+    border: "var(--c-danger-200)",
+    bgSolid: "var(--status-error-solid)",
+  },
+};
+
+const NOTCH = 14;
+
+function getClipPath(position: "first" | "middle" | "last"): string {
+  if (position === "first") {
+    return `polygon(0 0, calc(100% - ${NOTCH}px) 0, 100% 50%, calc(100% - ${NOTCH}px) 100%, 0 100%)`;
+  }
+  if (position === "last") {
+    return `polygon(0 0, 100% 0, 100% 100%, 0 100%, ${NOTCH}px 50%)`;
+  }
+  return `polygon(0 0, calc(100% - ${NOTCH}px) 0, 100% 50%, calc(100% - ${NOTCH}px) 100%, 0 100%, ${NOTCH}px 50%)`;
+}
+
+function StatusTab({ items, activeId, onChange, className }: StatusTabProps) {
+  const itemRefs = useRef<Record<string, HTMLElement | null>>({});
+
+  // Aktiv holat bosilganda/tashqaridan o'zgarganda ko'rinadigan hudud
+  // markaziga skroll qiladi — ProjectsTabs bilan bir xil xatti-harakat.
+  useEffect(() => {
+    if (!activeId) return;
+    itemRefs.current[activeId]?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [activeId]);
+
+  return (
+    <div
+      className={`flex h-8 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${className ?? ""}`}
+    >
+      {items.map((item, index) => {
+        const position = index === 0 ? "first" : index === items.length - 1 ? "last" : "middle";
+        const colors = COLOR_MAP[item.color];
+        const isActive = item.id === activeId;
+        const Tag = onChange ? "button" : "div";
+
+        return (
+          <Tag
+            key={item.id}
+            ref={(el: HTMLElement | null) => {
+              itemRefs.current[item.id] = el;
+            }}
+            type={onChange ? "button" : undefined}
+            onClick={onChange ? () => onChange(item.id) : undefined}
+            className="flex flex-none items-center justify-center gap-2 text-sm font-semibold"
+            style={{
+              clipPath: getClipPath(position),
+              marginLeft: index === 0 ? 0 : -NOTCH,
+              paddingLeft: position === "first" ? 16 : NOTCH + 14,
+              paddingRight: position === "last" ? 16 : NOTCH + 14,
+              background: isActive ? colors.bgSolid : colors.bgSoft,
+              color: isActive ? "var(--text-on-brand)" : colors.text,
+              border: `1px solid ${colors.border}`,
+              cursor: onChange ? "pointer" : "default",
+            }}
+          >
+            <span className="whitespace-nowrap">{item.label}</span>
+            <span
+              className="rounded bg-surface px-1.5 py-0.5 text-xs font-semibold"
+              style={{ color: colors.text }}
+            >
+              {item.count}
+            </span>
+          </Tag>
+        );
+      })}
+    </div>
+  );
+}
+
+export default StatusTab;
+
+// ─── Ishlatish misoli ────────────────────────────────────────────────────────
+//
+// <StatusTab
+//   items={[
+//     { id: "assigned",   label: "Berildi",      count: 2, color: "gray" },
+//     { id: "in_progress", label: "Jarayonda",    count: 2, color: "brand" },
+//     { id: "done",        label: "Bajarildi",    count: 1, color: "success" },
+//     { id: "failed",      label: "Bajarilmadi",  count: 1, color: "error" },
+//   ]}
+//   activeId="in_progress"
+//   onChange={setActiveId}
+// />
+
+
+
+Eski variant

@@ -12,6 +12,12 @@ interface CusDialogProps {
   footer?: ReactNode;
   size?: DialogSize;
   closeOnBackdrop?: boolean;
+  /**
+   * true bo'lsa mobilda ham (lg'dan tor ekranda) pastdan chiqadigan
+   * full-screen bottom-sheet emas, har doim markazda `size` o'lchamida
+   * ko'rsatiladi — qisqa xabar/tasdiqlash dialoglari uchun.
+   */
+  centered?: boolean;
 }
 
 export function CusDialog({
@@ -23,13 +29,14 @@ export function CusDialog({
   footer,
   size = "md",
   closeOnBackdrop = true,
+  centered = false,
 }: CusDialogProps) {
   return (
     <Dialog.Root
       open={open}
       onOpenChange={({ open }) => !open && onClose()}
-      placement={{ lgDown: "bottom", lg: "center" }}
-      size={{ lgDown: "full", lg: size }}
+      placement={centered ? "center" : { lgDown: "bottom", lg: "center" }}
+      size={centered ? size : { lgDown: "full", lg: size }}
       closeOnInteractOutside={closeOnBackdrop}
       closeOnEscape
       lazyMount
@@ -37,21 +44,22 @@ export function CusDialog({
     >
       <Dialog.Backdrop bg="var(--overlay-backdrop)" backdropFilter="blur(2px)" />
 
-      <Dialog.Positioner>
+      <Dialog.Positioner px={centered ? "4" : undefined}>
         <Dialog.Content
           bg="var(--bg-second)"
           borderColor="var(--border-default)"
           borderWidth="1px"
-          borderRadius={{ lgDown: "16px 16px 0 0", lg: "16px" }}
+          borderRadius={centered ? "16px" : { lgDown: "16px 16px 0 0", lg: "16px" }}
           boxShadow="var(--shadow-modal)"
           color="var(--text-default)"
           display="flex"
           flexDirection="column"
-          maxH={{ lgDown: "90dvh", lg: "85dvh" }}
-          minW={{ lg: "760px" }}
-          minH={{ lg: "500px" }}
+          maxH={centered ? "85dvh" : { lgDown: "90dvh", lg: "85dvh" }}
+          minW={centered ? undefined : { lg: "760px" }}
+          minH={centered ? undefined : { lg: "500px" }}
         >
-          {/* Drag handle — faqat tablet- da ko'rinadi */}
+          {/* Drag handle — faqat bottom-sheet (centered=false) mobil holatida */}
+          {!centered && (
           <div
             style={{
               display: "flex",
@@ -70,6 +78,7 @@ export function CusDialog({
               }}
             />
           </div>
+          )}
 
           {/* Header */}
           {(title || description) && (

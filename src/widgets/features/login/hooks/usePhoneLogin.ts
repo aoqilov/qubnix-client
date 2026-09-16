@@ -16,6 +16,13 @@ export function authErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
+/** Backend 404 USER_NOT_FOUND (ro'yxatdan o'tmagan raqam) qaytarganini aniqlaydi. */
+export function isUserNotFoundError(error: unknown): boolean {
+  const response = (error as { response?: { data?: { code?: string } } })
+    ?.response;
+  return response?.data?.code === "USER_NOT_FOUND";
+}
+
 /** 1-qadam: raqamga tasdiqlash kodi yuborish — javobdagi verification_token 2-qadam uchun saqlanadi. */
 export function useSendPhoneCode() {
   const setVerificationToken = useSessionStore((s) => s.setVerificationToken);
