@@ -16,11 +16,14 @@ const SAFE_AREA_STYLE = {
 export function MobileLayout() {
   return (
     <div
-      className="flex h-dvh flex-col border-t border-default bg-canvas text-primary"
+      className="flex h-dvh flex-col  bg-canvas text-primary"
       style={SAFE_AREA_STYLE}
     >
       {/* <Header /> */}
-      <main className="flex-1 overflow-auto">
+      <main
+        className="flex-1 overflow-auto "
+        style={{ borderTop: "1px solid var(--c-neutral-100)" }}
+      >
         <Outlet />
       </main>
       <BottomTabBar />
