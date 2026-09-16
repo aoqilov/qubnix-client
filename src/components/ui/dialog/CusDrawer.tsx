@@ -6,14 +6,16 @@ type DrawerSize = "xs" | "sm" | "md" | "lg" | "xl" | "full";
 type DrawerPlacement = "start" | "end" | "top" | "bottom";
 
 // MobileLayout'dagi bilan bir xil formula — Telegram (ayniqsa fullscreen
-// rejimida) notch/home-indicator maydonini shu CSS o'zgaruvchilar orqali
-// beradi; oddiy webda 0px fallback ishlaydi. Drawer.Content Chakra
-// portal orqali <body>ga chiqadi, ya'ni MobileLayout'ning safe-area
-// padding'ini meros qilib olmaydi — shu sabab bu yerda alohida qo'yiladi.
+// rejimida) notch/home-indicator maydonini --tg-safe-area-inset-* orqali
+// beradi; oddiy mobil brauzerda bu o'zgaruvchi yo'q, shuning uchun standart
+// env(safe-area-inset-*)'ga tushamiz (index.html'dagi viewport-fit=cover
+// buni yoqadi). Drawer.Content Chakra portal orqali <body>ga chiqadi, ya'ni
+// MobileLayout'ning safe-area padding'ini meros qilib olmaydi — shu sabab
+// bu yerda alohida qo'yiladi.
 const SAFE_TOP =
-  "calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))";
+  "calc(var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--tg-content-safe-area-inset-top, 0px))";
 const SAFE_BOTTOM =
-  "calc(var(--tg-safe-area-inset-bottom, 0px) + var(--tg-content-safe-area-inset-bottom, 0px))";
+  "calc(var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + var(--tg-content-safe-area-inset-bottom, 0px))";
 
 interface CusDrawerProps {
   open: boolean;
