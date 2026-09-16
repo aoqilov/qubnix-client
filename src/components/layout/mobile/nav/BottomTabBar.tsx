@@ -64,7 +64,7 @@ function TabBox({
 }) {
   return (
     <nav
-      className={`relative flex h-14 items-center overflow-hidden border border-default bg-surface px-1.5 ${className}`}
+      className={`relative flex h-14 items-center overflow-hidden border-y border-default bg-surface px-1.5 ${className}`}
     >
       <AnimatePresence initial={animateOnMount} custom={direction}>
         <motion.div
@@ -115,7 +115,7 @@ export function BottomTabBar() {
         direction={direction}
         className={
           box2Tabs.length > 0
-            ? "w-14 flex-none rounded-r-full"
+            ? "w-14 flex-none rounded-r-full border-r"
             : "w-44 flex-none rounded-full"
         }
       />
@@ -125,7 +125,7 @@ export function BottomTabBar() {
           tabs={box2Tabs}
           mode={mode}
           direction={direction}
-          className="flex-1 rounded-l-full"
+          className="flex-1 rounded-l-full border-l"
           animateOnMount
         />
       )}
