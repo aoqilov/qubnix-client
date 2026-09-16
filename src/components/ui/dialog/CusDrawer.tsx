@@ -48,7 +48,7 @@ export function CusDrawer({
   const isHorizontal = isBottom || isTop;
   // To'liq ekran (full + end) holatida panel ekranning o'zi bilan bir xil —
   // uni "o'rab turadigan" chegara keraksiz.
-  const isFullScreen = size === "full" && placement === "end";
+2 = size === "full" && placement === "end";
 
   return (
     <Drawer.Root
