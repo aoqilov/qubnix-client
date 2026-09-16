@@ -5,6 +5,16 @@ import { LuArrowLeft } from "react-icons/lu";
 type DrawerSize = "xs" | "sm" | "md" | "lg" | "xl" | "full";
 type DrawerPlacement = "start" | "end" | "top" | "bottom";
 
+// MobileLayout'dagi bilan bir xil formula — Telegram (ayniqsa fullscreen
+// rejimida) notch/home-indicator maydonini shu CSS o'zgaruvchilar orqali
+// beradi; oddiy webda 0px fallback ishlaydi. Drawer.Content Chakra
+// portal orqali <body>ga chiqadi, ya'ni MobileLayout'ning safe-area
+// padding'ini meros qilib olmaydi — shu sabab bu yerda alohida qo'yiladi.
+const SAFE_TOP =
+  "calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))";
+const SAFE_BOTTOM =
+  "calc(var(--tg-safe-area-inset-bottom, 0px) + var(--tg-content-safe-area-inset-bottom, 0px))";
+
 interface CusDrawerProps {
   open: boolean;
   onClose: () => void;
@@ -76,6 +86,8 @@ export function CusDrawer({
           borderRadius={
             isBottom ? "16px 16px 0 0" : isTop ? "0 0 16px 16px" : undefined
           }
+          pt={!isBottom ? SAFE_TOP : undefined}
+          pb={!isTop ? SAFE_BOTTOM : undefined}
         >
           {/* Drag handle — faqat bottom placement uchun */}
           {isBottom && (
@@ -134,7 +146,7 @@ export function CusDrawer({
           <Drawer.CloseTrigger
             asChild
             position="absolute"
-            top="3.5"
+            top={!isBottom ? `calc(0.875rem + ${SAFE_TOP})` : "3.5"}
             {...(backButton ? { left: "4" } : { right: "4" })}
           >
             <CloseButton

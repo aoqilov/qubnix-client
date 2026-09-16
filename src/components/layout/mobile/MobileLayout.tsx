@@ -14,9 +14,12 @@ const SAFE_AREA_STYLE = {
 
 export function MobileLayout() {
   return (
-    <div className="flex h-screen flex-col" style={SAFE_AREA_STYLE}>
+    <div
+      className="flex h-screen flex-col bg-canvas text-primary"
+      style={SAFE_AREA_STYLE}
+    >
       {/* <Header /> */}
-      <main className="flex-1 overflow-auto bg-[var(--bg-main)] text-[var(--text-default)]">
+      <main className="flex-1 overflow-auto">
         <Outlet />
       </main>
       <BottomTabBar />

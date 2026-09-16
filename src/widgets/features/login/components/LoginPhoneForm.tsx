@@ -115,7 +115,7 @@ export function LoginPhoneForm() {
           helperText="Tasdiqlash kodi shu raqamga bog'langan Telegram akkauntingizga yuboriladi"
           leftElementWidth="5rem"
           leftElement={
-            <span className="flex items-center gap-1.5 whitespace-nowrap text-base text-[var(--text-3)]">
+            <span className="flex items-center gap-1.5 whitespace-nowrap text-base text-secondary">
               <LuPhone size={16} />
               {UZ_DIAL_CODE}
             </span>
@@ -123,13 +123,13 @@ export function LoginPhoneForm() {
         />
 
         <CusButton
-          colorPalette="purple"
           size="xl"
           isLoading={sendCode.isPending}
           loadingText="Yuborilmoqda..."
           isDisabled={!isValidUzPhone(phoneDigits)}
           rightIcon={<LuSend size={18} />}
           onClick={requestCode}
+          style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
         >
           Jo'natish
         </CusButton>
@@ -140,14 +140,14 @@ export function LoginPhoneForm() {
   // ─── 2-qadam: tasdiqlash kodi ──────────────────────────────────────────────
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3 rounded-lg border border-[var(--accent-border)] bg-[var(--accent-soft)] p-4">
-        <p className="text-base leading-relaxed text-[var(--text-2)]">
+      <div className="flex flex-col gap-3 rounded-card bg-brand-subtle p-4">
+        <p className="text-base leading-relaxed text-primary">
           Tasdiqlash kodini Telegram ilovangizdagi{" "}
           <a
             href={BOT_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-semibold text-[var(--vio)] underline underline-offset-2"
+            className="font-semibold text-brand underline underline-offset-2"
           >
             @{BOT_USERNAME}
           </a>{" "}
@@ -168,10 +168,10 @@ export function LoginPhoneForm() {
 
       <div className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between">
-          <span className="text-base font-medium text-[var(--text-3)]">
+          <span className="text-base font-medium text-secondary">
             Tasdiqlash kodi
           </span>
-          <span className="text-base text-[var(--text-muted)]">
+          <span className="text-base text-secondary">
             {UZ_DIAL_CODE} {formatUzPhone(phoneDigits)}
           </span>
         </div>
@@ -190,9 +190,9 @@ export function LoginPhoneForm() {
         />
 
         {codeError ? (
-          <span className="text-sm font-medium text-red-500">{codeError}</span>
+          <span className="text-sm font-medium text-error-strong">{codeError}</span>
         ) : (
-          <span className="text-sm text-[var(--text-muted)]">
+          <span className="text-sm text-secondary">
             {timer.isRunning
               ? `Kod amal qilish muddati: ${timer.formatted}`
               : "Kod muddati tugadi — yangisini so'rang"}
@@ -202,13 +202,13 @@ export function LoginPhoneForm() {
 
       {timer.isRunning ? (
         <CusButton
-          colorPalette="purple"
           size="xl"
           isLoading={verifyCode.isPending}
           loadingText="Tekshirilmoqda..."
           isDisabled={code.length !== OTP_LENGTH}
           rightIcon={<LuSend size={18} />}
           onClick={() => submitCode()}
+          style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
         >
           Jo'natish
         </CusButton>
@@ -228,7 +228,7 @@ export function LoginPhoneForm() {
       <button
         type="button"
         onClick={backToPhone}
-        className="mx-auto flex items-center gap-1.5 text-base text-[var(--text-muted)] transition hover:text-[var(--vio)]"
+        className="mx-auto flex items-center gap-1.5 text-base text-secondary transition hover:text-brand"
       >
         <LuArrowLeft size={16} />
         Raqamni o'zgartirish

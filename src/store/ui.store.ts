@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { syncTelegramChrome } from "@/utils/telegram";
 
 const DARK_MODE_KEY = "qubnix_dark_mode";
 const FONT_SIZE_KEY = "qubnix_font_size";
@@ -7,6 +8,9 @@ export type FontSizePreference = "sm" | "md" | "lg";
 
 function applyDarkClass(isDark: boolean) {
   document.documentElement.classList.toggle("dark", isDark);
+  // Telegram ichida bo'lsa header/body rangi ham mavzu bilan birga
+  // yangilanadi; oddiy webda bu chaqiruv shunchaki no-op bo'ladi.
+  syncTelegramChrome(isDark);
 }
 
 function applyFontSize(size: FontSizePreference) {

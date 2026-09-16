@@ -2,6 +2,24 @@ function webApp() {
   return window.Telegram?.WebApp;
 }
 
+// globals.css'dagi --bg-canvas bilan bir xil (light: --c-neutral-50,
+// dark: --c-ink-950) — CSS o'zgaruvchisini o'qib bo'lmagani uchun (Telegram
+// WebApp API hex talab qiladi) qiymatlar shu yerda qo'lda takrorlangan.
+const TG_CHROME_COLOR = {
+  light: "#f8fafc",
+  dark: "#0c111d",
+} as const;
+
+// Header/body fonini joriy mavzuga (dark/light) moslab qo'yamiz, aks holda
+// Telegram status-bar soat/ikonalari kontrast rangini noto'g'ri (masalan
+// qorong'u fonda qora matn) tanlab, ko'rinmay qolishi mumkin (Bot API 6.1+).
+export function syncTelegramChrome(isDark: boolean): void {
+  const tg = webApp();
+  const color = isDark ? TG_CHROME_COLOR.dark : TG_CHROME_COLOR.light;
+  tg?.setHeaderColor?.(color);
+  tg?.setBackgroundColor?.(color);
+}
+
 export function initTelegramWebApp(): void {
   const tg = webApp();
   tg?.ready();
@@ -10,11 +28,7 @@ export function initTelegramWebApp(): void {
   // metod umuman mavjud emas, shuning uchun expand() ham baribir chaqiriladi
   // (u eski klientlar uchun eng yaqin muqobil — maksimal balandlikka ochadi).
   tg?.requestFullscreen?.();
-  // Header/body oq (#ffffff) — shuni Telegram'ga aytib qo'yamiz, aks holda
-  // status-bar soat/ikonalari kontrast rangini noto'g'ri (masalan oq fonda
-  // oq matn) tanlab, ko'rinmay qolishi mumkin (Bot API 6.1+).
-  tg?.setHeaderColor?.("#ffffff");
-  tg?.setBackgroundColor?.("#ffffff");
+  syncTelegramChrome(document.documentElement.classList.contains("dark"));
   // Aks holda pastga scroll qilib chegaraga yetganda Telegram buni
   // "pastga svayp" deb tushunib, mini-app'ni yopib/minimallashtirib
   // qo'yishi mumkin (Bot API 7.7+).

@@ -11,18 +11,18 @@ const STEPS = [
 export function TelegramRegisterPanel() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start gap-3 rounded-lg border border-[var(--accent-border)] bg-[var(--accent-soft)] p-4">
-        <LuInfo size={20} className="mt-0.5 shrink-0 text-[var(--vio)]" />
-        <p className="text-base font-medium leading-relaxed text-[var(--text-2)]">
+      <div className="flex items-start gap-3 rounded-card bg-brand-subtle p-4">
+        <LuInfo size={20} className="mt-0.5 shrink-0 text-brand" />
+        <p className="text-base font-medium leading-relaxed text-primary">
           Dasturga ro'yxatdan o'tish{" "}
-          <span className="text-[var(--vio)]">faqat Telegram bot orqali</span>{" "}
+          <span className="text-brand">faqat Telegram bot orqali</span>{" "}
           amalga oshiriladi. Boshqa ro'yxatdan o'tish usuli mavjud emas.
         </p>
       </div>
 
-      <p className="text-base leading-relaxed text-[var(--text-3)]">
+      <p className="text-base leading-relaxed text-secondary">
         Tugmani bossangiz{" "}
-        <span className="font-semibold text-[var(--vio)]">@{BOT_USERNAME}</span>{" "}
+        <span className="font-semibold text-brand">@{BOT_USERNAME}</span>{" "}
         yangi oynada ochiladi.
       </p>
 
@@ -30,9 +30,9 @@ export function TelegramRegisterPanel() {
         {STEPS.map((text, index) => (
           <li
             key={text}
-            className="flex items-start gap-3 text-base leading-relaxed text-[var(--text-3)]"
+            className="flex items-start gap-3 text-base leading-relaxed text-secondary"
           >
-            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--vio)] text-sm font-semibold text-[var(--text-on-accent)]">
+            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-semibold text-on-brand">
               {index + 1}
             </span>
             {text}
@@ -41,11 +41,11 @@ export function TelegramRegisterPanel() {
       </ol>
 
       <CusButton
-        colorPalette="purple"
         size="xl"
         leftIcon={<LuSend size={18} />}
         rightIcon={<LuExternalLink size={15} />}
         onClick={() => openBot("register")}
+        style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
       >
         Telegram bot orqali ro'yxatdan o'tish
       </CusButton>
@@ -54,7 +54,7 @@ export function TelegramRegisterPanel() {
         href={BOT_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="mx-auto text-sm text-[var(--text-muted)] transition hover:text-[var(--vio)]"
+        className="mx-auto text-sm text-secondary transition hover:text-brand"
       >
         {BOT_URL.replace("https://", "")}
       </a>
