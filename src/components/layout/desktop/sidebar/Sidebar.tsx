@@ -11,6 +11,7 @@ import {
   LuPanelLeftOpen,
 } from "react-icons/lu";
 import { useWorkspaceStore } from "@/store/workspace.store";
+import { avatarColorVar } from "@/utils/avatarColor";
 import { useUiStore } from "@/store/ui.store";
 import { CusPopover } from "@/components/ui/popover/CusPopover";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
@@ -160,7 +161,7 @@ export function Sidebar() {
                     collapsed ? "justify-center px-2" : "px-3"
                   }`}
                 >
-                  <Avatar initials={w.initials} color={w.color} size={22} />
+                  <Avatar initials={w.initials} color={avatarColorVar(w.id)} size={22} />
                   {!collapsed && (
                     <>
                       <span className="flex-1 truncate text-left">
@@ -192,7 +193,7 @@ export function Sidebar() {
                 >
                   <Avatar
                     initials={selectedWorkspace.initials}
-                    color={selectedWorkspace.color}
+                    color={avatarColorVar(selectedWorkspace.id)}
                   />
                   {!collapsed && (
                     <>
@@ -219,7 +220,7 @@ export function Sidebar() {
                       }}
                       className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-[var(--bg-hover)]"
                     >
-                      <Avatar initials={w.initials} color={w.color} size={22} />
+                      <Avatar initials={w.initials} color={avatarColorVar(w.id)} size={22} />
                       <span className="flex-1 truncate text-left">
                         {w.name}
                       </span>

@@ -1,50 +1,95 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWorkspaceStore } from "@/store/workspace.store";
-import { CusPageTitle } from "@/components/ui/page-title/CusPageTitle";
-import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
-import { CusBadge } from "@/components/ui/badge/CusBadge";
+import { DoskaSectionHeader } from "./components/DoskaSectionHeader";
+import { PersonalTasksCard } from "./components/PersonalTasksCard";
+import { WorkspaceCard } from "./components/WorkspaceCard";
+import { AddWorkspaceButton } from "./components/AddWorkspaceButton";
+import { ModalAddWorkspace } from "./modals/ModalAddWorkspace";
+import { usePersonalSummary, useWorkspaceList } from "./hooks/useApiDoska";
+import { formatBoardDate } from "./lib/formatBoardDate";
+import { orgsLabel } from "./lib/pluralRu";
+
+const PERSONAL_WORKSPACE_ID = "personal";
 
 export default function FeatureDoska() {
-  const workspaces = useWorkspaceStore((s) => s.workspaces);
-  const selectWorkspace = useWorkspaceStore((s) => s.selectWorkspace);
   const navigate = useNavigate();
+  const selectWorkspace = useWorkspaceStore((s) => s.selectWorkspace);
+  const [isAddOpen, setAddOpen] = useState(false);
+
+  const workspacesQuery = useWorkspaceList();
+  const personalQuery = usePersonalSummary();
+
+  const workspaces = workspacesQuery.data ?? [];
+
+  const openWorkspace = (id: string) => {
+    selectWorkspace(id);
+    navigate("/tasks");
+  };
 
   return (
-    <div className="p-4">
-      <CusPageTitle
-        title="Qayerda ishlaymiz?"
-        description="Davom etish uchun ish maydonlaridan birini tanlang"
-      />
-      <div className="flex flex-col gap-3">
-        {workspaces.map((w) => (
-          <CusCardbox
-            key={w.id}
-            onClick={() => {
-              selectWorkspace(w.id);
-              navigate("/tasks");
-            }}
-            className="flex cursor-pointer items-center gap-3 hover:border-vio"
-          >
-            <span
-              className="flex h-10 w-10 flex-none items-center justify-center rounded-full text-sm font-semibold text-[var(--text-on-accent)]"
-              style={{ background: w.color }}
-            >
-              {w.initials}
-            </span>
-            <span className="flex-1">
-              <span className="block font-medium">{w.name}</span>
-              <span className="block text-xs text-[var(--text-muted)]">
-                {w.projectsCount} ta loyiha
-              </span>
-            </span>
-            {w.todayCount > 0 && (
-              <CusBadge colorPalette="purple" size="xs">
-                {w.todayCount} bugungi
-              </CusBadge>
-            )}
-          </CusCardbox>
-        ))}
-      </div>
+    <div className="flex flex-col gap-6 p-4">
+      <header>
+        <h1 className="text-3xl font-bold leading-tight text-primary">
+          Где будем работать?
+        </h1>
+        <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-brand">
+          {formatBoardDate()}
+        </p>
+      </header>
+
+      <section>
+        <DoskaSectionHeader index="01" label="Личное" />
+        {personalQuery.isPending ? (
+          <CardSkeleton />
+        ) : (
+          <PersonalTasksCard
+            tasksCount={personalQuery.data?.tasksCount ?? 0}
+            onClick={() => openWorkspace(PERSONAL_WORKSPACE_ID)}
+          />
+        )}
+      </section>
+
+      <section>
+        <DoskaSectionHeader
+          index="02"
+          label="Workspace"
+          meta={workspacesQuery.isPending ? undefined : orgsLabel(workspaces.length)}
+        />
+
+        <div className="flex flex-col gap-3">
+          <AddWorkspaceButton onClick={() => setAddOpen(true)} />
+
+          {workspacesQuery.isPending ? (
+            <>
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+            </>
+          ) : workspacesQuery.isError ? (
+            <p className="px-1 text-sm text-error-strong">
+              Не удалось загрузить список. Обновите страницу.
+            </p>
+          ) : (
+            workspaces.map((workspace) => (
+              <WorkspaceCard
+                key={workspace.id}
+                workspace={workspace}
+                onClick={() => openWorkspace(workspace.id)}
+              />
+            ))
+          )}
+        </div>
+      </section>
+
+      <ModalAddWorkspace open={isAddOpen} onClose={() => setAddOpen(false)} />
     </div>
+  );
+}
+
+/** Karta balandligidagi yuklanish placeholder'i. */
+function CardSkeleton() {
+  return (
+    <div className="h-[72px] animate-pulse rounded-card border border-subtle bg-surface" />
   );
 }

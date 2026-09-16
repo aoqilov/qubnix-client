@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useWorkspaceStore } from "@/store/workspace.store";
+import { avatarColorVar } from "@/utils/avatarColor";
 
 export function WorkspacePicker() {
   const workspaces = useWorkspaceStore((s) => s.workspaces);
@@ -24,7 +25,7 @@ export function WorkspacePicker() {
           >
             <span
               className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold text-[var(--text-on-accent)]"
-              style={{ background: w.color }}
+              style={{ background: avatarColorVar(w.id) }}
             >
               {w.initials}
             </span>
