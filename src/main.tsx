@@ -6,13 +6,16 @@ import { enterWay } from "./components/layout/enter-way";
 import App from "./App";
 import "./styles/globals.css";
 
-// Session holati (Telegram silent-auth yoki web token) shu yerda tayyorlanadi,
-// shuning uchun avval enterWay tugashini kutamiz, keyin render qilamiz.
-enterWay().finally(() => {
-  const root = document.getElementById("root")!;
-  createRoot(root).render(
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>,
-  );
-});
+// Session holati (Telegram silent-auth yoki web token) fon rejimida
+// tayyorlanadi — render'ni kutdirmaymiz, chunki AppRoutes o'zi
+// sessionStatus'ga (idle/authenticating/authenticated/unauthenticated)
+// qarab loading/xato/app holatini ko'rsatadi (Telegram uchun
+// TelegramAuthGate, web uchun /login).
+void enterWay();
+
+const root = document.getElementById("root")!;
+createRoot(root).render(
+  <QueryClientProvider client={queryClient}>
+    <App />
+  </QueryClientProvider>,
+);
