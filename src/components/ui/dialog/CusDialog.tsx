@@ -18,6 +18,12 @@ interface CusDialogProps {
    * ko'rsatiladi — qisqa xabar/tasdiqlash dialoglari uchun.
    */
   centered?: boolean;
+  /**
+   * true bo'lsa dialog eni/bo'yi `size` o'lchamiga emas, ichidagi contentning
+   * o'ziga moslab avtomatik hisoblanadi (masalan rasm preview — dialog rasm
+   * qanchalik katta/kichik bo'lsa, shunga moslashadi). `centered`ni talab qiladi.
+   */
+  fitContent?: boolean;
 }
 
 export function CusDialog({
@@ -30,6 +36,7 @@ export function CusDialog({
   size = "md",
   closeOnBackdrop = true,
   centered = false,
+  fitContent = false,
 }: CusDialogProps) {
   return (
     <Dialog.Root
@@ -57,6 +64,11 @@ export function CusDialog({
           maxH={centered ? "85dvh" : { lgDown: "90dvh", lg: "85dvh" }}
           minW={centered ? undefined : { lg: "760px" }}
           minH={centered ? undefined : { lg: "500px" }}
+          style={
+            fitContent
+              ? { width: "fit-content", maxWidth: "90vw", maxHeight: "90dvh" }
+              : undefined
+          }
         >
           {/* Drag handle — faqat bottom-sheet (centered=false) mobil holatida */}
           {!centered && (
@@ -83,10 +95,14 @@ export function CusDialog({
           {/* Header */}
           {(title || description) && (
             <Dialog.Header
+              display="flex"
+              flexDirection="column"
+              alignItems="flex-start"
               borderBottomWidth="1px"
               borderColor="var(--border-default)"
               px="6"
               py="4"
+              pr="12"
             >
               {title && (
                 <Dialog.Title

@@ -20,7 +20,10 @@ export function MobileLayout() {
       style={SAFE_AREA_STYLE}
     >
       {/* <Header /> */}
-      <main className="flex-1 overflow-auto border-t border-subtle">
+      <main
+        className="flex-1 overflow-auto border-t border-subtle"
+        style={{ paddingBottom: 80 }}
+      >
         <Outlet />
       </main>
       <BottomTabBar />

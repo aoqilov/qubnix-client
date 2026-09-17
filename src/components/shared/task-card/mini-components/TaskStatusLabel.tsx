@@ -9,17 +9,27 @@ interface TaskStatusLabelProps {
 
 const COLOR_MAP: Record<TaskStatusColor, { text: string; bg: string }> = {
   brand: { text: "var(--brand-default)", bg: "var(--brand-subtle-bg)" },
-  error: { text: "var(--status-error-solid, #F04438)", bg: "var(--status-error-bg)" },
-  success: { text: "var(--status-success-solid)", bg: "var(--status-success-bg)" },
+  error: {
+    text: "var(--status-error-solid, #F04438)",
+    bg: "var(--status-error-bg)",
+  },
+  success: {
+    text: "var(--status-success-solid)",
+    bg: "var(--status-success-bg)",
+  },
   gray: { text: "var(--text-secondary)", bg: "var(--bg-surface-secondary)" },
 };
 
-function TaskStatusLabel({ label, color, withBg = false }: TaskStatusLabelProps) {
+function TaskStatusLabel({
+  label,
+  color,
+  withBg = false,
+}: TaskStatusLabelProps) {
   const c = COLOR_MAP[color];
 
   return (
     <span
-      className="whitespace-nowrap font-medium"
+      className="ml-auto flex-none whitespace-nowrap font-medium"
       style={{
         color: c.text,
         background: withBg ? c.bg : "transparent",

@@ -64,7 +64,12 @@ function TabBox({
 }) {
   return (
     <nav
-      className={`relative flex h-14 items-center overflow-hidden border-y border-default bg-surface px-1.5 ${className}`}
+      className={`relative flex h-14 items-center overflow-hidden border-y border-subtle px-1.5 shadow-dropdown ${className}`}
+      style={{
+        background: "color-mix(in srgb, var(--bg-surface) 65%, transparent)",
+        backdropFilter: "blur(16px) saturate(160%)",
+        WebkitBackdropFilter: "blur(16px) saturate(160%)",
+      }}
     >
       <AnimatePresence initial={animateOnMount} custom={direction}>
         <motion.div
@@ -108,7 +113,16 @@ export function BottomTabBar() {
   const box2Tabs = BOX2_TABS[mode];
 
   return (
-    <div className="flex flex-none items-center justify-center gap-2 bg-canvas py-3">
+    <div
+      className="z-sticky fixed inset-x-0 flex items-center justify-center gap-2 py-3"
+      style={{
+        bottom:
+          "calc(var(--tg-safe-area-inset-bottom, 0px) + var(--tg-content-safe-area-inset-bottom, 0px))",
+        background: "transparent",
+        backdropFilter: "blur(16px) saturate(160%)",
+        WebkitBackdropFilter: "blur(16px) saturate(160%)",
+      }}
+    >
       <TabBox
         tabs={box1Tabs}
         mode={mode}

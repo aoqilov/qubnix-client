@@ -19,12 +19,12 @@ export default function FeatureLogin() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-canvas p-4">
-      <CusCardbox className="w-full max-w-md rounded-modal p-6 shadow-md sm:p-8">
-        <div className="mb-7 text-center">
-          <h1 className="font-condensed text-4xl tracking-wide text-brand">
+      <CusCardbox className="w-full max-w-sm rounded-modal p-5 shadow-md sm:p-6">
+        <div className="mb-5 text-center">
+          <h1 className="font-condensed text-3xl tracking-wide text-brand">
             qubnix
           </h1>
-          <p className="mt-2 text-base leading-relaxed text-secondary">
+          <p className="mt-1.5 text-sm leading-relaxed text-secondary">
             Hisobingizga kiring yoki Telegram orqali ro'yxatdan o'ting
           </p>
         </div>
@@ -33,8 +33,8 @@ export default function FeatureLogin() {
           items={TABS}
           value={tab}
           onValueChange={setTab}
-          size="lg"
-          className="mb-7"
+          size="md"
+          className="mb-5"
         />
 
         {tab === "login" ? <LoginPhoneForm /> : <TelegramRegisterPanel />}

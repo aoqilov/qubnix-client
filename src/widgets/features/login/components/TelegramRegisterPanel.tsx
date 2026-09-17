@@ -1,4 +1,4 @@
-import { LuExternalLink, LuInfo, LuSend } from "react-icons/lu";
+import { LuExternalLink, LuSend } from "react-icons/lu";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { BOT_URL, BOT_USERNAME, openBot } from "../lib/bot";
 
@@ -11,15 +11,6 @@ const STEPS = [
 export function TelegramRegisterPanel() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start gap-3 rounded-card bg-brand-subtle p-4">
-        <LuInfo size={20} className="mt-0.5 shrink-0 text-brand" />
-        <p className="text-base font-medium leading-relaxed text-primary">
-          Dasturga ro'yxatdan o'tish{" "}
-          <span className="text-brand">faqat Telegram bot orqali</span>{" "}
-          amalga oshiriladi. Boshqa ro'yxatdan o'tish usuli mavjud emas.
-        </p>
-      </div>
-
       <p className="text-base leading-relaxed text-secondary">
         Tugmani bossangiz{" "}
         <span className="font-semibold text-brand">@{BOT_USERNAME}</span>{" "}

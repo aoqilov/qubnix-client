@@ -1,4 +1,3 @@
-import { LuPlus } from "react-icons/lu";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
 
 export interface TaskCardPhoto {
@@ -8,12 +7,11 @@ export interface TaskCardPhoto {
 
 interface TaskPhotoGridProps {
   photos: TaskCardPhoto[];
-  onAdd?: () => void;
 }
 
 const BOX_SIZE = 48;
 
-function TaskPhotoGrid({ photos, onAdd }: TaskPhotoGridProps) {
+function TaskPhotoGrid({ photos }: TaskPhotoGridProps) {
   return (
     <div className="flex flex-wrap gap-2">
       {photos.map((photo) => (
@@ -31,29 +29,15 @@ function TaskPhotoGrid({ photos, onAdd }: TaskPhotoGridProps) {
             overflow: "hidden",
           }}
         >
-          <CusImagePreview src={photo.url} width={BOX_SIZE} height={BOX_SIZE} borderRadius={8} />
+          <CusImagePreview
+            src={photo.url}
+            gallery={photos.map((p) => p.url)}
+            width={BOX_SIZE}
+            height={BOX_SIZE}
+            borderRadius={8}
+          />
         </div>
       ))}
-
-      {onAdd && (
-        <button
-          type="button"
-          onClick={onAdd}
-          style={{
-            width: BOX_SIZE,
-            height: BOX_SIZE,
-            flexShrink: 0,
-            borderRadius: "var(--radius-input, 8px)",
-            border: "1.5px dashed var(--border-default)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "var(--brand-default)",
-          }}
-        >
-          <LuPlus size={18} />
-        </button>
-      )}
     </div>
   );
 }

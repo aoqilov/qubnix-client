@@ -15,6 +15,8 @@ export interface CusMenuListItem {
   value: string;
   label: string;
   icon?: ReactNode;
+  /** Icon uchun maxsus rang — berilmasa, standart --text-muted ishlatiladi. */
+  iconColor?: string;
   image?: string;
   disabled?: boolean;
 }
@@ -114,7 +116,7 @@ export function CusMenuList({
                       style={{
                         display: "inline-flex",
                         flex: "none",
-                        color: "var(--text-muted)",
+                        color: item.iconColor ?? "var(--text-muted)",
                       }}
                     >
                       {item.icon}
