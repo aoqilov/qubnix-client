@@ -28,6 +28,6 @@ export const usersApi = {
   /** Telegram initdata yoki qubnix_session cookie orqali joriy foydalanuvchini oladi. */
   me: () =>
     axiosInstance
-      .get<ApiEnvelope<{ user: RawUser }>>("/api/v1/users/me")
+      .get<ApiEnvelope<{ user: RawUser }>>("/api/v1/users/me2")
       .then((r) => toSessionUser(r.data.data.user)),
 };
