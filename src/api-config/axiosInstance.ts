@@ -6,9 +6,5 @@ export const axiosInstance = axios.create({
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
-    // VITE_API_URL hozircha ngrok tunnel — bu header bo'lmasa ngrok
-    // brauzer so'roviga JSON o'rniga o'zining ogohlantirish HTML sahifasini
-    // qaytaradi.
-    "ngrok-skip-browser-warning": "1",
   },
 });
