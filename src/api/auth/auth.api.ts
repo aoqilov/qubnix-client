@@ -1,13 +1,13 @@
-import { axiosInstance } from "@/api-config/axiosInstance";
+import { api } from "@/api-config/axiosInstance";
 import type {
-  AuthByTelegramInitDataRequest,
   AuthResponse,
+  LogoutResponse,
   RequestPhoneCodeRequest,
   RequestPhoneCodeResponse,
   TelegramLoginWidgetPayload,
   VerifyPhoneCodeRequest,
   VerifyPhoneCodeResponse,
-} from "@/types/auth.types";
+} from "@/api/auth/auth.types";
 
 // Backend hamma javobni shu qobiq ichida qaytaradi.
 interface ApiEnvelope<T> {
@@ -16,19 +16,14 @@ interface ApiEnvelope<T> {
 }
 
 export const authApi = {
-  byTelegramInitData: (payload: AuthByTelegramInitDataRequest) =>
-    axiosInstance
-      .post<AuthResponse>("/auth/telegram", payload)
-      .then((r) => r.data),
-
   byTelegramWidget: (payload: TelegramLoginWidgetPayload) =>
-    axiosInstance
+    api
       .post<AuthResponse>("/auth/telegram-widget", payload)
       .then((r) => r.data),
 
   /** 1-qadam: raqamga tasdiqlash kodi yuborish (kod Telegram bot orqali keladi). */
   requestPhoneCode: (payload: RequestPhoneCodeRequest) =>
-    axiosInstance
+    api
       .post<
         ApiEnvelope<{
           verification_token: string;
@@ -47,7 +42,7 @@ export const authApi = {
 
   /** 2-qadam: kodni tekshirish — muvaffaqiyatli bo'lsa init_data qaytadi. */
   verifyPhoneCode: (payload: VerifyPhoneCodeRequest) =>
-    axiosInstance
+    api
       .post<ApiEnvelope<{ init_data: string }>>("/api/v1/auth/verify-code", {
         data: {
           verification_token: payload.verificationToken,
@@ -57,6 +52,16 @@ export const authApi = {
       .then(
         (r): VerifyPhoneCodeResponse => ({ initData: r.data.data.init_data }),
       ),
+
+  /**
+   * qubnix_session cookie'ni backend tomonda o'chiradi (web uchun). Telegram
+   * initdata bu bilan bekor bo'lmaydi — Mini App keyingi ochilishda baribir
+   * avtomatik qayta kiradi.
+   */
+  logout: () =>
+    api
+      .post<ApiEnvelope<{ logged_out: boolean }>>("/api/v1/auth/logout")
+      .then((r): LogoutResponse => ({ loggedOut: r.data.data.logged_out })),
 };
 
 // Auth qanday ishlaydi (hozirgi holat)

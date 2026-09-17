@@ -1,7 +1,28 @@
 import { create } from "zustand";
-import type { WorkspaceSummary } from "@/types/workspace.types";
 
-export type { WorkspaceSummary };
+/**
+ * Mobil /doska real /api/v1/organizations'dan o'qiydi (o'z feature-local
+ * hooki orqali — widgets/features/mobile/doska/hooks/useApiDoska.ts).
+ * Desktop (Sidebar, WorkspacePicker) hali shu store'dagi mock ro'yxatdan
+ * foydalanadi — keyingi bosqichda ular ham real API'ga o'tkaziladi.
+ * Rang bu yerda saqlanmaydi — utils/avatarColor.ts dagi avatarColorVar(id)
+ * dan olinadi, shunda dark temada avtomatik moslashadi.
+ */
+export interface WorkspaceSummary {
+  id: string;
+  name: string;
+  /** Avatar doirasidagi harf(lar). */
+  initials: string;
+  /** O'ngdagi belgidagi son — "4 задачи". */
+  tasksCount: number;
+  /**
+   * Backend /organizations javobida hozircha yo'q — Sidebar/WorkspacePicker
+   * shu maydon borida ko'rsatadi, bo'lmasa yashiradi.
+   */
+  projectsCount?: number;
+  /** Backend'da hali yo'q — yuqoridagi izohga qarang. */
+  todayCount?: number;
+}
 
 export interface ProjectFilter {
   id: string;
@@ -13,29 +34,61 @@ export interface ProjectFilter {
 
 const SELECTED_WORKSPACE_KEY = "qubnix_selected_workspace";
 
-/**
- * Backend'da workspace ro'yxati endpointi yo'q — vaqtincha mock.
- * Mobil /doska o'z mock qatlamini shu ro'yxat ustiga quradi
- * (widgets/features/mobile/doska/lib/doska.mock.ts), shuning uchun
- * ma'lumot ikki joyda takrorlanmaydi.
- */
+/** Desktop hali mock — Sidebar/WorkspacePicker real API'ga o'tkazilmagan. */
 export const MOCK_WORKSPACES: WorkspaceSummary[] = [
-  { id: "synapse", name: "Synapse", initials: "S", orgName: "RZB Tech", tasksCount: 4, projectsCount: 8, todayCount: 4 },
-  { id: "qubnix", name: "Qubnix", initials: "Q", orgName: "ABSC company", tasksCount: 2, projectsCount: 3, todayCount: 2 },
-  { id: "monitoring", name: "Monitoring", initials: "M", orgName: "UZ Academy", tasksCount: 3, projectsCount: 5, todayCount: 3 },
+  { id: "synapse", name: "Synapse", initials: "S", tasksCount: 4, projectsCount: 8, todayCount: 4 },
+  { id: "qubnix", name: "Qubnix", initials: "Q", tasksCount: 2, projectsCount: 3, todayCount: 2 },
+  { id: "monitoring", name: "Monitoring", initials: "M", tasksCount: 3, projectsCount: 5, todayCount: 3 },
 ];
 
+/** Loyiha filtrlari hali mock — /projects resursi ulanmagan. */
 const MOCK_PROJECT_FILTERS: ProjectFilter[] = [
-  { id: "all", workspaceId: "synapse", name: "Barcha loyihalar", color: "#9ca3af", count: 11 },
-  { id: "redizayn", workspaceId: "synapse", name: "Redizayn", color: "#7429e0", count: 5 },
-  { id: "mijoz", workspaceId: "synapse", name: "Mijoz", color: "#0ea5e9", count: 4 },
-  { id: "marketing", workspaceId: "synapse", name: "Marketing", color: "#f97316", count: 2 },
-  { id: "all", workspaceId: "qubnix", name: "Barcha loyihalar", color: "#9ca3af", count: 3 },
-  { id: "all", workspaceId: "monitoring", name: "Barcha loyihalar", color: "#9ca3af", count: 0 },
+  {
+    id: "all",
+    workspaceId: "synapse",
+    name: "Barcha loyihalar",
+    color: "#9ca3af",
+    count: 11,
+  },
+  {
+    id: "redizayn",
+    workspaceId: "synapse",
+    name: "Redizayn",
+    color: "#7429e0",
+    count: 5,
+  },
+  {
+    id: "mijoz",
+    workspaceId: "synapse",
+    name: "Mijoz",
+    color: "#0ea5e9",
+    count: 4,
+  },
+  {
+    id: "marketing",
+    workspaceId: "synapse",
+    name: "Marketing",
+    color: "#f97316",
+    count: 2,
+  },
+  {
+    id: "all",
+    workspaceId: "qubnix",
+    name: "Barcha loyihalar",
+    color: "#9ca3af",
+    count: 3,
+  },
+  {
+    id: "all",
+    workspaceId: "monitoring",
+    name: "Barcha loyihalar",
+    color: "#9ca3af",
+    count: 0,
+  },
 ];
 
 interface WorkspaceState {
-  /** Desktop sidebar/picker uchun sinxron ro'yxat. */
+  /** Desktop sidebar/picker uchun sinxron ro'yxat (hali mock). */
   workspaces: WorkspaceSummary[];
   selectedWorkspaceId: string | null;
   selectedFilterId: string | null;
@@ -54,5 +107,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   },
   selectFilter: (id) => set({ selectedFilterId: id }),
   filtersForSelected: () =>
-    MOCK_PROJECT_FILTERS.filter((f) => f.workspaceId === get().selectedWorkspaceId),
+    MOCK_PROJECT_FILTERS.filter(
+      (f) => f.workspaceId === get().selectedWorkspaceId,
+    ),
 }));

@@ -1,5 +1,5 @@
-import { axiosInstance } from "@/api-config/axiosInstance";
-import type { RawUser } from "@/types/user.types";
+import { api } from "@/api-config/axiosInstance";
+import type { RawUser } from "@/api/users/users.types";
 import type { SessionUser } from "@/store/session.store";
 
 interface ApiEnvelope<T> {
@@ -27,7 +27,7 @@ function toSessionUser(raw: RawUser): SessionUser {
 export const usersApi = {
   /** Telegram initdata yoki qubnix_session cookie orqali joriy foydalanuvchini oladi. */
   me: () =>
-    axiosInstance
+    api
       .get<ApiEnvelope<{ user: RawUser }>>("/api/v1/users/me")
       .then((r) => toSessionUser(r.data.data.user)),
 };

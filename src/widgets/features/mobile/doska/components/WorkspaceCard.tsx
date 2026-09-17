@@ -1,6 +1,6 @@
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { avatarColorVar } from "@/utils/avatarColor";
-import type { WorkspaceSummary } from "@/types/workspace.types";
+import type { WorkspaceSummary } from "@/store/workspace.store";
 import { tasksLabel } from "../lib/pluralRu";
 
 interface WorkspaceCardProps {
@@ -22,9 +22,8 @@ export function WorkspaceCard({ workspace, onClick }: WorkspaceCardProps) {
         {workspace.initials}
       </span>
 
-      <span className="min-w-0 flex-1">
-        <span className="block truncate font-semibold text-primary">{workspace.name}</span>
-        <span className="block truncate text-xs text-secondary">{workspace.orgName}</span>
+      <span className="min-w-0 flex-1 truncate font-semibold text-primary">
+        {workspace.name}
       </span>
 
       <span className="flex-none whitespace-nowrap rounded-chip bg-brand-subtle px-2.5 py-1 text-xs font-semibold text-brand">

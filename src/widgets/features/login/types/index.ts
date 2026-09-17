@@ -1,1 +1,1 @@
-export type { TelegramLoginWidgetPayload } from "@/types/auth.types";
+export type { TelegramLoginWidgetPayload } from "@/api/auth/auth.types";

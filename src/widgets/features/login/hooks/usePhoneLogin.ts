@@ -5,7 +5,7 @@ import { useSessionStore } from "@/store/session.store";
 import type {
   RequestPhoneCodeRequest,
   VerifyPhoneCodeRequest,
-} from "@/types/auth.types";
+} from "@/api/auth/auth.types";
 
 /** Axios yoki oddiy Error'dan foydalanuvchiga ko'rsatsa bo'ladigan matn chiqaradi. */
 export function authErrorMessage(error: unknown, fallback: string): string {
@@ -28,8 +28,10 @@ export function useSendPhoneCode() {
   const setVerificationToken = useSessionStore((s) => s.setVerificationToken);
 
   return useMutation({
-    mutationFn: (payload: RequestPhoneCodeRequest) => authApi.requestPhoneCode(payload),
-    onSuccess: ({ verificationToken }) => setVerificationToken(verificationToken),
+    mutationFn: (payload: RequestPhoneCodeRequest) =>
+      authApi.requestPhoneCode(payload),
+    onSuccess: ({ verificationToken }) =>
+      setVerificationToken(verificationToken),
   });
 }
 
@@ -43,7 +45,9 @@ export function useVerifyPhoneCode() {
   const setSession = useSessionStore((s) => s.setSession);
 
   return useMutation({
-    mutationFn: async (payload: Omit<VerifyPhoneCodeRequest, "verificationToken">) => {
+    mutationFn: async (
+      payload: Omit<VerifyPhoneCodeRequest, "verificationToken">,
+    ) => {
       const verificationToken = useSessionStore.getState().verificationToken;
       if (!verificationToken) {
         throw new Error("Tasdiqlash muddati tugadi, raqamni qaytadan yuboring");

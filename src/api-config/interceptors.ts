@@ -1,7 +1,7 @@
-import { axiosInstance } from "./axiosInstance";
+import { api } from "./axiosInstance";
 import { useSessionStore } from "@/store/session.store";
 
-axiosInstance.interceptors.request.use((config) => {
+api.interceptors.request.use((config) => {
   const initData = useSessionStore.getState().initData;
   if (initData) {
     config.headers.initdata = initData;
@@ -9,7 +9,7 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
-axiosInstance.interceptors.response.use(
+api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {

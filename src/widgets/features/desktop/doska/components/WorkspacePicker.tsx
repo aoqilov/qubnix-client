@@ -30,9 +30,11 @@ export function WorkspacePicker() {
               {w.initials}
             </span>
             <span className="font-medium">{w.name}</span>
-            <span className="text-xs text-[var(--text-muted)]">
-              {w.projectsCount} ta loyiha
-            </span>
+            {typeof w.projectsCount === "number" && (
+              <span className="text-xs text-[var(--text-muted)]">
+                {w.projectsCount} ta loyiha
+              </span>
+            )}
           </button>
         ))}
       </div>

@@ -1,9 +1,15 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { Tariff } from "@/types/workspace.types";
 
-// Backend tariff endpointlari hali tayyor emas — hozircha mock-data bilan
-// yoziladi. Keyinchalik backend tayyor bo'lganda faqat queryFn/mutationFn'ni
-// workspaceApi.tariffs/.buy bilan almashtirish kifoya (src/api/workspace/workspace.api.ts).
+export interface Tariff {
+  id: string;
+  name: string;
+  price: number;
+  currency: string;
+}
+
+// Backend'da tariff endpointlari hali yo'q (swiger.json'da yo'q) — hozircha
+// mock-data bilan yoziladi. Backend tayyor bo'lganda queryFn/mutationFn'ni
+// haqiqiy so'rovlarga almashtirish kifoya.
 const MOCK_TARIFFS: Tariff[] = [
   { id: "basic", name: "Basic", price: 0, currency: "UZS" },
   { id: "pro", name: "Pro", price: 149000, currency: "UZS" },

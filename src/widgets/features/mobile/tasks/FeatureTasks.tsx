@@ -1,4 +1,6 @@
 import { useState, type ReactNode } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import {
   LuCircle,
   LuLoaderCircle,
@@ -7,6 +9,7 @@ import {
   LuTriangleAlert,
 } from "react-icons/lu";
 import type { TaskStatusColor } from "@/components/shared/task-card/mini-components/TaskStatusLabel";
+import { projectsApi } from "@/api/projects/projects.api";
 import ProjectsTabs from "@/components/shared/project-tab/ProjectsTabs";
 import PageTitleDynamic from "@/components/shared/page-title-dynamic/PageTitleDynamic";
 import StatusTab from "@/components/shared/status-tab/StatusTab";
@@ -359,6 +362,22 @@ const INITIAL_TASKS: DemoTask[] = [
 ];
 
 export default function FeatureTasks() {
+  const [searchParams] = useSearchParams();
+  const organizationId = searchParams.get("organizationId");
+
+  const projectsQuery = useQuery({
+    queryKey: ["organizations", organizationId, "projects"] as const,
+    queryFn: () => projectsApi.list(organizationId!, { limit: 100 }),
+    enabled: !!organizationId,
+  });
+  const projectTabs =
+    projectsQuery.data?.projects.map((p) => ({
+      id: p.id,
+      projectName: p.name,
+      // Backend hozircha loyiha bo'yicha vazifalar sonini bermaydi.
+      projectTaskCount: 0,
+    })) ?? [];
+
   const [activeTabId, setActiveTabId] = useState("1");
   const [sort, setSort] = useState("deadline");
   const [statusId, setStatusId] = useState("in_progress");
@@ -444,12 +463,7 @@ export default function FeatureTasks() {
           statusLabel="Выполнено"
         />
         <ProjectsTabs
-          tabs={[
-            { id: "1", projectName: "Project 1", projectTaskCount: 5 },
-            { id: "2", projectName: "Project 2", projectTaskCount: 3 },
-            { id: "3", projectName: "Project 3", projectTaskCount: 7 },
-            { id: "4", projectName: "Project 4", projectTaskCount: 2 },
-          ]}
+          tabs={projectTabs}
           activeId={activeTabId}
           onChange={setActiveTabId}
         />

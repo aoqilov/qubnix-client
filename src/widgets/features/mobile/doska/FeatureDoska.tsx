@@ -10,8 +10,6 @@ import { usePersonalSummary, useWorkspaceList } from "./hooks/useApiDoska";
 import { formatBoardDate } from "./lib/formatBoardDate";
 import { orgsLabel } from "./lib/pluralRu";
 
-const PERSONAL_WORKSPACE_ID = "personal";
-
 export default function FeatureDoska() {
   const navigate = useNavigate();
   const selectWorkspace = useWorkspaceStore((s) => s.selectWorkspace);
@@ -22,9 +20,10 @@ export default function FeatureDoska() {
 
   const workspaces = workspacesQuery.data ?? [];
 
-  const openWorkspace = (id: string) => {
+  const openWorkspace = (id: string | undefined) => {
+    if (!id) return;
     selectWorkspace(id);
-    navigate("/tasks");
+    navigate(`/tasks?organizationId=${id}`);
   };
 
   return (
@@ -45,7 +44,7 @@ export default function FeatureDoska() {
         ) : (
           <PersonalTasksCard
             tasksCount={personalQuery.data?.tasksCount ?? 0}
-            onClick={() => openWorkspace(PERSONAL_WORKSPACE_ID)}
+            onClick={() => openWorkspace(personalQuery.data?.id)}
           />
         )}
       </section>

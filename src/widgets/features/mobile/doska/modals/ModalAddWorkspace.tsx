@@ -11,14 +11,12 @@ interface ModalAddWorkspaceProps {
 
 export function ModalAddWorkspace({ open, onClose }: ModalAddWorkspaceProps) {
   const [name, setName] = useState("");
-  const [orgName, setOrgName] = useState("");
   const createWorkspace = useCreateWorkspace();
 
   // Drawer yopilganda forma tozalanadi — qayta ochilganda eski qiymat qolmasin.
   useEffect(() => {
     if (!open) {
       setName("");
-      setOrgName("");
       createWorkspace.reset();
     }
     // createWorkspace har renderda yangi obyekt, shuning uchun bog'liqlikda faqat `open`.
@@ -29,10 +27,7 @@ export function ModalAddWorkspace({ open, onClose }: ModalAddWorkspaceProps) {
 
   const handleSubmit = () => {
     if (!canSubmit) return;
-    createWorkspace.mutate(
-      { name: name.trim(), orgName: orgName.trim() },
-      { onSuccess: onClose }
-    );
+    createWorkspace.mutate({ name: name.trim() }, { onSuccess: onClose });
   };
 
   return (
@@ -77,12 +72,6 @@ export function ModalAddWorkspace({ open, onClose }: ModalAddWorkspaceProps) {
           placeholder="Synapse"
           value={name}
           onChange={(e) => setName(e.target.value)}
-        />
-        <CusInput
-          label="Организация"
-          placeholder="RZB Tech"
-          value={orgName}
-          onChange={(e) => setOrgName(e.target.value)}
         />
         {createWorkspace.isError && (
           <p className="text-sm text-error-strong">

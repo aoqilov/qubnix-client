@@ -167,9 +167,11 @@ export function Sidebar() {
                       <span className="flex-1 truncate text-left">
                         {w.name}
                       </span>
-                      <span className="text-xs text-[var(--text-dim)]">
-                        {w.projectsCount}
-                      </span>
+                      {typeof w.projectsCount === "number" && (
+                        <span className="text-xs text-[var(--text-dim)]">
+                          {w.projectsCount}
+                        </span>
+                      )}
                     </>
                   )}
                 </button>
@@ -224,9 +226,11 @@ export function Sidebar() {
                       <span className="flex-1 truncate text-left">
                         {w.name}
                       </span>
-                      <span className="text-xs text-[var(--text-dim)]">
-                        {w.projectsCount}
-                      </span>
+                      {typeof w.projectsCount === "number" && (
+                        <span className="text-xs text-[var(--text-dim)]">
+                          {w.projectsCount}
+                        </span>
+                      )}
                       {w.id === selectedWorkspace.id && (
                         <LuCheck size={14} className="text-vio" />
                       )}
@@ -251,7 +255,7 @@ export function Sidebar() {
                   {!collapsed && <span className="flex-1">{item.label}</span>}
                   {!collapsed &&
                     item.to === "/tasks" &&
-                    selectedWorkspace.todayCount > 0 && (
+                    !!selectedWorkspace.todayCount && (
                       <CusBadge colorPalette="purple" size="xs">
                         {selectedWorkspace.todayCount}
                       </CusBadge>
