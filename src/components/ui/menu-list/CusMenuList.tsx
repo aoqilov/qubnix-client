@@ -1,4 +1,4 @@
-import { Menu } from "@chakra-ui/react";
+import { Menu, Portal } from "@chakra-ui/react";
 import { useState, type ReactNode } from "react";
 import { LuCheck } from "react-icons/lu";
 
@@ -59,6 +59,7 @@ export function CusMenuList({
       <Menu.Trigger asChild>
         {typeof trigger === "function" ? trigger(open) : trigger}
       </Menu.Trigger>
+      <Portal>
       <Menu.Positioner>
         <Menu.Content
           className={SCOPE}
@@ -138,6 +139,7 @@ export function CusMenuList({
           </Menu.RadioItemGroup>
         </Menu.Content>
       </Menu.Positioner>
+      </Portal>
     </Menu.Root>
   );
 }

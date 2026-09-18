@@ -256,7 +256,7 @@ export function Sidebar() {
                   {!collapsed &&
                     item.to === "/tasks" &&
                     !!selectedWorkspace.todayCount && (
-                      <CusBadge colorPalette="purple" size="xs">
+                      <CusBadge tone="brand" size="xs">
                         {selectedWorkspace.todayCount}
                       </CusBadge>
                     )}

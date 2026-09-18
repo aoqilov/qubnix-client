@@ -153,14 +153,17 @@ export const CusInput = forwardRef<HTMLInputElement, CusInputProps>(
               variant={variant}
               ps={leftElementWidth}
               onChange={handleChange}
-              bg="var(--bg-input)"
-              borderColor={isFocused ? "var(--color-blue)" : "var(--border-input)"}
-              boxShadow={isFocused ? "0 0 0 1px var(--color-blue)" : undefined}
-              color="var(--text-default)"
-              _placeholder={{ color: "var(--text-dim)" }}
-              _hover={{ borderColor: "var(--border-2)" }}
-              _focus={{ borderColor: "var(--color-blue)", boxShadow: "0 0 0 1px var(--color-blue)" }}
-              _invalid={{ borderColor: "var(--color-red)", boxShadow: "0 0 0 1px var(--color-red)" }}
+              bg="var(--bg-surface)"
+              borderRadius="var(--radius-button)"
+              borderColor={isFocused ? "var(--border-focus)" : "var(--border-default)"}
+              boxShadow={isFocused ? "0 0 0 1px var(--border-focus)" : undefined}
+              color="var(--text-secondary)"
+              fontSize="sm"
+              fontWeight="medium"
+              _placeholder={{ color: "var(--text-disabled)" }}
+              _hover={{ borderColor: "var(--border-focus)" }}
+              _focus={{ borderColor: "var(--border-focus)", boxShadow: "0 0 0 1px var(--border-focus)" }}
+              _invalid={{ borderColor: "var(--status-error-solid)", boxShadow: "0 0 0 1px var(--status-error-solid)" }}
               {...inputProps}
             />
           </InputGroup>
@@ -170,14 +173,17 @@ export const CusInput = forwardRef<HTMLInputElement, CusInputProps>(
             size={inputSize}
             variant={variant}
             onChange={handleChange}
-            bg="var(--bg-input)"
-            borderColor={isFocused ? "var(--color-blue)" : "var(--border-input)"}
-            boxShadow={isFocused ? "0 0 0 1px var(--color-blue)" : undefined}
-            color="var(--text-default)"
-            _placeholder={{ color: "var(--text-dim)" }}
-            _hover={{ borderColor: "var(--border-2)" }}
-            _focus={{ borderColor: "var(--color-blue)", boxShadow: "0 0 0 1px var(--color-blue)" }}
-            _invalid={{ borderColor: "var(--color-red)", boxShadow: "0 0 0 1px var(--color-red)" }}
+            bg="var(--bg-surface)"
+            borderRadius="var(--radius-button)"
+            borderColor={isFocused ? "var(--border-focus)" : "var(--border-default)"}
+            boxShadow={isFocused ? "0 0 0 1px var(--border-focus)" : undefined}
+            color="var(--text-secondary)"
+            fontSize="sm"
+            fontWeight="medium"
+            _placeholder={{ color: "var(--text-disabled)" }}
+            _hover={{ borderColor: "var(--border-focus)" }}
+            _focus={{ borderColor: "var(--border-focus)", boxShadow: "0 0 0 1px var(--border-focus)" }}
+            _invalid={{ borderColor: "var(--status-error-solid)", boxShadow: "0 0 0 1px var(--status-error-solid)" }}
             {...inputProps}
           />
         )}

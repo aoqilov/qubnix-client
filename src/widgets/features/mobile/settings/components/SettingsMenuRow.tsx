@@ -17,7 +17,7 @@ export function SettingsMenuRow({ to, icon, title, subtitle, badgeCount }: Setti
         <span className="block truncate text-xs text-secondary">{subtitle}</span>
       </span>
       {typeof badgeCount === "number" && (
-        <CusBadge variant="subtle" colorPalette="purple">
+        <CusBadge variant="subtle" tone="brand">
           {badgeCount}
         </CusBadge>
       )}

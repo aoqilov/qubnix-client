@@ -1,17 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { organizationsApi } from "@/api/organizations/organizations.api";
-import type {
-  OrganizationRole,
-  RawOrganization,
-} from "@/api/organizations/organizations.types";
+import type { RawOrganization } from "@/api/organizations/organizations.types";
 import { useWorkspaceStore } from "@/store/workspace.store";
-
-const ROLE_LABELS: Record<OrganizationRole, string> = {
-  owner: "Владелец",
-  admin: "Админ",
-  member: "Участник",
-  viewer: "Наблюдатель",
-};
+import { ORGANIZATION_ROLE_LABELS } from "@/utils/roleLabels";
 
 export interface SettingsWorkspace {
   id: string;
@@ -25,7 +16,7 @@ function toSettingsWorkspace(org: RawOrganization): SettingsWorkspace {
     id: org.id,
     name: org.name,
     initials: org.name.trim().charAt(0).toUpperCase() || "?",
-    roleLabel: ROLE_LABELS[org.role],
+    roleLabel: ORGANIZATION_ROLE_LABELS[org.role],
   };
 }
 

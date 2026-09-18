@@ -16,7 +16,7 @@ export const ORGANIZATION_ROLE_ITEMS: CusAccordionItem[] = [
     title: "Владелец",
     icon: <LuCrown size={18} />,
     badge: (
-      <CusBadge variant="subtle" colorPalette="purple">
+      <CusBadge variant="subtle" tone="brand">
         Полный доступ
       </CusBadge>
     ),
@@ -28,7 +28,7 @@ export const ORGANIZATION_ROLE_ITEMS: CusAccordionItem[] = [
     title: "Админ",
     icon: <LuShieldCheck size={18} />,
     badge: (
-      <CusBadge variant="subtle" colorPalette="blue">
+      <CusBadge variant="subtle" tone="info">
         Почти всё
       </CusBadge>
     ),
@@ -47,7 +47,7 @@ export const ORGANIZATION_ROLE_ITEMS: CusAccordionItem[] = [
     title: "Наблюдатель",
     icon: <LuEye size={18} />,
     badge: (
-      <CusBadge variant="subtle" colorPalette="gray">
+      <CusBadge variant="subtle" tone="neutral">
         Только просмотр
       </CusBadge>
     ),
@@ -63,7 +63,7 @@ export const PROJECT_ROLE_ITEMS: CusAccordionItem[] = [
     title: "Менеджер проекта",
     icon: <LuFolderKanban size={18} />,
     badge: (
-      <CusBadge variant="subtle" colorPalette="blue">
+      <CusBadge variant="subtle" tone="info">
         В своих проектах
       </CusBadge>
     ),
@@ -75,7 +75,7 @@ export const PROJECT_ROLE_ITEMS: CusAccordionItem[] = [
     title: "Участник проекта",
     icon: <LuSquareCheck size={18} />,
     badge: (
-      <CusBadge variant="subtle" colorPalette="gray">
+      <CusBadge variant="subtle" tone="neutral">
         Исполнитель
       </CusBadge>
     ),

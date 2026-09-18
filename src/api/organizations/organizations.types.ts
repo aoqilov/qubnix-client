@@ -61,8 +61,10 @@ export interface RawOrganizationMember {
   last_name: string;
   telegram_username: string | null;
   telegram_avatar_url: string | null;
+  phone: string | null;
   index_quality: number;
   organization_role: OrganizationMemberRole;
+  created_at: string;
 }
 
 /** Loyiha ichida beriladigan rol variantlari (member biriktirilganda tanlanadi). */
