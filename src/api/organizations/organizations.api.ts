@@ -14,7 +14,6 @@ interface ApiEnvelope<T> {
 }
 
 export const organizationsApi = {
-  /** Shaxsiy + a'zo/egalik qilingan tashkilotlar ro'yxati, sahifalab. */
   list: (params?: ListOrganizationsParams) =>
     api
       .get<
@@ -32,7 +31,6 @@ export const organizationsApi = {
       >(`/api/v1/organizations/${organizationID}`)
       .then((r) => r.data.data.organization),
 
-  /** Hozircha xaridsiz ochiq — server type/owner'ni o'zi belgilaydi. */
   create: (payload: CreateOrganizationRequest) =>
     api
       .post<
@@ -40,7 +38,6 @@ export const organizationsApi = {
       >("/api/v1/organizations", { data: payload })
       .then((r) => r.data.data.organization),
 
-  /** Faqat owner chaqira oladi. */
   rename: (organizationID: string, payload: RenameOrganizationRequest) =>
     api
       .patch<
@@ -48,7 +45,6 @@ export const organizationsApi = {
       >(`/api/v1/organizations/${organizationID}`, { data: payload })
       .then((r) => r.data.data.organization),
 
-  /** Faqat owner, faqat jamoaviy tashkilot (shaxsiy workspace o'chirilmaydi). */
   remove: (organizationID: string) =>
     api
       .delete<
@@ -56,7 +52,6 @@ export const organizationsApi = {
       >(`/api/v1/organizations/${organizationID}`)
       .then((r) => r.data.data.deleted),
 
-  /** Loyihaga biriktirish uchun tashkilotning faol xodimlari + mavjud loyiha rollari. */
   listMembers: (organizationID: string) =>
     api
       .get<
