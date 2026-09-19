@@ -579,14 +579,17 @@
                               "tasks_count"
                             ],
                             "properties": {
-                              "id": { "type": "string", "format": "uuid" },
+                              "id": { "type": "integer", "minimum": 1 },
                               "type": {
                                 "type": "string",
                                 "enum": ["personal", "organization"]
                               },
                               "name": { "type": "string" },
-                              "ownerId": { "type": "string" },
-                              "owner_user_id": { "type": "string" },
+                              "ownerId": { "type": "integer", "minimum": 1 },
+                              "owner_user_id": {
+                                "type": "integer",
+                                "minimum": 1
+                              },
                               "role": {
                                 "type": "string",
                                 "enum": ["owner", "admin", "viewer", "member"]
@@ -782,14 +785,17 @@
                             "created_at"
                           ],
                           "properties": {
-                            "id": { "type": "string", "format": "uuid" },
+                            "id": { "type": "integer", "minimum": 1 },
                             "type": {
                               "type": "string",
                               "enum": ["personal", "organization"]
                             },
                             "name": { "type": "string" },
-                            "ownerId": { "type": "string" },
-                            "owner_user_id": { "type": "string" },
+                            "ownerId": { "type": "integer", "minimum": 1 },
+                            "owner_user_id": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
                             "role": {
                               "type": "string",
                               "enum": ["owner", "admin", "viewer", "member"]
@@ -918,7 +924,7 @@
         "tags": ["Organizations"],
         "parameters": [
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "organizationID",
             "required": true
@@ -954,14 +960,17 @@
                             "created_at"
                           ],
                           "properties": {
-                            "id": { "type": "string", "format": "uuid" },
+                            "id": { "type": "integer", "minimum": 1 },
                             "type": {
                               "type": "string",
                               "enum": ["personal", "organization"]
                             },
                             "name": { "type": "string" },
-                            "ownerId": { "type": "string" },
-                            "owner_user_id": { "type": "string" },
+                            "ownerId": { "type": "integer", "minimum": 1 },
+                            "owner_user_id": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
                             "role": {
                               "type": "string",
                               "enum": ["owner", "admin", "viewer", "member"]
@@ -1116,7 +1125,7 @@
         },
         "parameters": [
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "organizationID",
             "required": true
@@ -1152,14 +1161,17 @@
                             "created_at"
                           ],
                           "properties": {
-                            "id": { "type": "string", "format": "uuid" },
+                            "id": { "type": "integer", "minimum": 1 },
                             "type": {
                               "type": "string",
                               "enum": ["personal", "organization"]
                             },
                             "name": { "type": "string" },
-                            "ownerId": { "type": "string" },
-                            "owner_user_id": { "type": "string" },
+                            "ownerId": { "type": "integer", "minimum": 1 },
+                            "owner_user_id": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
                             "role": {
                               "type": "string",
                               "enum": ["owner", "admin", "viewer", "member"]
@@ -1287,7 +1299,7 @@
         "description": "Only the owner can delete a team organization. Soft-deletes the organization, projects and tasks in one transaction. All members lose access. Personal workspaces cannot be deleted. The consumed purchase remains used; deletion does not issue a refund or a new creation credit.",
         "parameters": [
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "organizationID",
             "required": true
@@ -1408,7 +1420,7 @@
       "get": {
         "summary": "List projects in the selected organization",
         "tags": ["Projects"],
-        "description": "Archived projects are hidden unless include_archived=true. q searches the name. Results are newest first.",
+        "description": "q searches the project name. Results are newest first.",
         "parameters": [
           {
             "schema": {
@@ -1433,19 +1445,13 @@
             "required": false
           },
           {
-            "schema": { "type": "boolean", "default": false },
-            "in": "query",
-            "name": "include_archived",
-            "required": false
-          },
-          {
             "schema": { "type": "string", "maxLength": 100 },
             "in": "query",
             "name": "q",
             "required": false
           },
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "organizationID",
             "required": true
@@ -1477,15 +1483,14 @@
                               "name",
                               "members",
                               "created_by",
-                              "archived_at",
                               "created_at",
                               "updated_at"
                             ],
                             "properties": {
-                              "id": { "type": "string", "format": "uuid" },
+                              "id": { "type": "integer", "minimum": 1 },
                               "organization_id": {
-                                "type": "string",
-                                "format": "uuid"
+                                "type": "integer",
+                                "minimum": 1
                               },
                               "name": {
                                 "type": "string",
@@ -1507,7 +1512,10 @@
                                     "telegram_avatar_url"
                                   ],
                                   "properties": {
-                                    "user_id": { "type": "string" },
+                                    "user_id": {
+                                      "type": "integer",
+                                      "minimum": 1
+                                    },
                                     "role": {
                                       "type": "string",
                                       "enum": [
@@ -1526,11 +1534,7 @@
                                   }
                                 }
                               },
-                              "created_by": { "type": "string" },
-                              "archived_at": {
-                                "type": ["null", "string"],
-                                "format": "date-time"
-                              },
+                              "created_by": { "type": "integer", "minimum": 1 },
                               "created_at": {
                                 "type": "string",
                                 "format": "date-time"
@@ -1695,10 +1699,7 @@
                           "additionalProperties": false,
                           "required": ["user_id", "role"],
                           "properties": {
-                            "user_id": {
-                              "type": "string",
-                              "pattern": "^[0-9]+$"
-                            },
+                            "user_id": { "type": "integer", "minimum": 1 },
                             "role": {
                               "type": "string",
                               "enum": ["project_manager", "project_member"]
@@ -1716,7 +1717,7 @@
         },
         "parameters": [
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "organizationID",
             "required": true
@@ -1746,15 +1747,14 @@
                             "name",
                             "members",
                             "created_by",
-                            "archived_at",
                             "created_at",
                             "updated_at"
                           ],
                           "properties": {
-                            "id": { "type": "string", "format": "uuid" },
+                            "id": { "type": "integer", "minimum": 1 },
                             "organization_id": {
-                              "type": "string",
-                              "format": "uuid"
+                              "type": "integer",
+                              "minimum": 1
                             },
                             "name": {
                               "type": "string",
@@ -1776,7 +1776,10 @@
                                   "telegram_avatar_url"
                                 ],
                                 "properties": {
-                                  "user_id": { "type": "string" },
+                                  "user_id": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                  },
                                   "role": {
                                     "type": "string",
                                     "enum": [
@@ -1795,11 +1798,7 @@
                                 }
                               }
                             },
-                            "created_by": { "type": "string" },
-                            "archived_at": {
-                              "type": ["null", "string"],
-                              "format": "date-time"
-                            },
+                            "created_by": { "type": "integer", "minimum": 1 },
                             "created_at": {
                               "type": "string",
                               "format": "date-time"
@@ -1928,13 +1927,13 @@
         "tags": ["Projects"],
         "parameters": [
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "organizationID",
             "required": true
           },
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "project_id",
             "required": true
@@ -1964,15 +1963,14 @@
                             "name",
                             "members",
                             "created_by",
-                            "archived_at",
                             "created_at",
                             "updated_at"
                           ],
                           "properties": {
-                            "id": { "type": "string", "format": "uuid" },
+                            "id": { "type": "integer", "minimum": 1 },
                             "organization_id": {
-                              "type": "string",
-                              "format": "uuid"
+                              "type": "integer",
+                              "minimum": 1
                             },
                             "name": {
                               "type": "string",
@@ -1994,7 +1992,10 @@
                                   "telegram_avatar_url"
                                 ],
                                 "properties": {
-                                  "user_id": { "type": "string" },
+                                  "user_id": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                  },
                                   "role": {
                                     "type": "string",
                                     "enum": [
@@ -2013,11 +2014,7 @@
                                 }
                               }
                             },
-                            "created_by": { "type": "string" },
-                            "archived_at": {
-                              "type": ["null", "string"],
-                              "format": "date-time"
-                            },
+                            "created_by": { "type": "integer", "minimum": 1 },
                             "created_at": {
                               "type": "string",
                               "format": "date-time"
@@ -2140,9 +2137,9 @@
         }
       },
       "patch": {
-        "summary": "Edit, archive, or unarchive an organization project",
+        "summary": "Edit an organization project",
         "tags": ["Projects"],
-        "description": "Only the organization owner or admin can update the name and replace the complete member list. Archived projects and their tasks remain readable.",
+        "description": "Only the organization owner or admin can update the name and replace the complete member list.",
         "requestBody": {
           "required": true,
           "content": {
@@ -2170,10 +2167,7 @@
                           "additionalProperties": false,
                           "required": ["user_id", "role"],
                           "properties": {
-                            "user_id": {
-                              "type": "string",
-                              "pattern": "^[0-9]+$"
-                            },
+                            "user_id": { "type": "integer", "minimum": 1 },
                             "role": {
                               "type": "string",
                               "enum": ["project_manager", "project_member"]
@@ -2181,8 +2175,7 @@
                           }
                         },
                         "maxItems": 500
-                      },
-                      "archived": { "type": "boolean" }
+                      }
                     },
                     "minProperties": 1
                   }
@@ -2193,13 +2186,13 @@
         },
         "parameters": [
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "organizationID",
             "required": true
           },
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "project_id",
             "required": true
@@ -2229,15 +2222,14 @@
                             "name",
                             "members",
                             "created_by",
-                            "archived_at",
                             "created_at",
                             "updated_at"
                           ],
                           "properties": {
-                            "id": { "type": "string", "format": "uuid" },
+                            "id": { "type": "integer", "minimum": 1 },
                             "organization_id": {
-                              "type": "string",
-                              "format": "uuid"
+                              "type": "integer",
+                              "minimum": 1
                             },
                             "name": {
                               "type": "string",
@@ -2259,7 +2251,10 @@
                                   "telegram_avatar_url"
                                 ],
                                 "properties": {
-                                  "user_id": { "type": "string" },
+                                  "user_id": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                  },
                                   "role": {
                                     "type": "string",
                                     "enum": [
@@ -2278,11 +2273,7 @@
                                 }
                               }
                             },
-                            "created_by": { "type": "string" },
-                            "archived_at": {
-                              "type": ["null", "string"],
-                              "format": "date-time"
-                            },
+                            "created_by": { "type": "integer", "minimum": 1 },
                             "created_at": {
                               "type": "string",
                               "format": "date-time"
@@ -2407,16 +2398,16 @@
       "delete": {
         "summary": "Delete an organization project and its tasks",
         "tags": ["Projects"],
-        "description": "The owner or an admin can soft-delete the project and its tasks in one transaction. An active module is required. They are excluded from all project and task lists.",
+        "description": "The owner or an admin permanently deletes the project, its tasks and project member links in one transaction.",
         "parameters": [
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "organizationID",
             "required": true
           },
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "project_id",
             "required": true
@@ -2550,344 +2541,19 @@
         }
       }
     },
-    "/api/v1/organizations/{organizationID}/tasks": {
+    "/api/v1/organizations/{organizationID}/projects/{project_id}/members": {
       "get": {
-        "summary": "List tasks across the selected organization's projects",
-        "tags": ["Tasks"],
-        "description": "Filter by project_id, status, priority, or title (q). Without project_id, archived projects are hidden unless include_archived=true. Results are newest first.",
+        "summary": "List members assigned to a project",
+        "tags": ["Projects"],
         "parameters": [
           {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 1000000,
-              "default": 1
-            },
-            "in": "query",
-            "name": "page",
-            "required": false
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 20
-            },
-            "in": "query",
-            "name": "limit",
-            "required": false
-          },
-          {
-            "schema": { "type": "boolean", "default": false },
-            "in": "query",
-            "name": "include_archived",
-            "required": false
-          },
-          {
-            "schema": { "type": "string", "maxLength": 100 },
-            "in": "query",
-            "name": "q",
-            "required": false
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": ["todo", "in_progress", "done"]
-            },
-            "in": "query",
-            "name": "status",
-            "required": false
-          },
-          {
-            "schema": { "type": "string", "enum": ["low", "medium", "high"] },
-            "in": "query",
-            "name": "priority",
-            "required": false
-          },
-          {
-            "schema": { "type": "string", "format": "uuid" },
-            "in": "query",
-            "name": "project_id",
-            "required": false
-          },
-          {
-            "schema": { "type": "string", "format": "uuid" },
-            "in": "path",
-            "name": "organizationID",
-            "required": true
-          }
-        ],
-        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
-        "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "data"],
-                  "additionalProperties": false,
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 200 },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "tasks": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "additionalProperties": false,
-                            "required": [
-                              "id",
-                              "organization_id",
-                              "project_id",
-                              "title",
-                              "description",
-                              "assignee_id",
-                              "status",
-                              "priority",
-                              "due_at",
-                              "completed_at",
-                              "created_by",
-                              "created_at",
-                              "updated_at"
-                            ],
-                            "properties": {
-                              "id": { "type": "string", "format": "uuid" },
-                              "organization_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "project_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "title": {
-                                "type": "string",
-                                "minLength": 1,
-                                "maxLength": 200,
-                                "pattern": "\\S"
-                              },
-                              "description": {
-                                "type": ["null", "string"],
-                                "maxLength": 5000
-                              },
-                              "assignee_id": { "type": "string" },
-                              "status": {
-                                "type": "string",
-                                "enum": ["todo", "in_progress", "done"]
-                              },
-                              "priority": {
-                                "type": "string",
-                                "enum": ["low", "medium", "high"]
-                              },
-                              "due_at": {
-                                "type": ["null", "string"],
-                                "format": "date-time"
-                              },
-                              "completed_at": {
-                                "type": ["null", "string"],
-                                "format": "date-time"
-                              },
-                              "created_by": { "type": "string" },
-                              "created_at": {
-                                "type": "string",
-                                "format": "date-time"
-                              },
-                              "updated_at": {
-                                "type": "string",
-                                "format": "date-time"
-                              }
-                            }
-                          }
-                        },
-                        "pagination": {
-                          "type": "object",
-                          "additionalProperties": false,
-                          "required": ["page", "limit", "total", "total_pages"],
-                          "properties": {
-                            "page": { "type": "integer" },
-                            "limit": { "type": "integer" },
-                            "total": { "type": "integer" },
-                            "total_pages": { "type": "integer" }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 400 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 401 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 403 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 404 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 409 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 503 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/organizations/{organizationID}/projects/{project_id}/tasks": {
-      "get": {
-        "summary": "List tasks in an organization project",
-        "tags": ["Tasks"],
-        "description": "Filter by project_id, status, priority, or title (q). Without project_id, archived projects are hidden unless include_archived=true. Results are newest first.",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 1000000,
-              "default": 1
-            },
-            "in": "query",
-            "name": "page",
-            "required": false
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 20
-            },
-            "in": "query",
-            "name": "limit",
-            "required": false
-          },
-          {
-            "schema": { "type": "boolean", "default": false },
-            "in": "query",
-            "name": "include_archived",
-            "required": false
-          },
-          {
-            "schema": { "type": "string", "maxLength": 100 },
-            "in": "query",
-            "name": "q",
-            "required": false
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": ["todo", "in_progress", "done"]
-            },
-            "in": "query",
-            "name": "status",
-            "required": false
-          },
-          {
-            "schema": { "type": "string", "enum": ["low", "medium", "high"] },
-            "in": "query",
-            "name": "priority",
-            "required": false
-          },
-          {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "organizationID",
             "required": true
           },
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "project_id",
             "required": true
@@ -2908,84 +2574,34 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "tasks": {
+                        "members": {
                           "type": "array",
                           "items": {
                             "type": "object",
                             "additionalProperties": false,
                             "required": [
-                              "id",
-                              "organization_id",
-                              "project_id",
-                              "title",
-                              "description",
-                              "assignee_id",
-                              "status",
-                              "priority",
-                              "due_at",
-                              "completed_at",
-                              "created_by",
-                              "created_at",
-                              "updated_at"
+                              "user_id",
+                              "role",
+                              "first_name",
+                              "last_name",
+                              "telegram_username",
+                              "telegram_avatar_url"
                             ],
                             "properties": {
-                              "id": { "type": "string", "format": "uuid" },
-                              "organization_id": {
+                              "user_id": { "type": "integer", "minimum": 1 },
+                              "role": {
                                 "type": "string",
-                                "format": "uuid"
+                                "enum": ["project_manager", "project_member"]
                               },
-                              "project_id": {
-                                "type": "string",
-                                "format": "uuid"
+                              "first_name": { "type": "string" },
+                              "last_name": { "type": "string" },
+                              "telegram_username": {
+                                "type": ["null", "string"]
                               },
-                              "title": {
-                                "type": "string",
-                                "minLength": 1,
-                                "maxLength": 200,
-                                "pattern": "\\S"
-                              },
-                              "description": {
-                                "type": ["null", "string"],
-                                "maxLength": 5000
-                              },
-                              "assignee_id": { "type": "string" },
-                              "status": {
-                                "type": "string",
-                                "enum": ["todo", "in_progress", "done"]
-                              },
-                              "priority": {
-                                "type": "string",
-                                "enum": ["low", "medium", "high"]
-                              },
-                              "due_at": {
-                                "type": ["null", "string"],
-                                "format": "date-time"
-                              },
-                              "completed_at": {
-                                "type": ["null", "string"],
-                                "format": "date-time"
-                              },
-                              "created_by": { "type": "string" },
-                              "created_at": {
-                                "type": "string",
-                                "format": "date-time"
-                              },
-                              "updated_at": {
-                                "type": "string",
-                                "format": "date-time"
+                              "telegram_avatar_url": {
+                                "type": ["null", "string"]
                               }
                             }
-                          }
-                        },
-                        "pagination": {
-                          "type": "object",
-                          "additionalProperties": false,
-                          "required": ["page", "limit", "total", "total_pages"],
-                          "properties": {
-                            "page": { "type": "integer" },
-                            "limit": { "type": "integer" },
-                            "total": { "type": "integer" },
-                            "total_pages": { "type": "integer" }
                           }
                         }
                       }
@@ -3100,9 +2716,8 @@
         }
       },
       "post": {
-        "summary": "Create a task inside an organization project",
-        "tags": ["Tasks"],
-        "description": "Project is required. Owner/admin and project_manager can create tasks and assign them to an active project member. project_member is read-only except for changing the status of their own assigned task.",
+        "summary": "Add organization employees to a project",
+        "tags": ["Projects"],
         "requestBody": {
           "required": true,
           "content": {
@@ -3115,33 +2730,24 @@
                   "data": {
                     "type": "object",
                     "additionalProperties": false,
-                    "required": ["title"],
+                    "required": ["members"],
                     "properties": {
-                      "title": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 200,
-                        "pattern": "\\S"
-                      },
-                      "description": {
-                        "type": ["null", "string"],
-                        "maxLength": 5000
-                      },
-                      "assignee_id": {
-                        "type": "string",
-                        "pattern": "^[0-9]+$"
-                      },
-                      "status": {
-                        "type": "string",
-                        "enum": ["todo", "in_progress", "done"]
-                      },
-                      "priority": {
-                        "type": "string",
-                        "enum": ["low", "medium", "high"]
-                      },
-                      "due_at": {
-                        "type": ["null", "string"],
-                        "format": "date-time"
+                      "members": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["user_id", "role"],
+                          "properties": {
+                            "user_id": { "type": "integer", "minimum": 1 },
+                            "role": {
+                              "type": "string",
+                              "enum": ["project_manager", "project_member"]
+                            }
+                          }
+                        },
+                        "maxItems": 500,
+                        "minItems": 1
                       }
                     }
                   }
@@ -3152,13 +2758,13 @@
         },
         "parameters": [
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "organizationID",
             "required": true
           },
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "project_id",
             "required": true
@@ -3179,69 +2785,33 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "task": {
-                          "type": "object",
-                          "additionalProperties": false,
-                          "required": [
-                            "id",
-                            "organization_id",
-                            "project_id",
-                            "title",
-                            "description",
-                            "assignee_id",
-                            "status",
-                            "priority",
-                            "due_at",
-                            "completed_at",
-                            "created_by",
-                            "created_at",
-                            "updated_at"
-                          ],
-                          "properties": {
-                            "id": { "type": "string", "format": "uuid" },
-                            "organization_id": {
-                              "type": "string",
-                              "format": "uuid"
-                            },
-                            "project_id": {
-                              "type": "string",
-                              "format": "uuid"
-                            },
-                            "title": {
-                              "type": "string",
-                              "minLength": 1,
-                              "maxLength": 200,
-                              "pattern": "\\S"
-                            },
-                            "description": {
-                              "type": ["null", "string"],
-                              "maxLength": 5000
-                            },
-                            "assignee_id": { "type": "string" },
-                            "status": {
-                              "type": "string",
-                              "enum": ["todo", "in_progress", "done"]
-                            },
-                            "priority": {
-                              "type": "string",
-                              "enum": ["low", "medium", "high"]
-                            },
-                            "due_at": {
-                              "type": ["null", "string"],
-                              "format": "date-time"
-                            },
-                            "completed_at": {
-                              "type": ["null", "string"],
-                              "format": "date-time"
-                            },
-                            "created_by": { "type": "string" },
-                            "created_at": {
-                              "type": "string",
-                              "format": "date-time"
-                            },
-                            "updated_at": {
-                              "type": "string",
-                              "format": "date-time"
+                        "members": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "user_id",
+                              "role",
+                              "first_name",
+                              "last_name",
+                              "telegram_username",
+                              "telegram_avatar_url"
+                            ],
+                            "properties": {
+                              "user_id": { "type": "integer", "minimum": 1 },
+                              "role": {
+                                "type": "string",
+                                "enum": ["project_manager", "project_member"]
+                              },
+                              "first_name": { "type": "string" },
+                              "last_name": { "type": "string" },
+                              "telegram_username": {
+                                "type": ["null", "string"]
+                              },
+                              "telegram_avatar_url": {
+                                "type": ["null", "string"]
+                              }
                             }
                           }
                         }
@@ -3357,506 +2927,27 @@
         }
       }
     },
-    "/api/v1/organizations/{organizationID}/projects/{project_id}/tasks/{task_id}": {
-      "get": {
-        "summary": "Get a task in an organization project",
-        "tags": ["Tasks"],
-        "parameters": [
-          {
-            "schema": { "type": "string", "format": "uuid" },
-            "in": "path",
-            "name": "organizationID",
-            "required": true
-          },
-          {
-            "schema": { "type": "string", "format": "uuid" },
-            "in": "path",
-            "name": "project_id",
-            "required": true
-          },
-          {
-            "schema": { "type": "string", "format": "uuid" },
-            "in": "path",
-            "name": "task_id",
-            "required": true
-          }
-        ],
-        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
-        "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "data"],
-                  "additionalProperties": false,
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 200 },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "task": {
-                          "type": "object",
-                          "additionalProperties": false,
-                          "required": [
-                            "id",
-                            "organization_id",
-                            "project_id",
-                            "title",
-                            "description",
-                            "assignee_id",
-                            "status",
-                            "priority",
-                            "due_at",
-                            "completed_at",
-                            "created_by",
-                            "created_at",
-                            "updated_at"
-                          ],
-                          "properties": {
-                            "id": { "type": "string", "format": "uuid" },
-                            "organization_id": {
-                              "type": "string",
-                              "format": "uuid"
-                            },
-                            "project_id": {
-                              "type": "string",
-                              "format": "uuid"
-                            },
-                            "title": {
-                              "type": "string",
-                              "minLength": 1,
-                              "maxLength": 200,
-                              "pattern": "\\S"
-                            },
-                            "description": {
-                              "type": ["null", "string"],
-                              "maxLength": 5000
-                            },
-                            "assignee_id": { "type": "string" },
-                            "status": {
-                              "type": "string",
-                              "enum": ["todo", "in_progress", "done"]
-                            },
-                            "priority": {
-                              "type": "string",
-                              "enum": ["low", "medium", "high"]
-                            },
-                            "due_at": {
-                              "type": ["null", "string"],
-                              "format": "date-time"
-                            },
-                            "completed_at": {
-                              "type": ["null", "string"],
-                              "format": "date-time"
-                            },
-                            "created_by": { "type": "string" },
-                            "created_at": {
-                              "type": "string",
-                              "format": "date-time"
-                            },
-                            "updated_at": {
-                              "type": "string",
-                              "format": "date-time"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 400 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 401 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 403 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 404 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 409 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 503 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "summary": "Edit or complete a task in an organization project",
-        "tags": ["Tasks"],
-        "description": "Owner/admin and project_manager can edit all task fields. project_member can only change status on their own assigned task. Setting status=done records completed_at; reopening clears it.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["data"],
-                "additionalProperties": false,
-                "properties": {
-                  "data": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": [],
-                    "properties": {
-                      "title": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 200,
-                        "pattern": "\\S"
-                      },
-                      "description": {
-                        "type": ["null", "string"],
-                        "maxLength": 5000
-                      },
-                      "assignee_id": {
-                        "type": "string",
-                        "pattern": "^[0-9]+$"
-                      },
-                      "status": {
-                        "type": "string",
-                        "enum": ["todo", "in_progress", "done"]
-                      },
-                      "priority": {
-                        "type": "string",
-                        "enum": ["low", "medium", "high"]
-                      },
-                      "due_at": {
-                        "type": ["null", "string"],
-                        "format": "date-time"
-                      }
-                    },
-                    "minProperties": 1
-                  }
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "schema": { "type": "string", "format": "uuid" },
-            "in": "path",
-            "name": "organizationID",
-            "required": true
-          },
-          {
-            "schema": { "type": "string", "format": "uuid" },
-            "in": "path",
-            "name": "project_id",
-            "required": true
-          },
-          {
-            "schema": { "type": "string", "format": "uuid" },
-            "in": "path",
-            "name": "task_id",
-            "required": true
-          }
-        ],
-        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
-        "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "data"],
-                  "additionalProperties": false,
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 200 },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "task": {
-                          "type": "object",
-                          "additionalProperties": false,
-                          "required": [
-                            "id",
-                            "organization_id",
-                            "project_id",
-                            "title",
-                            "description",
-                            "assignee_id",
-                            "status",
-                            "priority",
-                            "due_at",
-                            "completed_at",
-                            "created_by",
-                            "created_at",
-                            "updated_at"
-                          ],
-                          "properties": {
-                            "id": { "type": "string", "format": "uuid" },
-                            "organization_id": {
-                              "type": "string",
-                              "format": "uuid"
-                            },
-                            "project_id": {
-                              "type": "string",
-                              "format": "uuid"
-                            },
-                            "title": {
-                              "type": "string",
-                              "minLength": 1,
-                              "maxLength": 200,
-                              "pattern": "\\S"
-                            },
-                            "description": {
-                              "type": ["null", "string"],
-                              "maxLength": 5000
-                            },
-                            "assignee_id": { "type": "string" },
-                            "status": {
-                              "type": "string",
-                              "enum": ["todo", "in_progress", "done"]
-                            },
-                            "priority": {
-                              "type": "string",
-                              "enum": ["low", "medium", "high"]
-                            },
-                            "due_at": {
-                              "type": ["null", "string"],
-                              "format": "date-time"
-                            },
-                            "completed_at": {
-                              "type": ["null", "string"],
-                              "format": "date-time"
-                            },
-                            "created_by": { "type": "string" },
-                            "created_at": {
-                              "type": "string",
-                              "format": "date-time"
-                            },
-                            "updated_at": {
-                              "type": "string",
-                              "format": "date-time"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 400 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 401 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 403 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 404 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 409 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 503 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
+    "/api/v1/organizations/{organizationID}/projects/{project_id}/members/{user_id}": {
       "delete": {
-        "summary": "Delete a task in an organization project",
-        "tags": ["Tasks"],
+        "summary": "Remove a member from a project",
+        "tags": ["Projects"],
         "parameters": [
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "organizationID",
             "required": true
           },
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "project_id",
             "required": true
           },
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
-            "name": "task_id",
+            "name": "user_id",
             "required": true
           }
         ],
@@ -3995,7 +3086,38 @@
         "description": "Returns existing active organization employees. Adding them to a project does not send another invitation.",
         "parameters": [
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 1
+            },
+            "in": "query",
+            "name": "page",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["admin", "viewer", "member"]
+            },
+            "in": "query",
+            "name": "role",
+            "required": false
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "organizationID",
             "required": true
@@ -4028,10 +3150,11 @@
                               "telegram_username",
                               "telegram_avatar_url",
                               "index_quality",
-                              "organization_role"
+                              "organization_role",
+                              "created_at"
                             ],
                             "properties": {
-                              "id": { "type": "string" },
+                              "id": { "type": "integer", "minimum": 1 },
                               "first_name": { "type": "string" },
                               "last_name": { "type": "string" },
                               "telegram_username": {
@@ -4048,23 +3171,43 @@
                               "organization_role": {
                                 "type": "string",
                                 "enum": ["admin", "viewer", "member"]
+                              },
+                              "created_at": {
+                                "type": "string",
+                                "format": "date-time"
                               }
                             }
                           }
                         },
-                        "project_roles": {
+                        "organization_roles": {
                           "type": "array",
                           "items": {
                             "type": "object",
                             "additionalProperties": false,
-                            "required": ["code", "name"],
+                            "required": ["code", "name", "role_member_count"],
                             "properties": {
                               "code": {
                                 "type": "string",
-                                "enum": ["project_manager", "project_member"]
+                                "enum": ["admin", "viewer", "member"]
                               },
-                              "name": { "type": "string" }
+                              "name": { "type": "string" },
+                              "role_member_count": {
+                                "type": "integer",
+                                "minimum": 0
+                              }
                             }
+                          }
+                        },
+                        "members_count": { "type": "integer", "minimum": 0 },
+                        "pagination": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["page", "limit", "total", "total_pages"],
+                          "properties": {
+                            "page": { "type": "integer" },
+                            "limit": { "type": "integer" },
+                            "total": { "type": "integer" },
+                            "total_pages": { "type": "integer" }
                           }
                         }
                       }
@@ -4191,7 +3334,7 @@
             "required": true
           },
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "organizationID",
             "required": true
@@ -4224,7 +3367,7 @@
                             "index_quality"
                           ],
                           "properties": {
-                            "id": { "type": "string" },
+                            "id": { "type": "integer", "minimum": 1 },
                             "first_name": { "type": "string" },
                             "last_name": { "type": "string" },
                             "telegram_username": { "type": ["null", "string"] },
@@ -4258,14 +3401,10 @@
                           "items": {
                             "type": "object",
                             "additionalProperties": false,
-                            "required": ["id", "name", "archived_at"],
+                            "required": ["id", "name"],
                             "properties": {
-                              "id": { "type": "string", "format": "uuid" },
-                              "name": { "type": "string" },
-                              "archived_at": {
-                                "type": ["null", "string"],
-                                "format": "date-time"
-                              }
+                              "id": { "type": "integer", "minimum": 1 },
+                              "name": { "type": "string" }
                             }
                           }
                         }
@@ -4383,9 +3522,9 @@
     },
     "/api/v1/organizations/{organizationID}/invitations": {
       "post": {
-        "summary": "Invite an employee with a role and selected projects",
+        "summary": "Invite an employee with a role and projects",
         "tags": ["Organization invitations"],
-        "description": "Owner can assign admin, viewer or member. Admin can assign viewer or member. owner is never assignable.",
+        "description": "Admin sees all projects and does not need project roles. Viewer and member invitations must include projects. Member invitations must include a role for every selected project.",
         "requestBody": {
           "required": true,
           "content": {
@@ -4400,14 +3539,31 @@
                     "additionalProperties": false,
                     "required": ["user_id", "role", "project_ids"],
                     "properties": {
-                      "user_id": { "type": "string", "pattern": "^[0-9]+$" },
+                      "user_id": { "type": "integer", "minimum": 1 },
                       "role": {
                         "type": "string",
                         "enum": ["admin", "viewer", "member"]
                       },
                       "project_ids": {
                         "type": "array",
-                        "items": { "type": "string", "format": "uuid" },
+                        "items": { "type": "integer", "minimum": 1 },
+                        "uniqueItems": true,
+                        "maxItems": 500
+                      },
+                      "project_roles": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["project_id"],
+                          "properties": {
+                            "project_id": { "type": "integer", "minimum": 1 },
+                            "role": {
+                              "type": "string",
+                              "enum": ["project_manager", "project_member"]
+                            }
+                          }
+                        },
                         "uniqueItems": true,
                         "maxItems": 500
                       }
@@ -4420,7 +3576,7 @@
         },
         "parameters": [
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "organizationID",
             "required": true
@@ -4456,7 +3612,7 @@
                             "responded_at"
                           ],
                           "properties": {
-                            "id": { "type": "string", "format": "uuid" },
+                            "id": { "type": "integer", "minimum": 1 },
                             "status": {
                               "type": "string",
                               "enum": [
@@ -4475,7 +3631,7 @@
                               "additionalProperties": false,
                               "required": ["id", "name"],
                               "properties": {
-                                "id": { "type": "string", "format": "uuid" },
+                                "id": { "type": "integer", "minimum": 1 },
                                 "name": { "type": "string" }
                               }
                             },
@@ -4491,7 +3647,7 @@
                                 "index_quality"
                               ],
                               "properties": {
-                                "id": { "type": "string" },
+                                "id": { "type": "integer", "minimum": 1 },
                                 "first_name": { "type": "string" },
                                 "last_name": { "type": "string" },
                                 "telegram_username": {
@@ -4519,7 +3675,7 @@
                                 "index_quality"
                               ],
                               "properties": {
-                                "id": { "type": "string" },
+                                "id": { "type": "integer", "minimum": 1 },
                                 "first_name": { "type": "string" },
                                 "last_name": { "type": "string" },
                                 "telegram_username": {
@@ -4540,13 +3696,16 @@
                               "items": {
                                 "type": "object",
                                 "additionalProperties": false,
-                                "required": ["id", "name", "archived_at"],
+                                "required": ["id", "name", "role"],
                                 "properties": {
-                                  "id": { "type": "string", "format": "uuid" },
+                                  "id": { "type": "integer", "minimum": 1 },
                                   "name": { "type": "string" },
-                                  "archived_at": {
-                                    "type": ["null", "string"],
-                                    "format": "date-time"
+                                  "role": {
+                                    "type": "string",
+                                    "enum": [
+                                      "project_manager",
+                                      "project_member"
+                                    ]
                                   }
                                 }
                               }
@@ -4709,7 +3868,7 @@
             "required": false
           },
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "organizationID",
             "required": true
@@ -4747,7 +3906,7 @@
                               "responded_at"
                             ],
                             "properties": {
-                              "id": { "type": "string", "format": "uuid" },
+                              "id": { "type": "integer", "minimum": 1 },
                               "status": {
                                 "type": "string",
                                 "enum": [
@@ -4766,7 +3925,7 @@
                                 "additionalProperties": false,
                                 "required": ["id", "name"],
                                 "properties": {
-                                  "id": { "type": "string", "format": "uuid" },
+                                  "id": { "type": "integer", "minimum": 1 },
                                   "name": { "type": "string" }
                                 }
                               },
@@ -4782,7 +3941,7 @@
                                   "index_quality"
                                 ],
                                 "properties": {
-                                  "id": { "type": "string" },
+                                  "id": { "type": "integer", "minimum": 1 },
                                   "first_name": { "type": "string" },
                                   "last_name": { "type": "string" },
                                   "telegram_username": {
@@ -4810,7 +3969,7 @@
                                   "index_quality"
                                 ],
                                 "properties": {
-                                  "id": { "type": "string" },
+                                  "id": { "type": "integer", "minimum": 1 },
                                   "first_name": { "type": "string" },
                                   "last_name": { "type": "string" },
                                   "telegram_username": {
@@ -4831,16 +3990,16 @@
                                 "items": {
                                   "type": "object",
                                   "additionalProperties": false,
-                                  "required": ["id", "name", "archived_at"],
+                                  "required": ["id", "name", "role"],
                                   "properties": {
-                                    "id": {
-                                      "type": "string",
-                                      "format": "uuid"
-                                    },
+                                    "id": { "type": "integer", "minimum": 1 },
                                     "name": { "type": "string" },
-                                    "archived_at": {
-                                      "type": ["null", "string"],
-                                      "format": "date-time"
+                                    "role": {
+                                      "type": "string",
+                                      "enum": [
+                                        "project_manager",
+                                        "project_member"
+                                      ]
                                     }
                                   }
                                 }
@@ -5048,7 +4207,7 @@
                               "responded_at"
                             ],
                             "properties": {
-                              "id": { "type": "string", "format": "uuid" },
+                              "id": { "type": "integer", "minimum": 1 },
                               "status": {
                                 "type": "string",
                                 "enum": [
@@ -5067,7 +4226,7 @@
                                 "additionalProperties": false,
                                 "required": ["id", "name"],
                                 "properties": {
-                                  "id": { "type": "string", "format": "uuid" },
+                                  "id": { "type": "integer", "minimum": 1 },
                                   "name": { "type": "string" }
                                 }
                               },
@@ -5083,7 +4242,7 @@
                                   "index_quality"
                                 ],
                                 "properties": {
-                                  "id": { "type": "string" },
+                                  "id": { "type": "integer", "minimum": 1 },
                                   "first_name": { "type": "string" },
                                   "last_name": { "type": "string" },
                                   "telegram_username": {
@@ -5111,7 +4270,7 @@
                                   "index_quality"
                                 ],
                                 "properties": {
-                                  "id": { "type": "string" },
+                                  "id": { "type": "integer", "minimum": 1 },
                                   "first_name": { "type": "string" },
                                   "last_name": { "type": "string" },
                                   "telegram_username": {
@@ -5132,16 +4291,16 @@
                                 "items": {
                                   "type": "object",
                                   "additionalProperties": false,
-                                  "required": ["id", "name", "archived_at"],
+                                  "required": ["id", "name", "role"],
                                   "properties": {
-                                    "id": {
-                                      "type": "string",
-                                      "format": "uuid"
-                                    },
+                                    "id": { "type": "integer", "minimum": 1 },
                                     "name": { "type": "string" },
-                                    "archived_at": {
-                                      "type": ["null", "string"],
-                                      "format": "date-time"
+                                    "role": {
+                                      "type": "string",
+                                      "enum": [
+                                        "project_manager",
+                                        "project_member"
+                                      ]
                                     }
                                   }
                                 }
@@ -5280,272 +4439,38 @@
         }
       }
     },
-    "/api/v1/organization-invitations/{invitation_id}/accept": {
+    "/api/v1/organization-invitations/{invitation_id}/respond": {
       "post": {
         "summary": "Accept or reject an invitation",
         "tags": ["Organization invitations"],
-        "parameters": [
-          {
-            "schema": { "type": "string", "format": "uuid" },
-            "in": "path",
-            "name": "invitation_id",
-            "required": true
-          }
-        ],
-        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
-        "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "data"],
-                  "additionalProperties": false,
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 200 },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "invitation": {
-                          "type": "object",
-                          "additionalProperties": false,
-                          "required": [
-                            "id",
-                            "status",
-                            "role",
-                            "organization",
-                            "employee",
-                            "invited_by",
-                            "projects",
-                            "created_at",
-                            "responded_at"
-                          ],
-                          "properties": {
-                            "id": { "type": "string", "format": "uuid" },
-                            "status": {
-                              "type": "string",
-                              "enum": [
-                                "pending",
-                                "accepted",
-                                "rejected",
-                                "cancelled"
-                              ]
-                            },
-                            "role": {
-                              "type": "string",
-                              "enum": ["admin", "viewer", "member"]
-                            },
-                            "organization": {
-                              "type": "object",
-                              "additionalProperties": false,
-                              "required": ["id", "name"],
-                              "properties": {
-                                "id": { "type": "string", "format": "uuid" },
-                                "name": { "type": "string" }
-                              }
-                            },
-                            "employee": {
-                              "type": "object",
-                              "additionalProperties": false,
-                              "required": [
-                                "id",
-                                "first_name",
-                                "last_name",
-                                "telegram_username",
-                                "telegram_avatar_url",
-                                "index_quality"
-                              ],
-                              "properties": {
-                                "id": { "type": "string" },
-                                "first_name": { "type": "string" },
-                                "last_name": { "type": "string" },
-                                "telegram_username": {
-                                  "type": ["null", "string"]
-                                },
-                                "telegram_avatar_url": {
-                                  "type": ["null", "string"]
-                                },
-                                "index_quality": {
-                                  "type": "integer",
-                                  "minimum": 0,
-                                  "maximum": 100
-                                }
-                              }
-                            },
-                            "invited_by": {
-                              "type": "object",
-                              "additionalProperties": false,
-                              "required": [
-                                "id",
-                                "first_name",
-                                "last_name",
-                                "telegram_username",
-                                "telegram_avatar_url",
-                                "index_quality"
-                              ],
-                              "properties": {
-                                "id": { "type": "string" },
-                                "first_name": { "type": "string" },
-                                "last_name": { "type": "string" },
-                                "telegram_username": {
-                                  "type": ["null", "string"]
-                                },
-                                "telegram_avatar_url": {
-                                  "type": ["null", "string"]
-                                },
-                                "index_quality": {
-                                  "type": "integer",
-                                  "minimum": 0,
-                                  "maximum": 100
-                                }
-                              }
-                            },
-                            "projects": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "required": ["id", "name", "archived_at"],
-                                "properties": {
-                                  "id": { "type": "string", "format": "uuid" },
-                                  "name": { "type": "string" },
-                                  "archived_at": {
-                                    "type": ["null", "string"],
-                                    "format": "date-time"
-                                  }
-                                }
-                              }
-                            },
-                            "created_at": {
-                              "type": "string",
-                              "format": "date-time"
-                            },
-                            "responded_at": {
-                              "type": ["null", "string"],
-                              "format": "date-time"
-                            }
-                          }
-                        }
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["data"],
+                "additionalProperties": false,
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["action"],
+                    "properties": {
+                      "action": {
+                        "type": "string",
+                        "enum": ["accept", "reject"]
                       }
                     }
                   }
                 }
               }
             }
-          },
-          "400": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 400 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 401 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 403 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 404 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 409 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["statusCode", "message"],
-                  "properties": {
-                    "statusCode": { "type": "integer", "example": 503 },
-                    "message": { "type": "string" },
-                    "code": { "type": "string" },
-                    "details": {}
-                  }
-                }
-              }
-            }
           }
-        }
-      }
-    },
-    "/api/v1/organization-invitations/{invitation_id}/reject": {
-      "post": {
-        "summary": "Accept or reject an invitation",
-        "tags": ["Organization invitations"],
+        },
         "parameters": [
           {
-            "schema": { "type": "string", "format": "uuid" },
+            "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "invitation_id",
             "required": true
@@ -5581,7 +4506,7 @@
                             "responded_at"
                           ],
                           "properties": {
-                            "id": { "type": "string", "format": "uuid" },
+                            "id": { "type": "integer", "minimum": 1 },
                             "status": {
                               "type": "string",
                               "enum": [
@@ -5600,7 +4525,7 @@
                               "additionalProperties": false,
                               "required": ["id", "name"],
                               "properties": {
-                                "id": { "type": "string", "format": "uuid" },
+                                "id": { "type": "integer", "minimum": 1 },
                                 "name": { "type": "string" }
                               }
                             },
@@ -5616,7 +4541,7 @@
                                 "index_quality"
                               ],
                               "properties": {
-                                "id": { "type": "string" },
+                                "id": { "type": "integer", "minimum": 1 },
                                 "first_name": { "type": "string" },
                                 "last_name": { "type": "string" },
                                 "telegram_username": {
@@ -5644,7 +4569,7 @@
                                 "index_quality"
                               ],
                               "properties": {
-                                "id": { "type": "string" },
+                                "id": { "type": "integer", "minimum": 1 },
                                 "first_name": { "type": "string" },
                                 "last_name": { "type": "string" },
                                 "telegram_username": {
@@ -5665,13 +4590,16 @@
                               "items": {
                                 "type": "object",
                                 "additionalProperties": false,
-                                "required": ["id", "name", "archived_at"],
+                                "required": ["id", "name", "role"],
                                 "properties": {
-                                  "id": { "type": "string", "format": "uuid" },
+                                  "id": { "type": "integer", "minimum": 1 },
                                   "name": { "type": "string" },
-                                  "archived_at": {
-                                    "type": ["null", "string"],
-                                    "format": "date-time"
+                                  "role": {
+                                    "type": "string",
+                                    "enum": [
+                                      "project_manager",
+                                      "project_member"
+                                    ]
                                   }
                                 }
                               }

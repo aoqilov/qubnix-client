@@ -372,7 +372,7 @@ export default function FeatureTasks() {
   });
   const projectTabs =
     projectsQuery.data?.projects.map((p) => ({
-      id: p.id,
+      id: String(p.id),
       projectName: p.name,
       // Backend hozircha loyiha bo'yicha vazifalar sonini bermaydi.
       projectTaskCount: 0,

@@ -53,6 +53,12 @@ export interface CusCalendarProps {
   // State
   disabled?: boolean;
   readOnly?: boolean;
+
+  /**
+   * true bo'lsa input+trigger ko'rsatilmaydi, kalendar grid popover'siz
+   * to'g'ridan-to'g'ri ko'rinadi — masalan `CusDialog` ichida ishlatilganda.
+   */
+  inline?: boolean;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -77,6 +83,7 @@ export function CusCalendar({
   timeZone,
   disabled,
   readOnly,
+  inline = false,
 }: CusCalendarProps) {
   const isMonthPicker = minView === "month";
   const resolvedPlaceholder =
@@ -86,6 +93,23 @@ export function CusCalendar({
   }
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
+
+  const views = (
+    <>
+      <DatePicker.View view="day">
+        <DatePicker.Header />
+        <DatePicker.DayTable />
+      </DatePicker.View>
+      <DatePicker.View view="month">
+        <DatePicker.Header />
+        <DatePicker.MonthTable />
+      </DatePicker.View>
+      <DatePicker.View view="year">
+        <DatePicker.Header />
+        <DatePicker.YearTable />
+      </DatePicker.View>
+    </>
+  );
 
   const hasError = !!errorText;
   const borderColor = hasError
@@ -110,7 +134,8 @@ export function CusCalendar({
 
       <DatePicker.Root
         width="100%"
-        open={open}
+        inline={inline}
+        open={inline ? true : open}
         onOpenChange={({ open: o }) => setOpen(o)}
         selectionMode={selectionMode}
         value={value}
@@ -141,74 +166,69 @@ export function CusCalendar({
           }
         }}
       >
-        <DatePicker.Control style={{ position: "relative", width: "100%" }}>
-          <DatePicker.Input
-            placeholder={resolvedPlaceholder}
-            onClick={() => { if (!open) setOpen(true); }}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            style={{
-              width: "100%",
-              height: 40,
-              paddingLeft: 12,
-              paddingRight: 40,
-              background: "var(--bg-input)",
-              border: `1px solid ${borderColor}`,
-              borderRadius: 8,
-              color: "var(--text-default)",
-              fontSize: 14,
-              outline: "none",
-              boxShadow,
-              transition: "border-color 0.15s, box-shadow 0.15s",
-              opacity: disabled ? 0.5 : 1,
-              cursor: disabled ? "not-allowed" : "text",
-            }}
-          />
-          <DatePicker.Trigger
-            style={{
-              position: "absolute",
-              right: 10,
-              top: "50%",
-              transform: "translateY(-50%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "transparent",
-              border: "none",
-              cursor: disabled ? "not-allowed" : "pointer",
-              color: "var(--text-muted)",
-              padding: 4,
-              borderRadius: 4,
-            }}
-          >
-            <LuCalendar size={15} />
-          </DatePicker.Trigger>
-        </DatePicker.Control>
+        {!inline && (
+          <DatePicker.Control style={{ position: "relative", width: "100%" }}>
+            <DatePicker.Input
+              placeholder={resolvedPlaceholder}
+              onClick={() => { if (!open) setOpen(true); }}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              style={{
+                width: "100%",
+                height: 40,
+                paddingLeft: 12,
+                paddingRight: 40,
+                background: "var(--bg-input)",
+                border: `1px solid ${borderColor}`,
+                borderRadius: 8,
+                color: "var(--text-default)",
+                fontSize: 14,
+                outline: "none",
+                boxShadow,
+                transition: "border-color 0.15s, box-shadow 0.15s",
+                opacity: disabled ? 0.5 : 1,
+                cursor: disabled ? "not-allowed" : "text",
+              }}
+            />
+            <DatePicker.Trigger
+              style={{
+                position: "absolute",
+                right: 10,
+                top: "50%",
+                transform: "translateY(-50%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "transparent",
+                border: "none",
+                cursor: disabled ? "not-allowed" : "pointer",
+                color: "var(--text-muted)",
+                padding: 4,
+                borderRadius: 4,
+              }}
+            >
+              <LuCalendar size={15} />
+            </DatePicker.Trigger>
+          </DatePicker.Control>
+        )}
 
-        <DatePicker.Positioner>
-          <DatePicker.Content
-            style={{
-              background: "var(--bg-second)",
-              border: "1px solid var(--border-default)",
-              borderRadius: 12,
-              padding: 12,
-              boxShadow: "var(--shadow-dropdown)",
-            }}
-          >
-            <DatePicker.View view="day">
-              <DatePicker.Header />
-              <DatePicker.DayTable />
-            </DatePicker.View>
-            <DatePicker.View view="month">
-              <DatePicker.Header />
-              <DatePicker.MonthTable />
-            </DatePicker.View>
-            <DatePicker.View view="year">
-              <DatePicker.Header />
-              <DatePicker.YearTable />
-            </DatePicker.View>
-          </DatePicker.Content>
-        </DatePicker.Positioner>
+        {inline ? (
+          <DatePicker.Content style={{ width: "100%" }}>{views}</DatePicker.Content>
+        ) : (
+          <DatePicker.Positioner>
+            <DatePicker.Content
+              style={{
+                background: "var(--bg-second)",
+                border: "1px solid var(--border-default)",
+                borderRadius: 12,
+                padding: 12,
+                boxShadow: "var(--shadow-dropdown)",
+              }}
+            >
+              {views}
+            </DatePicker.Content>
+          </DatePicker.Positioner>
+        )}
       </DatePicker.Root>
 
       {errorText && (

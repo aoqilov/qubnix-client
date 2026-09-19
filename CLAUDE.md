@@ -47,6 +47,8 @@ pages/<desktop|mobile>/<Platform><Name>.tsx   one-line wrapper that only renders
 
 `widgets/features/login/` is the one exception — platform-agnostic, used only by the auth-fork gate above, not routed normally.
 
+If a feature opens a `CusDrawer` or `CusDialog`, put that component in a `modals/` folder inside the feature (`widgets/features/<platform>/<feature>/modals/`), not in `components/` — see `settings-members/modals/InvitePersonDrawer.tsx` for the existing precedent.
+
 Query key + query/mutation convention (see `widgets/features/mobile/tasks/hooks/useApiTasks.ts`): a `<DOMAIN>_KEYS` object of key-builder functions, then one `useX` hook per query/mutation calling the matching `api/<resource>/<resource>.api.ts` function. API files are flat objects of thin `axiosInstance` wrappers keyed by resource, one file per backend resource under `api/<resource>/`.
 
 Adding a new screen: create the `widgets/features/<platform>/<feature>/` folder per the template above, add a one-line wrapper in `pages/<platform>/`, register it in both `routes.desktop.tsx` and `routes.mobile.tsx`. Something used by more than one feature moves to `components/ui/` (Cus* kit) or `hooks/`/`utils/`, not left duplicated inside a feature folder.

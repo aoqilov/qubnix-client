@@ -68,8 +68,8 @@ export const CusSwitch = forwardRef<HTMLInputElement, CusSwitchProps>(
           <Switch.Control
             mt="0.5"
             bg="var(--border-2)"
-            _checked={{ bg: "var(--color-blue)" }}
-            _focusVisible={{ boxShadow: "0 0 0 3px var(--focus-ring-blue)" }}
+            _checked={{ bg: "var(--brand-default)" }}
+            _focusVisible={{ boxShadow: "0 0 0 3px color-mix(in srgb, var(--brand-default) 19%, transparent)" }}
             _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
             _invalid={{ bg: "var(--color-red-soft)", outlineColor: "var(--color-red)", outlineWidth: "1px", outlineStyle: "solid" }}
           >

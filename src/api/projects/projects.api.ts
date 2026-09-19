@@ -2,7 +2,9 @@ import { api } from "@/api-config/axiosInstance";
 import type {
   CreateProjectRequest,
   ListProjectsParams,
+  ProjectMemberInput,
   RawProject,
+  RawProjectMember,
   UpdateProjectRequest,
 } from "@/api/projects/projects.types";
 import type { Pagination } from "@/types/common";
@@ -13,7 +15,7 @@ interface ApiEnvelope<T> {
 }
 
 export const projectsApi = {
-  /** Arxivlanganlar include_archived=true bo'lmasa ko'rinmaydi. Nom bo'yicha eng yangisi birinchi. */
+  /** Nom bo'yicha eng yangisi birinchi. */
   list: (organizationID: string, params?: ListProjectsParams) =>
     api
       .get<
@@ -36,7 +38,7 @@ export const projectsApi = {
       >(`/api/v1/organizations/${organizationID}/projects`, { data: payload })
       .then((r) => r.data.data.project),
 
-  /** Tahrirlash/arxivlash/qaytarish — bittasi. `members` yuborilsa to'liq almashadi. */
+  /** Nom va/yoki a'zolar ro'yxatini tahrirlash — bittasi. `members` yuborilsa to'liq almashadi. */
   update: (
     organizationID: string,
     projectId: string,
@@ -50,11 +52,41 @@ export const projectsApi = {
       })
       .then((r) => r.data.data.project),
 
-  /** Faqat owner/admin, soft-delete — loyiha + uning vazifalari. */
+  /** Faqat owner/admin — proyekt, vazifalari va a'zo bog'lanishlari bilan birga BUTUNLAY o'chadi (soft-delete emas). */
   remove: (organizationID: string, projectId: string) =>
     api
       .delete<
         ApiEnvelope<{ deleted: true }>
       >(`/api/v1/organizations/${organizationID}/projects/${projectId}`)
+      .then((r) => r.data.data.deleted),
+
+  /** Loyihaga biriktirilgan xodimlar ro'yxati. */
+  listMembers: (organizationID: string, projectId: string) =>
+    api
+      .get<
+        ApiEnvelope<{ members: RawProjectMember[] }>
+      >(`/api/v1/organizations/${organizationID}/projects/${projectId}/members`)
+      .then((r) => r.data.data.members),
+
+  /** Tashkilot xodimlarini loyihaga rol bilan qo'shadi — 1 dan 500 tagacha. */
+  addMembers: (
+    organizationID: string,
+    projectId: string,
+    members: ProjectMemberInput[],
+  ) =>
+    api
+      .post<
+        ApiEnvelope<{ members: RawProjectMember[] }>
+      >(`/api/v1/organizations/${organizationID}/projects/${projectId}/members`, {
+        data: { members },
+      })
+      .then((r) => r.data.data.members),
+
+  /** Bitta xodimni loyihadan olib tashlaydi. */
+  removeMember: (organizationID: string, projectId: string, userId: string) =>
+    api
+      .delete<
+        ApiEnvelope<{ deleted: true }>
+      >(`/api/v1/organizations/${organizationID}/projects/${projectId}/members/${userId}`)
       .then((r) => r.data.data.deleted),
 };
