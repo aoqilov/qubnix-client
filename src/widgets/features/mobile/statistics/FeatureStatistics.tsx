@@ -1,74 +1,46 @@
 import { useState } from "react";
-import { CusButton } from "@/components/ui/buttons/CusButton";
-import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
+import { CompletionRateCard } from "./components/CompletionRateCard";
+import { InsightCallout } from "./components/InsightCallout";
+import { PeriodChartCard } from "./components/PeriodChartCard";
+import { PriorityCard } from "./components/PriorityCard";
+import { ProjectsBreakdownCard } from "./components/ProjectsBreakdownCard";
+import { StatsPeriodTabs } from "./components/StatsPeriodTabs";
+import { StreakCard } from "./components/StreakCard";
+import {
+  CHART_TITLES,
+  MOCK_CHART_BUCKETS,
+  MOCK_COMPLETION,
+  MOCK_INSIGHT,
+  MOCK_PERIOD_RANGES,
+  MOCK_PRIORITY,
+  MOCK_PROJECTS,
+  MOCK_STREAK,
+} from "./lib/mockStatistics";
+import type { StatsPeriod } from "./types";
 
 export default function FeatureStatistics() {
-  const [open, setOpen] = useState(false);
+  const [period, setPeriod] = useState<StatsPeriod>("week");
 
   return (
-    <div className="p-4">
-      <h1 className="mb-4 font-condensed text-lg tracking-wide">Statistika</h1>
-
-      <CusButton colorPalette="purple" onClick={() => setOpen(true)}>
-        Batafsil statistika
-      </CusButton>
-
-      <CusDrawer
-        open={open}
-        onClose={() => setOpen(false)}
-        placement="end"
-        size="full"
-        closeOnBackdrop={false}
-        closeOnEscape={false}
-        title="Batafsil statistika"
-      >
-        <p className="text-sm text-[var(--text-muted)]">
-          {/* TODO: statistika tarkibi */}
+    <div className="flex flex-col gap-4 p-4">
+      <div>
+        <h1 className="font-condensed text-3xl font-semibold leading-none text-primary">
+          Статистика
+        </h1>
+        <p className="mt-1.5 text-sm font-semibold text-brand">
+          {MOCK_PERIOD_RANGES[period]}
         </p>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-        <h1>111111111</h1>
-      </CusDrawer>
+      </div>
+
+      <StatsPeriodTabs value={period} onChange={setPeriod} />
+
+      <CompletionRateCard summary={MOCK_COMPLETION[period]} />
+      <PeriodChartCard
+        title={CHART_TITLES[period]}
+        bars={MOCK_CHART_BUCKETS[period]}
+      />
+      <ProjectsBreakdownCard projects={MOCK_PROJECTS[period]} />
+      <PriorityCard items={MOCK_PRIORITY[period]} />
     </div>
   );
 }
