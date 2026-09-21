@@ -1,20 +1,16 @@
 import { useState } from "react";
 import { CompletionRateCard } from "./components/CompletionRateCard";
-import { InsightCallout } from "./components/InsightCallout";
 import { PeriodChartCard } from "./components/PeriodChartCard";
 import { PriorityCard } from "./components/PriorityCard";
 import { ProjectsBreakdownCard } from "./components/ProjectsBreakdownCard";
 import { StatsPeriodTabs } from "./components/StatsPeriodTabs";
-import { StreakCard } from "./components/StreakCard";
 import {
   CHART_TITLES,
   MOCK_CHART_BUCKETS,
   MOCK_COMPLETION,
-  MOCK_INSIGHT,
   MOCK_PERIOD_RANGES,
   MOCK_PRIORITY,
   MOCK_PROJECTS,
-  MOCK_STREAK,
 } from "./lib/mockStatistics";
 import type { StatsPeriod } from "./types";
 
