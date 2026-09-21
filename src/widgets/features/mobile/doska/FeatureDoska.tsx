@@ -8,7 +8,7 @@ import { AddWorkspaceButton } from "./components/AddWorkspaceButton";
 import { ModalAddWorkspace } from "./modals/ModalAddWorkspace";
 import { usePersonalSummary, useWorkspaceList } from "./hooks/useApiDoska";
 import { formatBoardDate } from "./lib/formatBoardDate";
-import { orgsLabel } from "./lib/pluralRu";
+import { orgsLabel } from "@/utils/pluralRu";
 
 export default function FeatureDoska() {
   const navigate = useNavigate();

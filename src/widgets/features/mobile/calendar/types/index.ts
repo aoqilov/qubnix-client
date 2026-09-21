@@ -3,6 +3,23 @@ export interface CalendarDayCell {
   dayNumber: number;
   weekdayLabel: string;
   isSelected?: boolean;
+  isToday?: boolean;
   isWeekend?: boolean;
   hasEvent?: boolean;
+}
+
+export interface DayTaskStats {
+  total: number;
+  done: number;
+  overdue: number;
+  left: number;
+}
+
+export interface CalendarProjectSummary {
+  id: string;
+  name: string;
+  initials: string;
+  done: number;
+  total: number;
+  isOverdue?: boolean;
 }

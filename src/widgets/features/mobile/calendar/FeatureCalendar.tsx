@@ -4,9 +4,11 @@ import { parseDate } from "@internationalized/date";
 import { LuCalendarDays } from "react-icons/lu";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusCalendar } from "@/components/ui/calendar/CusCalendar";
+import { CalendarDayInfoBox } from "./components/CalendarDayInfoBox";
+import { CalendarProjectsCard } from "./components/CalendarProjectsCard";
 import { CalendarWeekStrip } from "./components/CalendarWeekStrip";
 import { addDays, buildWeekDays, formatMonthLabel, getWeekStart, toDateKey } from "./lib/calendarWeek";
-import { MOCK_EVENT_DATES } from "./lib/mockCalendar";
+import { getMockDayProjects, MOCK_EVENT_DATES } from "./lib/mockCalendar";
 
 const monthToggleStyle: React.CSSProperties = {
   width: 44,
@@ -26,6 +28,7 @@ export default function FeatureCalendar() {
     () => buildWeekDays(weekStart, selectedDate, MOCK_EVENT_DATES),
     [weekStart, selectedDate]
   );
+  const dayProjects = useMemo(() => getMockDayProjects(selectedDate), [selectedDate]);
 
   function shiftWeek(offsetDays: number) {
     setDirection(offsetDays > 0 ? 1 : -1);
@@ -70,7 +73,10 @@ export default function FeatureCalendar() {
       />
 
       {/* day-info-box */}
+      <CalendarDayInfoBox date={selectedDate} />
+
       {/* projects-row */}
+      <CalendarProjectsCard projects={dayProjects} />
 
       <CusDialog open={isCalendarOpen} onClose={() => setCalendarOpen(false)} title="Выберите дату" centered size="sm">
         <CusCalendar

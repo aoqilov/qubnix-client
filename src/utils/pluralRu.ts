@@ -4,7 +4,7 @@
  * Qoida: oxirgi ikki xona 11-14 bo'lsa — doim ko'plik ("задач"); aks holda
  * oxirgi xona 1 → birlik, 2-4 → ikkilik shakl, qolgani → ko'plik.
  */
-function pluralRu(count: number, one: string, few: string, many: string): string {
+export function pluralRu(count: number, one: string, few: string, many: string): string {
   const abs = Math.abs(count) % 100;
   if (abs >= 11 && abs <= 14) return many;
 
@@ -28,4 +28,9 @@ export function tasksLabel(count: number): string {
 /** "3 организации" */
 export function orgsLabel(count: number): string {
   return `${count} ${pluralRu(count, "организация", "организации", "организаций")}`;
+}
+
+/** "2 проекта" */
+export function projectsLabel(count: number): string {
+  return `${count} ${pluralRu(count, "проект", "проекта", "проектов")}`;
 }

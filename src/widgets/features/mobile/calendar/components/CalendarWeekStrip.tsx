@@ -20,7 +20,13 @@ interface CalendarWeekStripProps {
   onNextWeek: () => void;
 }
 
-export function CalendarWeekStrip({ days, direction, onSelectDay, onPrevWeek, onNextWeek }: CalendarWeekStripProps) {
+export function CalendarWeekStrip({
+  days,
+  direction,
+  onSelectDay,
+  onPrevWeek,
+  onNextWeek,
+}: CalendarWeekStripProps) {
   const weekKey = toDateKey(days[0].date);
 
   return (
@@ -28,7 +34,10 @@ export function CalendarWeekStrip({ days, direction, onSelectDay, onPrevWeek, on
       <div className="flex items-center gap-1.5">
         <span className="flex-none" style={{ width: 34 }} />
         {days.map((day) => (
-          <span key={toDateKey(day.date)} className="flex-1 text-center text-xs font-medium text-secondary">
+          <span
+            key={toDateKey(day.date)}
+            className="flex-1 text-center text-xs font-medium text-secondary"
+          >
             {day.weekdayLabel}
           </span>
         ))}
@@ -60,8 +69,8 @@ export function CalendarWeekStrip({ days, direction, onSelectDay, onPrevWeek, on
                 const dateColor = day.isSelected
                   ? "var(--text-on-brand)"
                   : day.isWeekend
-                  ? "var(--status-error-text)"
-                  : "var(--text-primary)";
+                    ? "var(--status-error-text)"
+                    : "var(--text-primary)";
 
                 return (
                   <button
@@ -70,12 +79,28 @@ export function CalendarWeekStrip({ days, direction, onSelectDay, onPrevWeek, on
                     onClick={() => onSelectDay(day.date)}
                     className="relative flex h-11 flex-1 items-center justify-center"
                   >
-                    {day.isSelected && (
+                    {day.isSelected ? (
                       <motion.span
                         layoutId="calendar-selected-day"
-                        transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 500,
+                          damping: 35,
+                        }}
                         className="absolute inset-0"
-                        style={{ background: "var(--brand-default)", borderRadius: "var(--radius-card)" }}
+                        style={{
+                          background: "var(--brand-default)",
+                          borderRadius: "var(--radius-card)",
+                        }}
+                      />
+                    ) : (
+                      <span
+                        className="absolute inset-0"
+                        style={{
+                          background: day.isToday ? "var(--brand-subtle-bg)" : "var(--bg-surface)",
+                          borderRadius: "var(--radius-card)",
+                          borderBottom: day.isToday ? "2px solid var(--brand-default)" : undefined,
+                        }}
                       />
                     )}
                     {day.hasEvent && (

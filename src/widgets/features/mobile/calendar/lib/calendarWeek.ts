@@ -31,6 +31,7 @@ export function formatMonthLabel(date: Date): string {
 
 export function buildWeekDays(weekStart: Date, selectedDate: Date, eventDates: Set<string>): CalendarDayCell[] {
   const selectedKey = toDateKey(selectedDate);
+  const todayKey = toDateKey(new Date());
 
   return Array.from({ length: 7 }, (_, index) => {
     const current = addDays(weekStart, index);
@@ -42,6 +43,7 @@ export function buildWeekDays(weekStart: Date, selectedDate: Date, eventDates: S
       dayNumber: current.getDate(),
       weekdayLabel,
       isSelected: toDateKey(current) === selectedKey,
+      isToday: toDateKey(current) === todayKey,
       isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
       hasEvent: eventDates.has(toDateKey(current)),
     };

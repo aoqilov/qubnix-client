@@ -1,6 +1,6 @@
 import { LuChevronRight, LuUser } from "react-icons/lu";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
-import { tasksLabel } from "../lib/pluralRu";
+import { tasksLabel } from "@/utils/pluralRu";
 
 interface PersonalTasksCardProps {
   tasksCount: number;

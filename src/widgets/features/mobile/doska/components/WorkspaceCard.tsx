@@ -1,7 +1,7 @@
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { avatarColorVar } from "@/utils/avatarColor";
 import type { WorkspaceSummary } from "@/store/workspace.store";
-import { tasksLabel } from "../lib/pluralRu";
+import { tasksLabel } from "@/utils/pluralRu";
 
 interface WorkspaceCardProps {
   workspace: WorkspaceSummary;
