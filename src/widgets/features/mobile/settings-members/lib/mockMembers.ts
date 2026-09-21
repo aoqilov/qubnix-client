@@ -12,7 +12,7 @@ export const MOCK_WORKSPACE_NAME = "Synapse";
 
 export const MOCK_MEMBERS: RawOrganizationMember[] = [
   {
-    id: "1",
+    id: 1,
     first_name: "Sardor",
     last_name: "Rasulov",
     telegram_username: "sardor_r",
@@ -23,7 +23,7 @@ export const MOCK_MEMBERS: RawOrganizationMember[] = [
     created_at: "2026-02-10T08:00:00.000Z",
   },
   {
-    id: "2",
+    id: 2,
     first_name: "Dilnoza",
     last_name: "Yusupova",
     telegram_username: "dilnoza_y",
@@ -34,7 +34,7 @@ export const MOCK_MEMBERS: RawOrganizationMember[] = [
     created_at: "2026-04-22T08:00:00.000Z",
   },
   {
-    id: "3",
+    id: 3,
     first_name: "Aziz",
     last_name: "Karimov",
     telegram_username: "aziz_k",
@@ -45,7 +45,7 @@ export const MOCK_MEMBERS: RawOrganizationMember[] = [
     created_at: "2026-06-05T08:00:00.000Z",
   },
   {
-    id: "4",
+    id: 4,
     first_name: "Nigora",
     last_name: "Saidova",
     telegram_username: "nigora_s",
@@ -56,7 +56,7 @@ export const MOCK_MEMBERS: RawOrganizationMember[] = [
     created_at: "2026-07-18T08:00:00.000Z",
   },
   {
-    id: "5",
+    id: 5,
     first_name: "Jasur",
     last_name: "Toxtayev",
     telegram_username: "jasur_t",
@@ -67,7 +67,7 @@ export const MOCK_MEMBERS: RawOrganizationMember[] = [
     created_at: "2026-08-30T08:00:00.000Z",
   },
   {
-    id: "6",
+    id: 6,
     first_name: "Malika",
     last_name: "Qodirova",
     telegram_username: "malika_q",
@@ -78,7 +78,7 @@ export const MOCK_MEMBERS: RawOrganizationMember[] = [
     created_at: "2026-09-16T08:00:00.000Z",
   },
   {
-    id: "7",
+    id: 7,
     first_name: "Otabek",
     last_name: "Jalilov",
     telegram_username: "otabek_j",
@@ -89,7 +89,7 @@ export const MOCK_MEMBERS: RawOrganizationMember[] = [
     created_at: "2026-10-01T08:00:00.000Z",
   },
   {
-    id: "8",
+    id: 8,
     first_name: "Gulnora",
     last_name: "Islomova",
     telegram_username: "gulnora_i",
@@ -100,7 +100,7 @@ export const MOCK_MEMBERS: RawOrganizationMember[] = [
     created_at: "2026-11-12T08:00:00.000Z",
   },
   {
-    id: "9",
+    id: 9,
     first_name: "Shahzod",
     last_name: "Abdullayev",
     telegram_username: "shahzod_a",
@@ -111,7 +111,7 @@ export const MOCK_MEMBERS: RawOrganizationMember[] = [
     created_at: "2026-12-25T08:00:00.000Z",
   },
   {
-    id: "10",
+    id: 10,
     first_name: "Nilufar",
     last_name: "Rashidova",
     telegram_username: "nilufar_r",
@@ -122,7 +122,7 @@ export const MOCK_MEMBERS: RawOrganizationMember[] = [
     created_at: "2027-01-15T08:00:00.000Z",
   },
   {
-    id: "11",
+    id: 11,
     first_name: "Jasmina",
     last_name: "Karimova",
     telegram_username: "jasmina_k",
@@ -133,7 +133,7 @@ export const MOCK_MEMBERS: RawOrganizationMember[] = [
     created_at: "2027-02-28T08:00:00.000Z",
   },
   {
-    id: "12",
+    id: 12,
     first_name: "Rustam",
     last_name: "Yusupov",
     telegram_username: "rustam_y",

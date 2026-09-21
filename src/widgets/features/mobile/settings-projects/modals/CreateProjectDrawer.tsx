@@ -3,25 +3,32 @@ import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { ProjectMemberSelectList } from "../components/ProjectMemberSelectList";
-import { MOCK_AVAILABLE_MEMBERS } from "../lib/mockProjects";
-import type { ProjectFormInput, ProjectMemberRole } from "../types";
+import { useCreateProject, useOrgMembersForNewProject } from "../hooks/useApiSettingsProjects";
+import type { ProjectMemberRole } from "../types";
 
 interface CreateProjectDrawerProps {
   open: boolean;
   onClose: () => void;
-  onCreate: (input: ProjectFormInput) => void;
+  organizationId: string | null;
 }
 
-export function CreateProjectDrawer({ open, onClose, onCreate }: CreateProjectDrawerProps) {
+export function CreateProjectDrawer({ open, onClose, organizationId }: CreateProjectDrawerProps) {
   const [name, setName] = useState("");
   // userId -> tanlangan rol. Kalit borligi shu odam belgilanganini bildiradi.
   const [selections, setSelections] = useState<Record<string, ProjectMemberRole>>({});
+
+  const membersQuery = useOrgMembersForNewProject(organizationId);
+  const createProject = useCreateProject(organizationId);
+  const availableMembers = membersQuery.data ?? [];
 
   useEffect(() => {
     if (open) {
       setName("");
       setSelections({});
+      createProject.reset();
     }
+    // createProject har renderda yangi obyekt, shuning uchun bog'liqlikda faqat `open`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const toggleMember = (id: string) => {
@@ -41,11 +48,16 @@ export function CreateProjectDrawer({ open, onClose, onCreate }: CreateProjectDr
 
   const handleCreate = () => {
     if (!name.trim()) return;
-    onCreate({
-      name: name.trim(),
-      members: Object.entries(selections).map(([userId, role]) => ({ userId, role })),
-    });
-    onClose();
+    createProject.mutate(
+      {
+        name: name.trim(),
+        members: Object.entries(selections).map(([userId, role]) => ({
+          user_id: Number(userId),
+          role,
+        })),
+      },
+      { onSuccess: onClose },
+    );
   };
 
   return (
@@ -57,10 +69,21 @@ export function CreateProjectDrawer({ open, onClose, onCreate }: CreateProjectDr
       title="Новый проект"
       footer={
         <div className="flex w-full gap-2">
-          <CusButton variant="outline" className="flex-1" onClick={onClose}>
+          <CusButton
+            variant="outline"
+            className="flex-1"
+            onClick={onClose}
+            isDisabled={createProject.isPending}
+          >
             Отмена
           </CusButton>
-          <CusButton className="flex-1" isDisabled={!name.trim()} onClick={handleCreate}>
+          <CusButton
+            className="flex-1"
+            isDisabled={!name.trim()}
+            isLoading={createProject.isPending}
+            loadingText="Yaratilmoqda..."
+            onClick={handleCreate}
+          >
             Создать
           </CusButton>
         </div>
@@ -74,17 +97,27 @@ export function CreateProjectDrawer({ open, onClose, onCreate }: CreateProjectDr
           onChange={(e) => setName(e.target.value)}
         />
 
+        {createProject.isError && (
+          <p className="text-sm text-error-strong">
+            Не удалось создать проект. Попробуйте ещё раз.
+          </p>
+        )}
+
         <div className="flex flex-col">
           <span className="mb-2 text-xs font-medium uppercase tracking-wide text-secondary">
             Сотрудники
           </span>
 
-          <ProjectMemberSelectList
-            members={MOCK_AVAILABLE_MEMBERS}
-            selections={selections}
-            onToggle={toggleMember}
-            onRoleChange={setMemberRole}
-          />
+          {membersQuery.isPending ? (
+            <p className="py-4 text-center text-sm text-secondary">Yuklanmoqda...</p>
+          ) : (
+            <ProjectMemberSelectList
+              members={availableMembers}
+              selections={selections}
+              onToggle={toggleMember}
+              onRoleChange={setMemberRole}
+            />
+          )}
         </div>
       </div>
     </CusDrawer>

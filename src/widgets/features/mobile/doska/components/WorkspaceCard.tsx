@@ -1,7 +1,9 @@
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
+import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { avatarColorVar } from "@/utils/avatarColor";
 import type { WorkspaceSummary } from "@/store/workspace.store";
 import { tasksLabel } from "@/utils/pluralRu";
+import { ORGANIZATION_ROLE_LABELS } from "@/utils/roleLabels";
 
 interface WorkspaceCardProps {
   workspace: WorkspaceSummary;
@@ -22,8 +24,15 @@ export function WorkspaceCard({ workspace, onClick }: WorkspaceCardProps) {
         {workspace.initials}
       </span>
 
-      <span className="min-w-0 flex-1 truncate font-semibold text-primary">
-        {workspace.name}
+      <span className="min-w-0 flex-1">
+        <p className="truncate font-semibold text-primary">{workspace.name}</p>
+        {workspace.role && (
+          <div className="mt-0.5">
+            <CusBadge variant="subtle" tone="neutral" size="xs">
+              {ORGANIZATION_ROLE_LABELS[workspace.role]}
+            </CusBadge>
+          </div>
+        )}
       </span>
 
       <span className="flex-none whitespace-nowrap rounded-chip bg-brand-subtle px-2.5 py-1 text-xs font-semibold text-brand">

@@ -59,22 +59,22 @@ export interface SearchEmployeeResult {
   projects: SearchProjectOption[];
 }
 
-export interface ProjectRoleInput {
-  project_id: number;
-  role: ProjectMemberRole;
+export interface InvitationProjectInput {
+  id: number;
+  /** `member` uchun har bir loyihaga rol majburiy; `viewer`da shart emas. */
+  role?: ProjectMemberRole;
 }
 
 /**
- * Faqat owner/admin yuboradi. `role: "admin"` bo'lsa `project_ids` shart
+ * Faqat owner/admin yuboradi. `role: "admin"` bo'lsa `projects` shart
  * emas — admin barcha loyihalarni ko'radi. `viewer`/`member` uchun
- * `project_ids` majburiy; `member` uchun tanlangan har bir loyihaga
- * `project_roles` orqali rol ham berilishi shart.
+ * `projects` majburiy; `member` uchun tanlangan har bir loyihaga
+ * `role` ham berilishi shart.
  */
 export interface CreateInvitationRequest {
   user_id: number;
   role: OrganizationRole;
-  project_ids: number[];
-  project_roles?: ProjectRoleInput[];
+  projects?: InvitationProjectInput[];
 }
 
 export interface ListInvitationsParams {

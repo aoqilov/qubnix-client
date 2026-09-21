@@ -1,7 +1,7 @@
 import { avatarColorVar } from "@/utils/avatarColor";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { ORGANIZATION_ROLE_LABELS } from "@/utils/roleLabels";
-import { daysSince } from "../lib/daysSince";
+import { daysSince } from "@/utils/daysSince";
 import type { RawOrganizationMember } from "@/api/organizations/organizations.types";
 
 function initialsOf(member: RawOrganizationMember): string {

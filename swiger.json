@@ -1420,7 +1420,7 @@
       "get": {
         "summary": "List projects in the selected organization",
         "tags": ["Projects"],
-        "description": "q searches the project name. Results are newest first.",
+        "description": "search searches the project name. Results are newest first. Task counts can be filtered by date or inclusive from/to dates.",
         "parameters": [
           {
             "schema": {
@@ -1447,7 +1447,25 @@
           {
             "schema": { "type": "string", "maxLength": 100 },
             "in": "query",
-            "name": "q",
+            "name": "search",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "format": "date" },
+            "in": "query",
+            "name": "date",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "format": "date" },
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "format": "date" },
+            "in": "query",
+            "name": "to",
             "required": false
           },
           {
@@ -1482,6 +1500,7 @@
                               "organization_id",
                               "name",
                               "members",
+                              "task_counts",
                               "created_by",
                               "created_at",
                               "updated_at"
@@ -1509,7 +1528,8 @@
                                     "first_name",
                                     "last_name",
                                     "telegram_username",
-                                    "telegram_avatar_url"
+                                    "telegram_avatar_url",
+                                    "tasks_count"
                                   ],
                                   "properties": {
                                     "user_id": {
@@ -1530,7 +1550,35 @@
                                     },
                                     "telegram_avatar_url": {
                                       "type": ["null", "string"]
+                                    },
+                                    "tasks_count": {
+                                      "type": ["null", "integer"],
+                                      "minimum": 0
                                     }
+                                  }
+                                }
+                              },
+                              "task_counts": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "total",
+                                  "todo",
+                                  "in_progress",
+                                  "done",
+                                  "not_done"
+                                ],
+                                "properties": {
+                                  "total": { "type": "integer", "minimum": 0 },
+                                  "todo": { "type": "integer", "minimum": 0 },
+                                  "in_progress": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                  },
+                                  "done": { "type": "integer", "minimum": 0 },
+                                  "not_done": {
+                                    "type": "integer",
+                                    "minimum": 0
                                   }
                                 }
                               },
@@ -1746,6 +1794,7 @@
                             "organization_id",
                             "name",
                             "members",
+                            "task_counts",
                             "created_by",
                             "created_at",
                             "updated_at"
@@ -1773,7 +1822,8 @@
                                   "first_name",
                                   "last_name",
                                   "telegram_username",
-                                  "telegram_avatar_url"
+                                  "telegram_avatar_url",
+                                  "tasks_count"
                                 ],
                                 "properties": {
                                   "user_id": {
@@ -1794,8 +1844,33 @@
                                   },
                                   "telegram_avatar_url": {
                                     "type": ["null", "string"]
+                                  },
+                                  "tasks_count": {
+                                    "type": ["null", "integer"],
+                                    "minimum": 0
                                   }
                                 }
+                              }
+                            },
+                            "task_counts": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "required": [
+                                "total",
+                                "todo",
+                                "in_progress",
+                                "done",
+                                "not_done"
+                              ],
+                              "properties": {
+                                "total": { "type": "integer", "minimum": 0 },
+                                "todo": { "type": "integer", "minimum": 0 },
+                                "in_progress": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                "done": { "type": "integer", "minimum": 0 },
+                                "not_done": { "type": "integer", "minimum": 0 }
                               }
                             },
                             "created_by": { "type": "integer", "minimum": 1 },
@@ -1962,6 +2037,7 @@
                             "organization_id",
                             "name",
                             "members",
+                            "task_counts",
                             "created_by",
                             "created_at",
                             "updated_at"
@@ -1989,7 +2065,8 @@
                                   "first_name",
                                   "last_name",
                                   "telegram_username",
-                                  "telegram_avatar_url"
+                                  "telegram_avatar_url",
+                                  "tasks_count"
                                 ],
                                 "properties": {
                                   "user_id": {
@@ -2010,8 +2087,33 @@
                                   },
                                   "telegram_avatar_url": {
                                     "type": ["null", "string"]
+                                  },
+                                  "tasks_count": {
+                                    "type": ["null", "integer"],
+                                    "minimum": 0
                                   }
                                 }
+                              }
+                            },
+                            "task_counts": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "required": [
+                                "total",
+                                "todo",
+                                "in_progress",
+                                "done",
+                                "not_done"
+                              ],
+                              "properties": {
+                                "total": { "type": "integer", "minimum": 0 },
+                                "todo": { "type": "integer", "minimum": 0 },
+                                "in_progress": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                "done": { "type": "integer", "minimum": 0 },
+                                "not_done": { "type": "integer", "minimum": 0 }
                               }
                             },
                             "created_by": { "type": "integer", "minimum": 1 },
@@ -2221,6 +2323,7 @@
                             "organization_id",
                             "name",
                             "members",
+                            "task_counts",
                             "created_by",
                             "created_at",
                             "updated_at"
@@ -2248,7 +2351,8 @@
                                   "first_name",
                                   "last_name",
                                   "telegram_username",
-                                  "telegram_avatar_url"
+                                  "telegram_avatar_url",
+                                  "tasks_count"
                                 ],
                                 "properties": {
                                   "user_id": {
@@ -2269,8 +2373,33 @@
                                   },
                                   "telegram_avatar_url": {
                                     "type": ["null", "string"]
+                                  },
+                                  "tasks_count": {
+                                    "type": ["null", "integer"],
+                                    "minimum": 0
                                   }
                                 }
+                              }
+                            },
+                            "task_counts": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "required": [
+                                "total",
+                                "todo",
+                                "in_progress",
+                                "done",
+                                "not_done"
+                              ],
+                              "properties": {
+                                "total": { "type": "integer", "minimum": 0 },
+                                "todo": { "type": "integer", "minimum": 0 },
+                                "in_progress": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                "done": { "type": "integer", "minimum": 0 },
+                                "not_done": { "type": "integer", "minimum": 0 }
                               }
                             },
                             "created_by": { "type": "integer", "minimum": 1 },
@@ -2544,7 +2673,7 @@
     "/api/v1/organizations/{organizationID}/projects/{project_id}/members": {
       "get": {
         "summary": "List members assigned to a project",
-        "tags": ["Projects"],
+        "tags": ["Project members"],
         "parameters": [
           {
             "schema": { "type": "integer", "minimum": 1 },
@@ -2585,7 +2714,8 @@
                               "first_name",
                               "last_name",
                               "telegram_username",
-                              "telegram_avatar_url"
+                              "telegram_avatar_url",
+                              "tasks_count"
                             ],
                             "properties": {
                               "user_id": { "type": "integer", "minimum": 1 },
@@ -2600,6 +2730,10 @@
                               },
                               "telegram_avatar_url": {
                                 "type": ["null", "string"]
+                              },
+                              "tasks_count": {
+                                "type": ["null", "integer"],
+                                "minimum": 0
                               }
                             }
                           }
@@ -2717,7 +2851,7 @@
       },
       "post": {
         "summary": "Add organization employees to a project",
-        "tags": ["Projects"],
+        "tags": ["Project members"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2746,8 +2880,8 @@
                             }
                           }
                         },
-                        "maxItems": 500,
-                        "minItems": 1
+                        "minItems": 1,
+                        "maxItems": 500
                       }
                     }
                   }
@@ -2796,7 +2930,8 @@
                               "first_name",
                               "last_name",
                               "telegram_username",
-                              "telegram_avatar_url"
+                              "telegram_avatar_url",
+                              "tasks_count"
                             ],
                             "properties": {
                               "user_id": { "type": "integer", "minimum": 1 },
@@ -2811,6 +2946,196 @@
                               },
                               "telegram_avatar_url": {
                                 "type": ["null", "string"]
+                              },
+                              "tasks_count": {
+                                "type": ["null", "integer"],
+                                "minimum": 0
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationID}/projects/{project_id}/members/available": {
+      "get": {
+        "summary": "List organization employees not assigned to a project",
+        "tags": ["Project members"],
+        "parameters": [
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "project_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "members": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "id",
+                              "first_name",
+                              "last_name",
+                              "telegram_username",
+                              "telegram_avatar_url",
+                              "index_quality",
+                              "organization_role",
+                              "created_at"
+                            ],
+                            "properties": {
+                              "id": { "type": "integer", "minimum": 1 },
+                              "first_name": { "type": "string" },
+                              "last_name": { "type": "string" },
+                              "telegram_username": {
+                                "type": ["null", "string"]
+                              },
+                              "telegram_avatar_url": {
+                                "type": ["null", "string"]
+                              },
+                              "index_quality": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "organization_role": {
+                                "type": "string",
+                                "enum": ["admin", "viewer", "member"]
+                              },
+                              "created_at": {
+                                "type": "string",
+                                "format": "date-time"
                               }
                             }
                           }
@@ -2930,7 +3255,7 @@
     "/api/v1/organizations/{organizationID}/projects/{project_id}/members/{user_id}": {
       "delete": {
         "summary": "Remove a member from a project",
-        "tags": ["Projects"],
+        "tags": ["Project members"],
         "parameters": [
           {
             "schema": { "type": "integer", "minimum": 1 },
@@ -2942,6 +3267,356 @@
             "schema": { "type": "integer", "minimum": 1 },
             "in": "path",
             "name": "project_id",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "user_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "deleted": { "type": "boolean", "enum": [true] }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationID}/members/{user_id}": {
+      "patch": {
+        "summary": "Change an organization member role",
+        "tags": ["Organizations"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["data"],
+                "additionalProperties": false,
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["role"],
+                    "properties": {
+                      "role": {
+                        "type": "string",
+                        "enum": ["admin", "viewer", "member"]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "user_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "member": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "id",
+                            "first_name",
+                            "last_name",
+                            "telegram_username",
+                            "telegram_avatar_url",
+                            "index_quality",
+                            "organization_role",
+                            "created_at"
+                          ],
+                          "properties": {
+                            "id": { "type": "integer", "minimum": 1 },
+                            "first_name": { "type": "string" },
+                            "last_name": { "type": "string" },
+                            "telegram_username": { "type": ["null", "string"] },
+                            "telegram_avatar_url": {
+                              "type": ["null", "string"]
+                            },
+                            "index_quality": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 100
+                            },
+                            "organization_role": {
+                              "type": "string",
+                              "enum": ["admin", "viewer", "member"]
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove an employee from an organization",
+        "tags": ["Organizations"],
+        "parameters": [
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
             "required": true
           },
           {
@@ -3524,7 +4199,7 @@
       "post": {
         "summary": "Invite an employee with a role and projects",
         "tags": ["Organization invitations"],
-        "description": "Admin sees all projects and does not need project roles. Viewer and member invitations must include projects. Member invitations must include a role for every selected project.",
+        "description": "Projects are optional. Without projects, the employee is added only to the organization. Admins access all projects; viewer selections default to project_member; member selections require a project role.",
         "requestBody": {
           "required": true,
           "content": {
@@ -3537,34 +4212,27 @@
                   "data": {
                     "type": "object",
                     "additionalProperties": false,
-                    "required": ["user_id", "role", "project_ids"],
+                    "required": ["user_id", "role"],
                     "properties": {
                       "user_id": { "type": "integer", "minimum": 1 },
                       "role": {
                         "type": "string",
                         "enum": ["admin", "viewer", "member"]
                       },
-                      "project_ids": {
-                        "type": "array",
-                        "items": { "type": "integer", "minimum": 1 },
-                        "uniqueItems": true,
-                        "maxItems": 500
-                      },
-                      "project_roles": {
+                      "projects": {
                         "type": "array",
                         "items": {
                           "type": "object",
                           "additionalProperties": false,
-                          "required": ["project_id"],
+                          "required": ["id"],
                           "properties": {
-                            "project_id": { "type": "integer", "minimum": 1 },
+                            "id": { "type": "integer", "minimum": 1 },
                             "role": {
                               "type": "string",
                               "enum": ["project_manager", "project_member"]
                             }
                           }
                         },
-                        "uniqueItems": true,
                         "maxItems": 500
                       }
                     }

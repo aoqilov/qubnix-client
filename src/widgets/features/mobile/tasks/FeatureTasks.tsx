@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -33,15 +33,17 @@ const SORT_OPTIONS = [
   { value: "created", label: "Yaratilgan sana bo'yicha" },
 ];
 
-const STATUS_TABS = [
-  { id: "assigned", label: "Berildi", count: 2, color: "gray" as const },
-  { id: "in_progress", label: "Jarayonda", count: 2, color: "brand" as const },
-  { id: "done", label: "Bajarildi", count: 1, color: "success" as const },
-  { id: "failed", label: "Bajarilmadi", count: 1, color: "error" as const },
+// Statik metama'lumot (id/label/rang) — sonlar esa aktiv loyihaning
+// `task_counts`'idan dinamik olinadi (pastga qarang, komponent ichida).
+const STATUS_META = [
+  { id: "assigned", label: "Berildi", color: "gray" as const, countKey: "todo" as const },
+  { id: "in_progress", label: "Jarayonda", color: "brand" as const, countKey: "in_progress" as const },
+  { id: "done", label: "Bajarildi", color: "success" as const, countKey: "done" as const },
+  { id: "failed", label: "Bajarilmadi", color: "error" as const, countKey: "not_done" as const },
 ];
 
 // Checkbox ustidagi CusMenuList uchun: har bir status uchun ikonka va rang.
-// STATUS_TABS bilan id orqali mos keladi.
+// STATUS_META bilan id orqali mos keladi.
 const STATUS_ICON: Record<string, ReactNode> = {
   assigned: <LuCircle size={14} />,
   in_progress: <LuLoaderCircle size={14} />,
@@ -56,11 +58,11 @@ const STATUS_ICON_COLOR: Record<TaskStatusColor, string> = {
   error: "var(--status-error-solid)",
 };
 
-const STATUS_MENU_OPTIONS = STATUS_TABS.map((tab) => ({
-  id: tab.id,
-  label: tab.label,
-  icon: STATUS_ICON[tab.id],
-  iconColor: STATUS_ICON_COLOR[tab.color],
+const STATUS_MENU_OPTIONS = STATUS_META.map((meta) => ({
+  id: meta.id,
+  label: meta.label,
+  icon: STATUS_ICON[meta.id],
+  iconColor: STATUS_ICON_COLOR[meta.color],
 }));
 
 interface DemoTask {
@@ -370,15 +372,37 @@ export default function FeatureTasks() {
     queryFn: () => projectsApi.list(organizationId!, { limit: 100 }),
     enabled: !!organizationId,
   });
-  const projectTabs =
-    projectsQuery.data?.projects.map((p) => ({
-      id: String(p.id),
-      projectName: p.name,
-      // Backend hozircha loyiha bo'yicha vazifalar sonini bermaydi.
-      projectTaskCount: 0,
-    })) ?? [];
+  const projects = projectsQuery.data?.projects ?? [];
+  const projectTabs = projects.map((p) => ({
+    id: String(p.id),
+    projectName: p.name,
+    projectTaskCount: p.task_counts.total,
+  }));
 
-  const [activeTabId, setActiveTabId] = useState("1");
+  const [activeTabId, setActiveTabId] = useState("");
+
+  // Loyihalar yuklangach yoki workspace almashganda — javobdagi birinchi
+  // loyiha ([0]) avtomatik aktiv qilinadi.
+  useEffect(() => {
+    if (projectTabs.length === 0) return;
+    const hasActiveTab = projectTabs.some((tab) => tab.id === activeTabId);
+    if (!hasActiveTab) {
+      setActiveTabId(projectTabs[0].id);
+    }
+  }, [projectTabs, activeTabId]);
+
+  // StatusTab'dagi sonlar aktiv loyihaning task_counts'idan olinadi — loyiha
+  // almashtirilganda avtomatik yangilanadi.
+  const activeProjectCounts = projects.find(
+    (p) => String(p.id) === activeTabId,
+  )?.task_counts;
+  const statusTabs = STATUS_META.map((meta) => ({
+    id: meta.id,
+    label: meta.label,
+    color: meta.color,
+    count: activeProjectCounts?.[meta.countKey] ?? 0,
+  }));
+
   const [sort, setSort] = useState("deadline");
   const [statusId, setStatusId] = useState("in_progress");
   const [tasks, setTasks] = useState(INITIAL_TASKS);
@@ -397,7 +421,7 @@ export default function FeatureTasks() {
   };
 
   const addTask = ({ title, description }: TaskModalAddValues) => {
-    const assigned = STATUS_TABS.find((tab) => tab.id === "assigned")!;
+    const assigned = STATUS_META.find((meta) => meta.id === "assigned")!;
     setTasks((prev) => [
       ...prev,
       {
@@ -425,7 +449,7 @@ export default function FeatureTasks() {
   const deletingTask = tasks.find((t) => t.id === deletingTaskId);
 
   const applyStatusChange = (taskId: string, nextStatusId: string) => {
-    const meta = STATUS_TABS.find((tab) => tab.id === nextStatusId);
+    const meta = STATUS_META.find((m) => m.id === nextStatusId);
     if (!meta) return;
     updateTask(taskId, {
       statusId: nextStatusId,
@@ -474,7 +498,7 @@ export default function FeatureTasks() {
           menulist={SORT_OPTIONS}
         />
         <StatusTab
-          items={STATUS_TABS}
+          items={statusTabs}
           activeId={statusId}
           onChange={setStatusId}
           className="sticky top-0 z-sticky -mx-4 bg-canvas px-4 py-2"

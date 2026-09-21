@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { OrganizationRole } from "@/api/organizations/organizations.types";
 
 /**
  * Mobil /doska real /api/v1/organizations'dan o'qiydi (o'z feature-local
@@ -15,6 +16,8 @@ export interface WorkspaceSummary {
   initials: string;
   /** O'ngdagi belgidagi son — "4 задачи". */
   tasksCount: number;
+  /** Joriy foydalanuvchining shu tashkilotdagi roli — hozircha desktop mock'da yo'q. */
+  role?: OrganizationRole;
   /**
    * Backend /organizations javobida hozircha yo'q — Sidebar/WorkspacePicker
    * shu maydon borida ko'rsatadi, bo'lmasa yashiradi.

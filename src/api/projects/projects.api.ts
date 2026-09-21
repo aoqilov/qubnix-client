@@ -1,5 +1,6 @@
 import { api } from "@/api-config/axiosInstance";
 import type {
+  AvailableProjectMember,
   CreateProjectRequest,
   ListProjectsParams,
   ProjectMemberInput,
@@ -89,4 +90,12 @@ export const projectsApi = {
         ApiEnvelope<{ deleted: true }>
       >(`/api/v1/organizations/${organizationID}/projects/${projectId}/members/${userId}`)
       .then((r) => r.data.data.deleted),
+
+  /** Tashkilotning shu loyihaga hali qo'shilmagan xodimlari — "qo'shish" paneli uchun. */
+  listAvailableMembers: (organizationID: string, projectId: string) =>
+    api
+      .get<
+        ApiEnvelope<{ members: AvailableProjectMember[] }>
+      >(`/api/v1/organizations/${organizationID}/projects/${projectId}/members/available`)
+      .then((r) => r.data.data.members),
 };

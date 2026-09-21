@@ -1,4 +1,5 @@
 import type { Pagination } from "@/types/common";
+import type { RawOrganizationMember } from "@/api/organizations/organizations.types";
 
 export type ProjectMemberRole = "project_manager" | "project_member";
 
@@ -9,6 +10,16 @@ export interface RawProjectMember {
   last_name: string;
   telegram_username: string | null;
   telegram_avatar_url: string | null;
+  tasks_count: number | null;
+}
+
+/** Loyihadagi vazifalar soni, holat bo'yicha taqsimlangan. */
+export interface ProjectTaskCounts {
+  total: number;
+  todo: number;
+  in_progress: number;
+  done: number;
+  not_done: number;
 }
 
 /** Backend /api/v1/organizations/{organizationID}/projects* javoblaridagi xom shakl. */
@@ -17,6 +28,7 @@ export interface RawProject {
   organization_id: number;
   name: string;
   members: RawProjectMember[];
+  task_counts: ProjectTaskCounts;
   created_by: number;
   created_at: string;
   updated_at: string;
@@ -26,14 +38,23 @@ export interface ListProjectsParams {
   page?: number;
   /** 1–100, default 20. */
   limit?: number;
-  /** Nom bo'yicha qidiruv. */
-  q?: string;
+  /** Nom bo'yicha qidiruv, eng ko'p 100 belgi. */
+  search?: string;
+  /** YYYY-MM-DD — shu sanadagi vazifalari bor loyihalar. */
+  date?: string;
+  /** YYYY-MM-DD — oraliq boshlanishi (`date` bilan birga ishlatilmaydi). */
+  from?: string;
+  /** YYYY-MM-DD — oraliq oxiri. */
+  to?: string;
 }
 
 export interface ListProjectsResponse {
   projects: RawProject[];
   pagination: Pagination;
 }
+
+/** GET .../members/available javobidagi xodim — shakli tashkilot xodimi bilan bir xil. */
+export type AvailableProjectMember = RawOrganizationMember;
 
 export interface ProjectMemberInput {
   user_id: number;

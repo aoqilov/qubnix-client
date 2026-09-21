@@ -5,23 +5,36 @@ import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { avatarColorVar } from "@/utils/avatarColor";
 import { ProjectMemberSelectList } from "../components/ProjectMemberSelectList";
-import { MOCK_AVAILABLE_MEMBERS } from "../lib/mockProjects";
-import type { ProjectFormMember, ProjectMemberRole, ProjectStatsItem } from "../types";
+import { useAvailableProjectMembers, useUpdateProject } from "../hooks/useApiSettingsProjects";
+import type { ProjectMemberRole, ProjectStatsItem } from "../types";
 
 interface EditProjectDrawerProps {
   open: boolean;
   onClose: () => void;
+  organizationId: string | null;
   project: ProjectStatsItem | null;
-  onSave: (input: { name: string; members: ProjectFormMember[] }) => void;
 }
 
-export function EditProjectDrawer({ open, onClose, project, onSave }: EditProjectDrawerProps) {
+export function EditProjectDrawer({
+  open,
+  onClose,
+  organizationId,
+  project,
+}: EditProjectDrawerProps) {
   const [name, setName] = useState("");
   // Loyihada qolayotgan mavjud xodimlar: userId -> rol.
   const [keptRoles, setKeptRoles] = useState<Record<string, ProjectMemberRole>>({});
   const [isAddingOpen, setAddingOpen] = useState(false);
   // Yangi qo'shilayotgan xodimlar: userId -> rol.
   const [additions, setAdditions] = useState<Record<string, ProjectMemberRole>>({});
+
+  const updateProject = useUpdateProject(organizationId);
+  const availableQuery = useAvailableProjectMembers(
+    organizationId,
+    project?.id ?? null,
+    isAddingOpen,
+  );
+  const availableMembers = availableQuery.data ?? [];
 
   // Drawer har safar (boshqa proyekt uchun ham) ochilganda o'sha proyektning
   // joriy holatidan qayta boshlanadi.
@@ -33,16 +46,14 @@ export function EditProjectDrawer({ open, onClose, project, onSave }: EditProjec
       );
       setAddingOpen(false);
       setAdditions({});
+      updateProject.reset();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, project]);
 
   if (!project) return null;
 
   const members = project.members.filter((member) => member.id in keptRoles);
-
-  const availableMembers = MOCK_AVAILABLE_MEMBERS.filter(
-    (member) => !(member.id in keptRoles),
-  );
 
   const removeMember = (id: string) => {
     setKeptRoles((prev) => {
@@ -69,14 +80,25 @@ export function EditProjectDrawer({ open, onClose, project, onSave }: EditProjec
 
   const handleSave = () => {
     if (!name.trim()) return;
-    onSave({
-      name: name.trim(),
-      members: [
-        ...Object.entries(keptRoles).map(([userId, role]) => ({ userId, role })),
-        ...Object.entries(additions).map(([userId, role]) => ({ userId, role })),
-      ],
-    });
-    onClose();
+    updateProject.mutate(
+      {
+        projectId: project.id,
+        payload: {
+          name: name.trim(),
+          members: [
+            ...Object.entries(keptRoles).map(([userId, role]) => ({
+              user_id: Number(userId),
+              role,
+            })),
+            ...Object.entries(additions).map(([userId, role]) => ({
+              user_id: Number(userId),
+              role,
+            })),
+          ],
+        },
+      },
+      { onSuccess: onClose },
+    );
   };
 
   return (
@@ -88,10 +110,21 @@ export function EditProjectDrawer({ open, onClose, project, onSave }: EditProjec
       title="Изменить проект"
       footer={
         <div className="flex w-full gap-2">
-          <CusButton variant="outline" className="flex-1" onClick={onClose}>
+          <CusButton
+            variant="outline"
+            className="flex-1"
+            onClick={onClose}
+            isDisabled={updateProject.isPending}
+          >
             Отмена
           </CusButton>
-          <CusButton className="flex-1" isDisabled={!name.trim()} onClick={handleSave}>
+          <CusButton
+            className="flex-1"
+            isDisabled={!name.trim()}
+            isLoading={updateProject.isPending}
+            loadingText="Saqlanmoqda..."
+            onClick={handleSave}
+          >
             Сохранить
           </CusButton>
         </div>
@@ -103,6 +136,12 @@ export function EditProjectDrawer({ open, onClose, project, onSave }: EditProjec
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
+
+        {updateProject.isError && (
+          <p className="text-sm text-error-strong">
+            Не удалось сохранить изменения. Попробуйте ещё раз.
+          </p>
+        )}
 
         <div className="flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-secondary">
@@ -147,7 +186,9 @@ export function EditProjectDrawer({ open, onClose, project, onSave }: EditProjec
             <span className="mb-2 text-xs font-medium uppercase tracking-wide text-secondary">
               Добавить сотрудника
             </span>
-            {availableMembers.length === 0 ? (
+            {availableQuery.isPending ? (
+              <p className="py-4 text-center text-sm text-secondary">Yuklanmoqda...</p>
+            ) : availableMembers.length === 0 ? (
               <p className="py-4 text-center text-sm text-secondary">
                 Все сотрудники уже добавлены
               </p>

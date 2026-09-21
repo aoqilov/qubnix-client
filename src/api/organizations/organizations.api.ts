@@ -1,6 +1,7 @@
 import { api } from "@/api-config/axiosInstance";
 import type {
   CreateOrganizationRequest,
+  ListOrganizationMembersParams,
   ListOrganizationMembersResponse,
   ListOrganizationsParams,
   RawOrganization,
@@ -52,10 +53,10 @@ export const organizationsApi = {
       >(`/api/v1/organizations/${organizationID}`)
       .then((r) => r.data.data.deleted),
 
-  listMembers: (organizationID: string) =>
+  listMembers: (organizationID: string, params?: ListOrganizationMembersParams) =>
     api
       .get<
         ApiEnvelope<ListOrganizationMembersResponse>
-      >(`/api/v1/organizations/${organizationID}/members`)
+      >(`/api/v1/organizations/${organizationID}/members`, { params })
       .then((r) => r.data.data),
 };
