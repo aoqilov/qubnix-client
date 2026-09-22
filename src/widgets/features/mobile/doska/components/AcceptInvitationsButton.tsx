@@ -13,15 +13,15 @@ export function AcceptInvitationsButton({ count, onClick }: AcceptInvitationsBut
       variant="plain"
       onClick={onClick}
       className="relative w-full"
-      // Punktir chegara va brend rangi Chakra variantlarida yo'q, shuning uchun
+      // Brend gradient fon Chakra variantlarida yo'q, shuning uchun
       // token'lar inline style orqali beriladi (hex emas) — AddWorkspaceButton
       // bilan bir xil uslub, 2 ustunli qatorda juftlashadi.
       style={{
         height: "48px",
         width: "100%",
-        border: "1px dashed var(--border-default)",
+        background: "linear-gradient(135deg, var(--brand-default), var(--brand-hover))",
         borderRadius: "var(--radius-card)",
-        color: "var(--brand-default)",
+        color: "var(--text-on-brand)",
         fontWeight: 600,
       }}
       leftIcon={<LuBell size={16} />}

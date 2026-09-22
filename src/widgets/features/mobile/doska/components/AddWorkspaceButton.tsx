@@ -11,14 +11,14 @@ export function AddWorkspaceButton({ onClick }: AddWorkspaceButtonProps) {
       variant="plain"
       onClick={onClick}
       className="w-full"
-      // Punktir chegara va brend rangi Chakra variantlarida yo'q, shuning uchun
+      // Brend gradient fon Chakra variantlarida yo'q, shuning uchun
       // token'lar inline style orqali beriladi (hex emas).
       style={{
         height: "48px",
         width: "100%",
-        border: "1px dashed var(--border-default)",
+        background: "linear-gradient(135deg, var(--brand-default), var(--brand-hover))",
         borderRadius: "var(--radius-card)",
-        color: "var(--brand-default)",
+        color: "var(--text-on-brand)",
         fontWeight: 600,
       }}
       leftIcon={<LuPlus size={16} />}

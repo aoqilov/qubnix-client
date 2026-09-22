@@ -2,7 +2,7 @@ import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { avatarColorVar } from "@/utils/avatarColor";
 import type { WorkspaceSummary } from "@/store/workspace.store";
-import { tasksLabel } from "@/utils/pluralRu";
+import { pluralRu } from "@/utils/pluralRu";
 import { ORGANIZATION_ROLE_LABELS } from "@/utils/roleLabels";
 
 interface WorkspaceCardProps {
@@ -35,8 +35,11 @@ export function WorkspaceCard({ workspace, onClick }: WorkspaceCardProps) {
         )}
       </span>
 
-      <span className="flex-none whitespace-nowrap rounded-chip bg-brand-subtle px-2.5 py-1 text-xs font-semibold text-brand">
-        {tasksLabel(workspace.tasksCount)}
+      <span className="flex flex-none flex-col items-center rounded-chip bg-brand-subtle px-3 py-1.5 text-brand">
+        <span className="text-lg font-bold leading-none">{workspace.tasksCount}</span>
+        <span className="text-[10px] font-semibold leading-tight">
+          {pluralRu(workspace.tasksCount, "задача", "задачи", "задач")}
+        </span>
       </span>
     </CusCardbox>
   );
