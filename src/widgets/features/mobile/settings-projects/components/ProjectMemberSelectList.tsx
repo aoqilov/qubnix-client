@@ -1,29 +1,39 @@
+import { forwardRef } from "react";
 import type React from "react";
+import { LuChevronDown } from "react-icons/lu";
 import { CusCheckbox } from "@/components/ui/inputs/CusCheckbox";
+import { CusMenuList } from "@/components/ui/menu-list/CusMenuList";
 import type { MemberPickerItem } from "@/components/shared/member-picker-drawer/MemberPickerDrawer";
 import type { ProjectMemberRole } from "../types";
 
-// Rangni className orqali emas, style orqali beramiz — Chakra provayder
-// ostida raw <button>'larga bg-*/text-* util sinflari ba'zan bosilmay qoladi,
-// inline style esa har doim aniq qiymatni beradi.
-const baseStyle: React.CSSProperties = {
-  borderRadius: "5px",
-  padding: "2px 6px",
-  fontSize: "10px",
-  fontWeight: 600,
-  border: "1px solid var(--border-default)",
-  background: "var(--bg-surface)",
-  color: "var(--text-secondary)",
+const ROLE_LABELS: Record<ProjectMemberRole, string> = {
+  project_member: "Xodim",
+  project_manager: "Manager",
 };
 
-const activeStyle: React.CSSProperties = {
-  ...baseStyle,
-  border: "1px solid var(--brand-default)",
-  background: "var(--brand-default)",
-  color: "var(--text-on-brand)",
-};
+// CusMenuList'ning Menu.Trigger asChild'i trigger DOM node'iga pozitsiya
+// hisoblash uchun o'z proplarini beradi — CusButton esa faqat o'zi bilgan
+// nomlangan proplarni forward qiladi, qolganini yutib yuboradi, shu sabab
+// menyu har doim (0,0)da chiqib qolardi. Shuning uchun bu yerda ...propsni
+// to'liq spread qiladigan oddiy <button> ishlatiladi.
+const RoleTriggerButton = forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { label: string }
+>(function RoleTriggerButton({ label, ...props }, ref) {
+  return (
+    <button
+      ref={ref}
+      {...props}
+      type="button"
+      className="flex flex-none items-center gap-1 rounded-input border border-default bg-surface px-2 py-1 text-xs font-semibold text-primary hover:bg-surface-secondary"
+    >
+      {label}
+      <LuChevronDown size={12} className="flex-none text-secondary" />
+    </button>
+  );
+});
 
-export function RoleToggle({
+export function RoleDropdown({
   value,
   onChange,
 }: {
@@ -31,22 +41,16 @@ export function RoleToggle({
   onChange: (role: ProjectMemberRole) => void;
 }) {
   return (
-    <div className="flex gap-2">
-      <button
-        type="button"
-        onClick={() => onChange("project_member")}
-        style={value === "project_member" ? activeStyle : baseStyle}
-      >
-        Xodim
-      </button>
-      <button
-        type="button"
-        onClick={() => onChange("project_manager")}
-        style={value === "project_manager" ? activeStyle : baseStyle}
-      >
-        Manager
-      </button>
-    </div>
+    <CusMenuList
+      value={value}
+      onValueChange={(v) => onChange(v as ProjectMemberRole)}
+      items={[
+        { value: "project_member", label: ROLE_LABELS.project_member },
+        { value: "project_manager", label: ROLE_LABELS.project_manager },
+      ]}
+      width={140}
+      trigger={<RoleTriggerButton label={ROLE_LABELS[value]} />}
+    />
   );
 }
 
@@ -82,7 +86,7 @@ export function ProjectMemberSelectList({
               {member.name}
             </span>
             {isSelected && (
-              <RoleToggle
+              <RoleDropdown
                 value={selections[member.id]}
                 onChange={(role) => onRoleChange(member.id, role)}
               />

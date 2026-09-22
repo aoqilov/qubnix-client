@@ -9,6 +9,8 @@ import { useSelectedOrganization } from "@/widgets/features/mobile/settings/hook
 import type { SettingsWorkspace } from "@/widgets/features/mobile/settings/hooks/useApiSettings";
 import { useRenameOrganization } from "./hooks/useApiSettingsGeneral";
 import { MOCK_PRO_STATUS } from "./lib/mockGeneralSettings";
+import { RoleGate } from "@/components/shared/role-gate/RoleGate";
+import { WORKSPACE_ROLES } from "@/const/roles";
 
 // `key={organization.id}` bilan mount qilinadi (pastga qarang) — shu sabab local
 // state faqat tashkilot ALMASHGANDA qayta boshlanadi, har qanday qayta-render yoki
@@ -55,6 +57,7 @@ function WorkspaceNameField({
 
 export default function FeatureSettingsGeneral() {
   const organizationQuery = useSelectedOrganization();
+  const ownerRoles = organizationQuery.data ? [organizationQuery.data.role] : [];
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -64,19 +67,21 @@ export default function FeatureSettingsGeneral() {
         {(organizationQuery.data?.name ?? "").toUpperCase()}
       </p>
 
-      {organizationQuery.data ? (
-        <WorkspaceNameField
-          key={organizationQuery.data.id}
-          organization={organizationQuery.data}
-        />
-      ) : (
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-            Название организации
-          </span>
-          <CusInput value="" disabled placeholder="Yuklanmoqda..." />
-        </div>
-      )}
+      <RoleGate roles={ownerRoles} allow={[WORKSPACE_ROLES.OWNER]}>
+        {organizationQuery.data ? (
+          <WorkspaceNameField
+            key={organizationQuery.data.id}
+            organization={organizationQuery.data}
+          />
+        ) : (
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+              Название организации
+            </span>
+            <CusInput value="" disabled placeholder="Yuklanmoqda..." />
+          </div>
+        )}
+      </RoleGate>
 
       <CusCardbox className="flex flex-col gap-3 rounded-input">
         <div className="flex items-center justify-between gap-2">
@@ -98,17 +103,19 @@ export default function FeatureSettingsGeneral() {
           />
         </div>
 
-        <CusButton
-          className="w-full"
-          size="lg"
-          rounded="9999px"
-          style={{
-            background: "var(--brand-default)",
-            color: "var(--text-on-brand)",
-          }}
-        >
-          Продлить подписку
-        </CusButton>
+        <RoleGate roles={ownerRoles} allow={[WORKSPACE_ROLES.OWNER]}>
+          <CusButton
+            className="w-full"
+            size="lg"
+            rounded="9999px"
+            style={{
+              background: "var(--brand-default)",
+              color: "var(--text-on-brand)",
+            }}
+          >
+            Продлить подписку
+          </CusButton>
+        </RoleGate>
       </CusCardbox>
     </div>
   );

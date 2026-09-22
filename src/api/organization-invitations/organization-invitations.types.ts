@@ -67,10 +67,11 @@ export interface InvitationProjectInput {
 }
 
 /**
- * Faqat owner/admin yuboradi. `role: "admin"` bo'lsa `projects` shart
- * emas — admin barcha loyihalarni ko'radi. `viewer`/`member` uchun
- * `projects` majburiy; `member` uchun tanlangan har bir loyihaga
- * `role` ham berilishi shart.
+ * Faqat owner/admin yuboradi. `projects` har doim ixtiyoriy — berilmasa,
+ * xodim faqat tashkilotga qo'shiladi. `role: "admin"`da `projects`ning
+ * ma'nosi yo'q (admin barcha loyihalarni ko'radi); `viewer` uchun
+ * loyihaga rol shart emas (`project_member`ga teng), `member` uchun esa
+ * tanlangan har bir loyihaga `role` ham berilishi kerak.
  */
 export interface CreateInvitationRequest {
   user_id: number;

@@ -180,12 +180,12 @@ function TaskCard({
           <TaskMetaBadge
             icon={<LuSquareCheck size={14} />}
             label={subtaskCountLabel}
-            bg="var(--orange-subtle, #FFEDD5)"
+            bg="color-mix(in srgb, var(--accent-orange) 16%, transparent)"
           />
           <TaskMetaBadge
             icon={<LuPaperclip size={14} />}
             label={String(fileCount)}
-            bg="var(--c-danger-50, #FFEDEC)"
+            bg="var(--status-error-bg)"
           />
         </div>
       </div>

@@ -6,18 +6,20 @@ import type { CalendarProjectSummary } from "../types";
 
 interface CalendarProjectRowProps {
   project: CalendarProjectSummary;
+  onClick: () => void;
 }
 
-function CalendarProjectRow({ project }: CalendarProjectRowProps) {
+function CalendarProjectRow({ project, onClick }: CalendarProjectRowProps) {
   const accent = avatarColorVar(project.id);
   const percent = project.total > 0 ? (project.done / project.total) * 100 : 0;
 
   return (
     <CusCardbox
+      onClick={onClick}
       // CusCardbox default'da --border-default beradi; mockup'da chegara
       // ancha yumshoq, shuning uchun inline style bilan --border-subtle.
       style={{ borderColor: "var(--border-subtle)" }}
-      className="flex gap-3 rounded-card bg-surface"
+      className="flex cursor-pointer gap-3 rounded-card bg-surface transition-colors hover:border-focus"
     >
       <span
         className="flex size-10 flex-none items-center justify-center rounded-input text-sm font-semibold text-on-brand"
@@ -49,9 +51,10 @@ function CalendarProjectRow({ project }: CalendarProjectRowProps) {
 
 interface CalendarProjectsCardProps {
   projects: CalendarProjectSummary[];
+  onSelectProject: (project: CalendarProjectSummary) => void;
 }
 
-export function CalendarProjectsCard({ projects }: CalendarProjectsCardProps) {
+export function CalendarProjectsCard({ projects, onSelectProject }: CalendarProjectsCardProps) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between px-1">
@@ -61,7 +64,11 @@ export function CalendarProjectsCard({ projects }: CalendarProjectsCardProps) {
 
       <div className="flex flex-col gap-3">
         {projects.map((project) => (
-          <CalendarProjectRow key={project.id} project={project} />
+          <CalendarProjectRow
+            key={project.id}
+            project={project}
+            onClick={() => onSelectProject(project)}
+          />
         ))}
       </div>
     </div>

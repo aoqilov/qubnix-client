@@ -1,19 +1,23 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useWorkspaceStore } from "@/store/workspace.store";
 import {
   LuCircle,
   LuLoaderCircle,
   LuCircleCheck,
   LuCircleX,
   LuTriangleAlert,
+  LuX,
 } from "react-icons/lu";
 import type { TaskStatusColor } from "@/components/shared/task-card/mini-components/TaskStatusLabel";
 import { projectsApi } from "@/api/projects/projects.api";
-import { todayApiDate } from "@/utils/apiDate";
+import { fromApiDate, todayApiDate } from "@/utils/apiDate";
+import { formatWeekdayDate } from "@/utils/formatWeekdayDate";
 import ProjectsTabs from "@/components/shared/project-tab/ProjectsTabs";
 import PageTitleDynamic from "@/components/shared/page-title-dynamic/PageTitleDynamic";
 import StatusTab from "@/components/shared/status-tab/StatusTab";
+import { CusBadge } from "@/components/ui/badge/CusBadge";
 import TaskCard from "@/components/shared/task-card/TaskCard";
 import type { TaskCardMember } from "@/components/shared/task-card/mini-components/TaskAvatarGroup";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
@@ -364,15 +368,24 @@ const INITIAL_TASKS: DemoTask[] = [
   },
 ];
 
+interface TasksNavigationState {
+  /** /calendar'dan "shu kunga o't" bilan kelganda beriladi — YYYY-MM-DD. */
+  date?: string;
+}
+
 export default function FeatureTasks() {
-  const [searchParams] = useSearchParams();
-  const organizationId = searchParams.get("organizationId");
+  const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
+  const location = useLocation();
+  const navigationDate = (location.state as TasksNavigationState | null)?.date;
+
+  // Kalendardan aniq sana bilan kelinishi mumkin — bo'lmasa bugungi kun.
+  const [selectedDate, setSelectedDate] = useState(() => navigationDate ?? todayApiDate());
+  const isToday = selectedDate === todayApiDate();
 
   const projectsQuery = useQuery({
-    queryKey: ["organizations", organizationId, "projects", "today"] as const,
-    // task_counts faqat bugungi kunga tegishli vazifalar bo'yicha hisoblanadi.
-    queryFn: () =>
-      projectsApi.list(organizationId!, { limit: 100, date: todayApiDate() }),
+    queryKey: ["organizations", organizationId, "projects", selectedDate] as const,
+    // task_counts faqat tanlangan sanaga tegishli vazifalar bo'yicha hisoblanadi.
+    queryFn: () => projectsApi.list(organizationId!, { limit: 100, date: selectedDate }),
     enabled: !!organizationId,
   });
   const projects = projectsQuery.data?.projects ?? [];
@@ -474,6 +487,27 @@ export default function FeatureTasks() {
     ? tasks.find((t) => t.id === pendingStatusChange.taskId)
     : undefined;
 
+  // Bugungi kun bo'lsa — oddiy matn; kalendardan boshqa sana bilan kelingan
+  // bo'lsa — yopish (X) tugmali badge, bosilsa yana bugunga qaytaradi.
+  const dateLabel = isToday ? (
+    formatWeekdayDate()
+  ) : (
+    <CusBadge
+      tone="brand"
+      variant="subtle"
+      size="lg"
+      rightIcon={
+        <LuX
+          size={14}
+          className="cursor-pointer"
+          onClick={() => setSelectedDate(todayApiDate())}
+        />
+      }
+    >
+      {formatWeekdayDate(fromApiDate(selectedDate))}
+    </CusBadge>
+  );
+
   return (
     <div>
       <div
@@ -484,7 +518,7 @@ export default function FeatureTasks() {
       >
         <PageTitleDynamic
           title="Mening vazifalarim"
-          date="CHORSHANBA - 14.09.2026"
+          date={dateLabel}
           doneCount={1}
           totalCount={6}
           statusLabel="Выполнено"

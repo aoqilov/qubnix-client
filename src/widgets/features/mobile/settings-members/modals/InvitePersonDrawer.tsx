@@ -268,9 +268,11 @@ export function InvitePersonDrawer({ open, onClose }: InvitePersonDrawerProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEmployee?.id]);
 
-  // Faqat "member" uchun loyihaga tanlangan rol (Менежер/A'zo) majburiy;
-  // "viewer" ham loyihalarga biriktiriladi, lekin loyiha-darajasidagi rolsiz.
-  const needsProjects = role === "member" || role === "viewer";
+  // "admin" barcha loyihalarni ko'radi, shuning uchun unga bu bo'lim
+  // umuman ko'rsatilmaydi. "member"/"viewer" uchun loyiha biriktirish
+  // ixtiyoriy (backend: "Projects are optional"); biriktirilsa, faqat
+  // "member"da har bir loyihaga rol (Менежер/A'zo) ham tanlanadi.
+  const canAttachProjects = role === "member" || role === "viewer";
   const roleRequiredPerProject = role === "member";
 
   const takenProjectIds = projects.map((p) => p.projectId);
@@ -290,17 +292,18 @@ export function InvitePersonDrawer({ open, onClose }: InvitePersonDrawerProps) {
     setProjects((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const canSubmit = !!selectedEmployee && !!role && (!needsProjects || projects.length > 0);
+  const canSubmit = !!selectedEmployee && !!role;
 
   const handleSubmit = () => {
     if (!selectedEmployee || !role) return;
 
-    const projectPayload: InvitationProjectInput[] | undefined = needsProjects
-      ? projects.map((p) => ({
-          id: p.projectId,
-          ...(roleRequiredPerProject ? { role: p.role } : {}),
-        }))
-      : undefined;
+    const projectPayload: InvitationProjectInput[] | undefined =
+      canAttachProjects && projects.length > 0
+        ? projects.map((p) => ({
+            id: p.projectId,
+            ...(roleRequiredPerProject ? { role: p.role } : {}),
+          }))
+        : undefined;
 
     createInvitation.mutate(
       { user_id: selectedEmployee.id, role, projects: projectPayload },
@@ -407,10 +410,10 @@ export function InvitePersonDrawer({ open, onClose }: InvitePersonDrawerProps) {
               />
             </div>
 
-            {needsProjects && (
+            {canAttachProjects && (
               <div>
                 <p className="mb-1.5 text-sm font-medium text-secondary">
-                  Loyihalarga biriktirish
+                  Loyihalarga biriktirish (ixtiyoriy)
                 </p>
                 <div className="flex flex-col gap-2">
                   {projects.map((assignment, index) => (

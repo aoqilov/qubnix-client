@@ -9,3 +9,9 @@ export function toApiDate(date: Date): string {
 export function todayApiDate(): string {
   return toApiDate(new Date());
 }
+
+/** `YYYY-MM-DD` -> mahalliy (local) Date. `new Date(string)` ishlatilmaydi — u UTC deb o'qib, ba'zi zonalarda kunni bir kunga surib yuboradi. */
+export function fromApiDate(value: string): Date {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}

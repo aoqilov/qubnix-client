@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type React from "react";
+import { useNavigate } from "react-router-dom";
 import { parseDate } from "@internationalized/date";
 import { LuCalendarDays } from "react-icons/lu";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
@@ -9,6 +10,7 @@ import { CalendarProjectsCard } from "./components/CalendarProjectsCard";
 import { CalendarWeekStrip } from "./components/CalendarWeekStrip";
 import { addDays, buildWeekDays, formatMonthLabel, getWeekStart, toDateKey } from "./lib/calendarWeek";
 import { getMockDayProjects, MOCK_EVENT_DATES } from "./lib/mockCalendar";
+import { toApiDate } from "@/utils/apiDate";
 
 const monthToggleStyle: React.CSSProperties = {
   width: 44,
@@ -19,6 +21,7 @@ const monthToggleStyle: React.CSSProperties = {
 };
 
 export default function FeatureCalendar() {
+  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [direction, setDirection] = useState(0);
@@ -33,6 +36,12 @@ export default function FeatureCalendar() {
   function shiftWeek(offsetDays: number) {
     setDirection(offsetDays > 0 ? 1 : -1);
     setWeekStart((prev) => addDays(prev, offsetDays));
+  }
+
+  // Loyiha ustiga bosilganda /tasks'ga shu kunni olib o'tadi — task ro'yxati
+  // doim "bugun" emas, tanlangan sana bo'yicha ochiladi.
+  function handleSelectProject() {
+    navigate("/tasks", { state: { date: toApiDate(selectedDate) } });
   }
 
   function handlePickDate(date: Date) {
@@ -76,7 +85,7 @@ export default function FeatureCalendar() {
       <CalendarDayInfoBox date={selectedDate} />
 
       {/* projects-row */}
-      <CalendarProjectsCard projects={dayProjects} />
+      <CalendarProjectsCard projects={dayProjects} onSelectProject={handleSelectProject} />
 
       <CusDialog open={isCalendarOpen} onClose={() => setCalendarOpen(false)} title="Выберите дату" centered size="sm">
         <CusCalendar

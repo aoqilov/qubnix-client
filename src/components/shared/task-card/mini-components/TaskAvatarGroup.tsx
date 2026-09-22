@@ -112,7 +112,7 @@ function TaskAvatarGroup({ members, overflowCount, max = 3 }: TaskAvatarGroupPro
               </span>
               <span
                 className="flex-1 truncate text-sm font-medium"
-                style={{ color: "var(--brand-default)" }}
+                style={{ color: "var(--text-primary)" }}
               >
                 {member.name}
               </span>

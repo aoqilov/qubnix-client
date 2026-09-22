@@ -1,8 +1,10 @@
+import type { ReactNode } from "react";
+
 interface PageTitleDynamicProps {
   /** Workspace/loyiha nomi — masalan "Synapse". */
   title: string;
-  /** Tayyor formatlangan sana matni — masalan "СРЕДА - 14.09.2026". */
-  date: string;
+  /** Tayyor formatlangan sana matni — masalan "СРЕДА - 14.09.2026". Boshqa sana tanlanganda badge (yopish tugmasi bilan) ham berilishi mumkin. */
+  date: ReactNode;
   doneCount: number;
   totalCount: number;
   /** Masalan "Выполнено" — holat matni. */

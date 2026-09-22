@@ -9,7 +9,7 @@ import { AcceptInvitationsButton } from "./components/AcceptInvitationsButton";
 import { ModalAddWorkspace } from "./modals/ModalAddWorkspace";
 import { InvitationsDrawer } from "./modals/InvitationsDrawer";
 import { usePersonalSummary, useReceivedInvitations, useWorkspaceList } from "./hooks/useApiDoska";
-import { formatBoardDate } from "./lib/formatBoardDate";
+import { formatWeekdayDate } from "@/utils/formatWeekdayDate";
 import { orgsLabel } from "@/utils/pluralRu";
 
 export default function FeatureDoska() {
@@ -28,7 +28,7 @@ export default function FeatureDoska() {
   const openWorkspace = (id: string | undefined) => {
     if (!id) return;
     selectWorkspace(id);
-    navigate(`/tasks?organizationId=${id}`);
+    navigate("/tasks");
   };
 
   return (
@@ -38,7 +38,7 @@ export default function FeatureDoska() {
           Где будем работать?
         </h1>
         <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-brand">
-          {formatBoardDate()}
+          {formatWeekdayDate()}
         </p>
       </header>
 

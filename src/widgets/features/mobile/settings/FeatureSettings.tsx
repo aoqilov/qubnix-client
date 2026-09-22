@@ -11,14 +11,24 @@ import {
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { SettingsWorkspaceCard } from "./components/SettingsWorkspaceCard";
 import { SettingsMenuRow } from "./components/SettingsMenuRow";
-import { useOrganizationMembersCount, useSelectedOrganization } from "./hooks/useApiSettings";
+import {
+  useOrganizationMembersCount,
+  useSelectedOrganization,
+} from "./hooks/useApiSettings";
 import type { SettingsMenuItem } from "./types";
+import { RoleGate, hasRole } from "@/components/shared/role-gate/RoleGate";
+import { MemberReminderSettings } from "./components/MemberReminderSettings";
+import { WORKSPACE_ROLES } from "@/const/roles";
+
+const MANAGER_ROLES = [WORKSPACE_ROLES.ADMIN, WORKSPACE_ROLES.OWNER];
 
 export default function FeatureSettings() {
   const workspaceQuery = useSelectedOrganization();
-  const membersCountQuery = useOrganizationMembersCount();
-
   const workspace = workspaceQuery.data;
+  // GET .../members faqat admin/owner uchun ruxsat etilgan — member'da 403 qaytadi,
+  // shuning uchun rol aniqlanib, admin/owner ekani bilinmaguncha so'rov yuborilmaydi.
+  const isManager = hasRole(workspace ? [workspace.role] : [], MANAGER_ROLES);
+  const membersCountQuery = useOrganizationMembersCount(isManager);
 
   if (workspaceQuery.isPending) {
     return (
@@ -99,22 +109,31 @@ export default function FeatureSettings() {
         </p>
       </div>
 
-      <SettingsWorkspaceCard workspace={workspace} membersCount={membersCountQuery.data} />
+      <SettingsWorkspaceCard
+        workspace={workspace}
+        membersCount={membersCountQuery.data}
+      />
+      {/* admin owner */}
+      <RoleGate roles={[workspace.role]} allow={MANAGER_ROLES}>
+        <div className="flex flex-col gap-2">
+          <div className="text-xs font-semibold tracking-wide text-secondary">
+            УПРАВЛЕНИЕ
+          </div>
 
-      <div className="flex flex-col gap-2">
-        <div className="text-xs font-semibold tracking-wide text-secondary">
-          УПРАВЛЕНИЕ
+          <CusCardbox
+            className="flex flex-col divide-y divide-[var(--border-subtle)] rounded-card"
+            style={{ padding: 0 }}
+          >
+            {menuItems.map((item) => (
+              <SettingsMenuRow key={item.to} {...item} />
+            ))}
+          </CusCardbox>
         </div>
-
-        <CusCardbox
-          className="flex flex-col divide-y divide-[var(--border-subtle)] rounded-card"
-          style={{ padding: 0 }}
-        >
-          {menuItems.map((item) => (
-            <SettingsMenuRow key={item.to} {...item} />
-          ))}
-        </CusCardbox>
-      </div>
+      </RoleGate>
+      {/* member */}
+      <RoleGate roles={[workspace.role]} allow={[WORKSPACE_ROLES.MEMBER]}>
+        <MemberReminderSettings />
+      </RoleGate>
 
       <button className="flex w-full items-center justify-center gap-2 rounded-button border border-error py-3 text-sm font-semibold text-error-strong">
         <LuLogOut size={16} />
