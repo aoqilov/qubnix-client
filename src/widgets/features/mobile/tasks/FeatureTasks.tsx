@@ -10,6 +10,7 @@ import {
 } from "react-icons/lu";
 import type { TaskStatusColor } from "@/components/shared/task-card/mini-components/TaskStatusLabel";
 import { projectsApi } from "@/api/projects/projects.api";
+import { todayApiDate } from "@/utils/apiDate";
 import ProjectsTabs from "@/components/shared/project-tab/ProjectsTabs";
 import PageTitleDynamic from "@/components/shared/page-title-dynamic/PageTitleDynamic";
 import StatusTab from "@/components/shared/status-tab/StatusTab";
@@ -368,8 +369,10 @@ export default function FeatureTasks() {
   const organizationId = searchParams.get("organizationId");
 
   const projectsQuery = useQuery({
-    queryKey: ["organizations", organizationId, "projects"] as const,
-    queryFn: () => projectsApi.list(organizationId!, { limit: 100 }),
+    queryKey: ["organizations", organizationId, "projects", "today"] as const,
+    // task_counts faqat bugungi kunga tegishli vazifalar bo'yicha hisoblanadi.
+    queryFn: () =>
+      projectsApi.list(organizationId!, { limit: 100, date: todayApiDate() }),
     enabled: !!organizationId,
   });
   const projects = projectsQuery.data?.projects ?? [];

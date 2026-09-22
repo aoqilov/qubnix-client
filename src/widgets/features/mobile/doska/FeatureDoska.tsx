@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LuBell } from "react-icons/lu";
 import { useWorkspaceStore } from "@/store/workspace.store";
-import { CusButton } from "@/components/ui/buttons/CusButton";
-import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { DoskaSectionHeader } from "./components/DoskaSectionHeader";
 import { PersonalTasksCard } from "./components/PersonalTasksCard";
 import { WorkspaceCard } from "./components/WorkspaceCard";
 import { AddWorkspaceButton } from "./components/AddWorkspaceButton";
+import { AcceptInvitationsButton } from "./components/AcceptInvitationsButton";
 import { ModalAddWorkspace } from "./modals/ModalAddWorkspace";
 import { InvitationsDrawer } from "./modals/InvitationsDrawer";
 import { usePersonalSummary, useReceivedInvitations, useWorkspaceList } from "./hooks/useApiDoska";
@@ -35,33 +33,13 @@ export default function FeatureDoska() {
 
   return (
     <div className="flex flex-col gap-6 p-4">
-      <header className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold leading-tight text-primary">
-            Где будем работать?
-          </h1>
-          <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-brand">
-            {formatBoardDate()}
-          </p>
-        </div>
-
-        <div className="relative flex-none">
-          <CusButton
-            variant="ghost"
-            colorPalette="gray"
-            onClick={() => setInvitationsOpen(true)}
-            style={{ padding: 0, width: 40, height: 40, borderRadius: "var(--radius-button)" }}
-          >
-            <LuBell size={20} />
-          </CusButton>
-          {invitationsCount > 0 && (
-            <span className="absolute -right-1 -top-1">
-              <CusBadge tone="error" variant="solid" size="xs">
-                {invitationsCount}
-              </CusBadge>
-            </span>
-          )}
-        </div>
+      <header>
+        <h1 className="text-3xl font-bold leading-tight text-primary">
+          Где будем работать?
+        </h1>
+        <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-brand">
+          {formatBoardDate()}
+        </p>
       </header>
 
       <section>
@@ -84,7 +62,13 @@ export default function FeatureDoska() {
         />
 
         <div className="flex flex-col gap-3">
-          <AddWorkspaceButton onClick={() => setAddOpen(true)} />
+          <div className="grid grid-cols-2 gap-3">
+            <AddWorkspaceButton onClick={() => setAddOpen(true)} />
+            <AcceptInvitationsButton
+              count={invitationsCount}
+              onClick={() => setInvitationsOpen(true)}
+            />
+          </div>
 
           {workspacesQuery.isPending ? (
             <>

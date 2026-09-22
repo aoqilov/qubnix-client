@@ -5,7 +5,9 @@ import type {
   ListOrganizationMembersResponse,
   ListOrganizationsParams,
   RawOrganization,
+  RawOrganizationMember,
   RenameOrganizationRequest,
+  UpdateOrganizationMemberRoleRequest,
 } from "@/api/organizations/organizations.types";
 import type { Pagination } from "@/types/common";
 
@@ -59,4 +61,22 @@ export const organizationsApi = {
         ApiEnvelope<ListOrganizationMembersResponse>
       >(`/api/v1/organizations/${organizationID}/members`, { params })
       .then((r) => r.data.data),
+
+  updateMemberRole: (
+    organizationID: string,
+    userId: number,
+    payload: UpdateOrganizationMemberRoleRequest,
+  ) =>
+    api
+      .patch<
+        ApiEnvelope<{ member: RawOrganizationMember }>
+      >(`/api/v1/organizations/${organizationID}/members/${userId}`, { data: payload })
+      .then((r) => r.data.data.member),
+
+  removeMember: (organizationID: string, userId: number) =>
+    api
+      .delete<
+        ApiEnvelope<{ deleted: true }>
+      >(`/api/v1/organizations/${organizationID}/members/${userId}`)
+      .then((r) => r.data.data.deleted),
 };

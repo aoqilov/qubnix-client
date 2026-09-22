@@ -3,18 +3,17 @@ import { LuSearchX, LuPlus } from "react-icons/lu";
 import { CusSegment } from "@/components/ui/segment/CusSegment";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { SettingsBackHeader } from "@/widgets/features/mobile/settings/components/SettingsBackHeader";
+import { useSelectedOrganization } from "@/widgets/features/mobile/settings/hooks/useApiSettings";
 import { MembersToolbar } from "./components/MembersToolbar";
 import { MemberRow } from "./components/MemberRow";
 import { MemberCard } from "./components/MemberCard";
 import { InviteRow } from "./components/InviteRow";
 import { InvitePersonDrawer } from "./modals/InvitePersonDrawer";
+import { MemberActionsDrawer } from "./modals/MemberActionsDrawer";
 import { useMemberViewStyle } from "./hooks/useMemberViewStyle";
-import {
-  MOCK_INVITES,
-  MOCK_MEMBERS,
-  MOCK_WORKSPACE_NAME,
-} from "./lib/mockMembers";
-import type { MemberRoleFilter, MockInvite } from "./lib/mockMembers";
+import { useOrganizationMembers } from "./hooks/useApiSettingsMembers";
+import { useSentInvitations } from "./hooks/useApiInvitations";
+import type { MemberRoleFilter } from "./lib/mockMembers";
 
 type MembersTab = "general" | "invites";
 
@@ -27,6 +26,12 @@ function EmptyState() {
       <p className="text-sm font-medium text-primary">Hech narsa topilmadi</p>
       <p className="text-xs text-secondary">Qidiruv yoki filtrni o'zgartirib ko'ring</p>
     </div>
+  );
+}
+
+function MemberRowSkeleton() {
+  return (
+    <div className="h-[68px] animate-pulse rounded-card border border-subtle bg-surface" />
   );
 }
 
@@ -48,36 +53,41 @@ export default function FeatureSettingsMembers() {
   const [search, setSearch] = useState("");
   const [viewStyle, setViewStyle] = useMemberViewStyle();
   const [roleFilter, setRoleFilter] = useState<MemberRoleFilter>("all");
-  const [invites, setInvites] = useState<MockInvite[]>(MOCK_INVITES);
   const [isInviteOpen, setInviteOpen] = useState(false);
+  const [actionsMemberId, setActionsMemberId] = useState<number | null>(null);
 
-  const handleInviteSubmit = (input: Pick<MockInvite, "contact" | "invitedRole" | "projects">) => {
-    setInvites((prev) => [
-      { id: `i-${Date.now()}`, sentDaysAgo: 0, ...input },
-      ...prev,
-    ]);
-    setInviteOpen(false);
-  };
+  const organizationQuery = useSelectedOrganization();
+  const membersQuery = useOrganizationMembers(roleFilter === "all" ? undefined : roleFilter);
+  const members = membersQuery.data?.members ?? [];
+  // ID orqali har renderda qayta topiladi — shunda rol o'zgartirilgach so'rov
+  // qayta yuklanganda (invalidate) drawer eski (snapshot) emas, yangi
+  // ma'lumotni ko'rsatadi.
+  const actionsMember = members.find((m) => m.id === actionsMemberId) ?? null;
+  // organization_roles — rolga qarab filtrlanmagan, tashkilotdagi umumiy son.
+  const totalMembersCount =
+    membersQuery.data?.organization_roles.reduce((sum, r) => sum + r.role_member_count, 0) ??
+    members.length;
+
+  const invitationsQuery = useSentInvitations();
+  const invites = invitationsQuery.data?.invitations ?? [];
+  const invitesCount = invitationsQuery.data?.pagination.total ?? invites.length;
 
   const filteredMembers = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return MOCK_MEMBERS.filter((member) => {
-      const matchesRole = roleFilter === "all" || member.organization_role === roleFilter;
-      const matchesQuery =
-        !query ||
-        `${member.first_name} ${member.last_name} ${member.telegram_username ?? ""}`
-          .toLowerCase()
-          .includes(query);
-      return matchesRole && matchesQuery;
-    });
-  }, [search, roleFilter]);
+    if (!query) return members;
+    return members.filter((member) =>
+      `${member.first_name} ${member.last_name} ${member.telegram_username ?? ""}`
+        .toLowerCase()
+        .includes(query),
+    );
+  }, [members, search]);
 
   return (
     <div className="flex flex-col gap-4 p-4">
       <SettingsBackHeader title="Сотрудники" />
 
       <p className="-mt-2 text-sm font-semibold text-brand">
-        {MOCK_WORKSPACE_NAME.toUpperCase()} - {MOCK_MEMBERS.length}{" "}
+        {(organizationQuery.data?.name ?? "").toUpperCase()} - {totalMembersCount}{" "}
         пользователей
       </p>
 
@@ -89,12 +99,12 @@ export default function FeatureSettingsMembers() {
           {
             id: "general",
             label: "Общее",
-            icon: <CountPill count={MOCK_MEMBERS.length} />,
+            icon: <CountPill count={totalMembersCount} />,
           },
           {
             id: "invites",
             label: "Приглашения",
-            icon: <CountPill count={invites.length} />,
+            icon: <CountPill count={invitesCount} />,
           },
         ]}
       />
@@ -111,18 +121,36 @@ export default function FeatureSettingsMembers() {
               onRoleFilterChange={setRoleFilter}
             />
           </div>
-          {filteredMembers.length === 0 ? (
+          {membersQuery.isPending ? (
+            <div className="flex flex-col gap-2">
+              <MemberRowSkeleton />
+              <MemberRowSkeleton />
+              <MemberRowSkeleton />
+            </div>
+          ) : membersQuery.isError ? (
+            <p className="px-1 text-sm text-error-strong">
+              Не удалось загрузить сотрудников.
+            </p>
+          ) : filteredMembers.length === 0 ? (
             <EmptyState />
           ) : viewStyle === "card" ? (
             <div className="grid grid-cols-3 gap-2">
               {filteredMembers.map((member) => (
-                <MemberCard key={member.id} member={member} />
+                <MemberCard
+                  key={member.id}
+                  member={member}
+                  onOpenActions={() => setActionsMemberId(member.id)}
+                />
               ))}
             </div>
           ) : (
             <div className="flex flex-col gap-2">
               {filteredMembers.map((member) => (
-                <MemberRow key={member.id} member={member} />
+                <MemberRow
+                  key={member.id}
+                  member={member}
+                  onOpenActions={() => setActionsMemberId(member.id)}
+                />
               ))}
             </div>
           )}
@@ -145,16 +173,29 @@ export default function FeatureSettingsMembers() {
           >
             Odam qo'shish
           </CusButton>
-          {invites.map((invite) => (
-            <InviteRow key={invite.id} invite={invite} />
-          ))}
+          {invitationsQuery.isPending ? (
+            <div className="flex flex-col gap-2">
+              <MemberRowSkeleton />
+              <MemberRowSkeleton />
+            </div>
+          ) : invitationsQuery.isError ? (
+            <p className="px-1 text-sm text-error-strong">
+              Не удалось загрузить приглашения.
+            </p>
+          ) : invites.length === 0 ? (
+            <EmptyState />
+          ) : (
+            invites.map((invite) => <InviteRow key={invite.id} invite={invite} />)
+          )}
         </div>
       )}
 
-      <InvitePersonDrawer
-        open={isInviteOpen}
-        onClose={() => setInviteOpen(false)}
-        onSubmit={handleInviteSubmit}
+      <InvitePersonDrawer open={isInviteOpen} onClose={() => setInviteOpen(false)} />
+
+      <MemberActionsDrawer
+        open={actionsMemberId !== null}
+        onClose={() => setActionsMemberId(null)}
+        member={actionsMember}
       />
     </div>
   );

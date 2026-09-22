@@ -55,8 +55,7 @@ export type OrganizationMemberRole = "admin" | "viewer" | "member";
 
 /**
  * GET .../members javobidagi bitta xodim.
- * `phone` backend javobida yo'q — hozircha faqat MOCK_MEMBERS'da ishlatiladi
- * (settings-members hali shu endpointga o'tkazilmagan).
+ * `phone` backend javobida hali yo'q — optional bo'lib qoladi.
  */
 export interface RawOrganizationMember {
   id: number;
@@ -89,4 +88,9 @@ export interface ListOrganizationMembersResponse {
   organization_roles: OrganizationRoleOption[];
   members_count: number;
   pagination: Pagination;
+}
+
+/** PATCH .../members/{user_id} — faqat owner/admin. */
+export interface UpdateOrganizationMemberRoleRequest {
+  role: OrganizationMemberRole;
 }

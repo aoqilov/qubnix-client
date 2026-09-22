@@ -7,6 +7,7 @@ import { useWorkspaceStore } from "@/store/workspace.store";
 import { ProjectStatCard } from "./components/ProjectStatCard";
 import { CreateProjectDrawer } from "./modals/CreateProjectDrawer";
 import { EditProjectDrawer } from "./modals/EditProjectDrawer";
+import { DeleteProjectDialog } from "./modals/DeleteProjectDialog";
 import { useDeleteProject, useProjectsList } from "./hooks/useApiSettingsProjects";
 
 function EmptyState({ hasQuery }: { hasQuery: boolean }) {
@@ -37,9 +38,16 @@ export default function FeatureSettingsProjects() {
   const [search, setSearch] = useState("");
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
 
   const projects = projectsQuery.data ?? [];
   const editingProject = projects.find((project) => project.id === editingProjectId) ?? null;
+  const deletingProject = projects.find((project) => project.id === deletingProjectId) ?? null;
+
+  const handleConfirmDelete = () => {
+    if (!deletingProjectId) return;
+    deleteProject.mutate(deletingProjectId, { onSuccess: () => setDeletingProjectId(null) });
+  };
 
   const filteredProjects = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -92,7 +100,7 @@ export default function FeatureSettingsProjects() {
               key={project.id}
               project={project}
               onEdit={() => setEditingProjectId(project.id)}
-              onDelete={() => deleteProject.mutate(project.id)}
+              onDelete={() => setDeletingProjectId(project.id)}
             />
           ))}
         </div>
@@ -109,6 +117,14 @@ export default function FeatureSettingsProjects() {
         onClose={() => setEditingProjectId(null)}
         organizationId={organizationId}
         project={editingProject}
+      />
+
+      <DeleteProjectDialog
+        open={deletingProjectId !== null}
+        onClose={() => setDeletingProjectId(null)}
+        onConfirm={handleConfirmDelete}
+        project={deletingProject}
+        isLoading={deleteProject.isPending}
       />
     </div>
   );

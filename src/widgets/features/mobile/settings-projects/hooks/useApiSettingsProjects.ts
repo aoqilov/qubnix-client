@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { projectsApi } from "@/api/projects/projects.api";
 import { organizationsApi } from "@/api/organizations/organizations.api";
+import { todayApiDate } from "@/utils/apiDate";
 import type {
   CreateProjectRequest,
   RawProject,
@@ -51,7 +52,13 @@ export const PROJECTS_KEYS = {
 export function useProjectsList(organizationId: string | null) {
   return useQuery({
     queryKey: PROJECTS_KEYS.list(organizationId ?? ""),
-    queryFn: () => projectsApi.list(organizationId!, { limit: 100 }),
+    // task_counts 2026 boshidan bugungacha bo'lgan oraliq bo'yicha hisoblanadi.
+    queryFn: () =>
+      projectsApi.list(organizationId!, {
+        limit: 100,
+        from: "2026-01-01",
+        to: todayApiDate(),
+      }),
     select: (data) => data.projects.map(toProjectStatsItem),
     enabled: !!organizationId,
   });

@@ -54,7 +54,8 @@ export interface SearchProjectOption {
 }
 
 export interface SearchEmployeeResult {
-  employee: InvitationPersonSummary;
+  /** Bir nechta mos xodim bo'lishi mumkin — shundan biri tanlanadi. */
+  employees: InvitationPersonSummary[];
   roles: SearchRoleOption[];
   projects: SearchProjectOption[];
 }

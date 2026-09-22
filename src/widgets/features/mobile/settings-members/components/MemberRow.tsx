@@ -1,3 +1,4 @@
+import { LuChevronRight } from "react-icons/lu";
 import { avatarColorVar } from "@/utils/avatarColor";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { ORGANIZATION_ROLE_LABELS } from "@/utils/roleLabels";
@@ -10,9 +11,10 @@ function initialsOf(member: RawOrganizationMember): string {
 
 interface MemberRowProps {
   member: RawOrganizationMember;
+  onOpenActions: () => void;
 }
 
-export function MemberRow({ member }: MemberRowProps) {
+export function MemberRow({ member, onOpenActions }: MemberRowProps) {
   return (
     <div className="flex items-center gap-3 rounded-card border border-subtle bg-surface p-3">
       <span
@@ -36,6 +38,13 @@ export function MemberRow({ member }: MemberRowProps) {
       <CusBadge variant="subtle" tone="neutral">
         {ORGANIZATION_ROLE_LABELS[member.organization_role]}
       </CusBadge>
+      <button
+        type="button"
+        onClick={onOpenActions}
+        className="flex size-8 flex-none items-center justify-center rounded-input text-secondary hover:bg-surface-secondary"
+      >
+        <LuChevronRight size={16} />
+      </button>
     </div>
   );
 }
