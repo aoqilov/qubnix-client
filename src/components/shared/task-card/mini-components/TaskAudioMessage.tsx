@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { LuPlay, LuPause, LuDownload } from "react-icons/lu";
+import { LuPlay, LuPause, LuLoaderCircle } from "react-icons/lu";
+import { ImArrowDown2 } from "react-icons/im";
 
 export interface TaskCardAudio {
   url: string;
@@ -74,7 +75,6 @@ const SLIDER_STYLE = `
 function TaskAudioMessage({ audio }: TaskAudioMessageProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [status, setStatus] = useState<Status>("idle");
-  const [loadProgress, setLoadProgress] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [elapsedLabel, setElapsedLabel] = useState("0:00");
@@ -83,14 +83,13 @@ function TaskAudioMessage({ audio }: TaskAudioMessageProps) {
     const el = audioRef.current;
     if (!el) return;
 
-    const onProgress = () => {
-      if (el.buffered.length > 0 && el.duration) {
-        setLoadProgress(Math.min(1, el.buffered.end(el.buffered.length - 1) / el.duration));
-      }
-    };
     const onReady = () => {
-      setLoadProgress(1);
-      setStatus("ready");
+      setStatus((prev) => {
+        // Yuklash tugmasi bosilgandan keyin (idle emas, ya'ni "loading"dan) tayyor
+        // bo'lganda avtomatik pleyni boshlaydi.
+        if (prev === "loading") el.play();
+        return "ready";
+      });
     };
     const onTimeUpdate = () => {
       if (el.duration) setProgress(el.currentTime / el.duration);
@@ -104,7 +103,6 @@ function TaskAudioMessage({ audio }: TaskAudioMessageProps) {
     const onPlay = () => setPlaying(true);
     const onPause = () => setPlaying(false);
 
-    el.addEventListener("progress", onProgress);
     el.addEventListener("canplaythrough", onReady);
     el.addEventListener("loadeddata", onReady);
     el.addEventListener("timeupdate", onTimeUpdate);
@@ -112,7 +110,6 @@ function TaskAudioMessage({ audio }: TaskAudioMessageProps) {
     el.addEventListener("pause", onPause);
     el.addEventListener("ended", onEnded);
     return () => {
-      el.removeEventListener("progress", onProgress);
       el.removeEventListener("canplaythrough", onReady);
       el.removeEventListener("loadeddata", onReady);
       el.removeEventListener("timeupdate", onTimeUpdate);
@@ -162,27 +159,13 @@ function TaskAudioMessage({ audio }: TaskAudioMessageProps) {
           width: 34,
           height: 34,
           borderRadius: "var(--radius-avatar, 9999px)",
-          background:
-            status === "loading"
-              ? `conic-gradient(var(--brand-default) ${loadProgress * 360}deg, var(--border-default) 0deg)`
-              : "var(--brand-default)",
-          transition: "background 0.15s linear",
+          background: "var(--brand-default)",
         }}
       >
         {status === "loading" ? (
-          <span
-            className="flex items-center justify-center"
-            style={{
-              width: 26,
-              height: 26,
-              borderRadius: "var(--radius-avatar, 9999px)",
-              background: "var(--bg-surface-secondary)",
-            }}
-          >
-            <LuDownload size={13} color="var(--brand-default)" />
-          </span>
+          <LuLoaderCircle size={14} color="var(--text-on-brand)" className="animate-spin" />
         ) : status === "idle" ? (
-          <LuDownload size={14} color="var(--text-on-brand)" />
+          <ImArrowDown2 size={13} color="var(--text-on-brand)" />
         ) : playing ? (
           <LuPause size={14} color="var(--text-on-brand)" />
         ) : (

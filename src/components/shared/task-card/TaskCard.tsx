@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  LuFlag,
   LuChevronDown,
   LuClock,
   LuSquareCheck,
@@ -9,6 +8,7 @@ import {
   LuTrash2,
   LuPencil,
 } from "react-icons/lu";
+import { IoFlagSharp } from "react-icons/io5";
 import { FaRightLeft } from "react-icons/fa6";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -36,9 +36,17 @@ export interface TaskCardStatusOption {
   iconColor?: string;
 }
 
+export type TaskCardPriority = "low" | "medium" | "high";
+
+const PRIORITY_FLAG_COLOR: Record<TaskCardPriority, string> = {
+  low: "var(--text-secondary)",
+  medium: "var(--accent-orange)",
+  high: "var(--status-error-solid)",
+};
+
 interface TaskCardProps {
   title: string;
-  flagged?: boolean;
+  priority?: TaskCardPriority;
 
   statusOptions: TaskCardStatusOption[];
   statusId: string;
@@ -82,7 +90,7 @@ function SectionLabel({ children }: { children: ReactNode }) {
 
 function TaskCard({
   title,
-  flagged,
+  priority,
   statusOptions,
   statusId,
   onStatusChange,
@@ -155,8 +163,8 @@ function TaskCard({
         </div>
 
         <div className="flex flex-none items-center gap-2">
-          <span className="text-secondary">
-            <LuFlag size={16} fill={flagged ? "currentColor" : "none"} />
+          <span style={{ color: PRIORITY_FLAG_COLOR[priority ?? "low"] }}>
+            <IoFlagSharp size={16} />
           </span>
           <button
             type="button"

@@ -529,7 +529,7 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100,
+              "maximum": 1000,
               "default": 50
             },
             "in": "query",
@@ -1437,7 +1437,7 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100,
+              "maximum": 1000,
               "default": 20
             },
             "in": "query",
@@ -1527,6 +1527,7 @@
                                     "role",
                                     "first_name",
                                     "last_name",
+                                    "phone_number",
                                     "telegram_username",
                                     "telegram_avatar_url",
                                     "tasks_count"
@@ -1545,6 +1546,7 @@
                                     },
                                     "first_name": { "type": "string" },
                                     "last_name": { "type": "string" },
+                                    "phone_number": { "type": "string" },
                                     "telegram_username": {
                                       "type": ["null", "string"]
                                     },
@@ -1821,6 +1823,7 @@
                                   "role",
                                   "first_name",
                                   "last_name",
+                                  "phone_number",
                                   "telegram_username",
                                   "telegram_avatar_url",
                                   "tasks_count"
@@ -1839,6 +1842,7 @@
                                   },
                                   "first_name": { "type": "string" },
                                   "last_name": { "type": "string" },
+                                  "phone_number": { "type": "string" },
                                   "telegram_username": {
                                     "type": ["null", "string"]
                                   },
@@ -2064,6 +2068,7 @@
                                   "role",
                                   "first_name",
                                   "last_name",
+                                  "phone_number",
                                   "telegram_username",
                                   "telegram_avatar_url",
                                   "tasks_count"
@@ -2082,6 +2087,7 @@
                                   },
                                   "first_name": { "type": "string" },
                                   "last_name": { "type": "string" },
+                                  "phone_number": { "type": "string" },
                                   "telegram_username": {
                                     "type": ["null", "string"]
                                   },
@@ -2350,6 +2356,7 @@
                                   "role",
                                   "first_name",
                                   "last_name",
+                                  "phone_number",
                                   "telegram_username",
                                   "telegram_avatar_url",
                                   "tasks_count"
@@ -2368,6 +2375,7 @@
                                   },
                                   "first_name": { "type": "string" },
                                   "last_name": { "type": "string" },
+                                  "phone_number": { "type": "string" },
                                   "telegram_username": {
                                     "type": ["null", "string"]
                                   },
@@ -2713,6 +2721,7 @@
                               "role",
                               "first_name",
                               "last_name",
+                              "phone_number",
                               "telegram_username",
                               "telegram_avatar_url",
                               "tasks_count"
@@ -2725,6 +2734,7 @@
                               },
                               "first_name": { "type": "string" },
                               "last_name": { "type": "string" },
+                              "phone_number": { "type": "string" },
                               "telegram_username": {
                                 "type": ["null", "string"]
                               },
@@ -2929,6 +2939,7 @@
                               "role",
                               "first_name",
                               "last_name",
+                              "phone_number",
                               "telegram_username",
                               "telegram_avatar_url",
                               "tasks_count"
@@ -2941,6 +2952,7 @@
                               },
                               "first_name": { "type": "string" },
                               "last_name": { "type": "string" },
+                              "phone_number": { "type": "string" },
                               "telegram_username": {
                                 "type": ["null", "string"]
                               },
@@ -3108,6 +3120,7 @@
                               "id",
                               "first_name",
                               "last_name",
+                              "phone_number",
                               "telegram_username",
                               "telegram_avatar_url",
                               "index_quality",
@@ -3118,6 +3131,7 @@
                               "id": { "type": "integer", "minimum": 1 },
                               "first_name": { "type": "string" },
                               "last_name": { "type": "string" },
+                              "phone_number": { "type": "string" },
                               "telegram_username": {
                                 "type": ["null", "string"]
                               },
@@ -3404,6 +3418,3758 @@
         }
       }
     },
+    "/api/v1/organizations/{organizationID}/projects/{project_id}/tasks": {
+      "get": {
+        "tags": ["Tasks"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 1
+            },
+            "in": "query",
+            "name": "page",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 20
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "maxLength": 100 },
+            "in": "query",
+            "name": "search",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["todo", "in_progress", "done", "not_done"]
+            },
+            "in": "query",
+            "name": "status",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "enum": ["low", "medium", "high"] },
+            "in": "query",
+            "name": "priority",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["priority", "deadline", "created_at"]
+            },
+            "in": "query",
+            "name": "sort_by",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 1000,
+              "pattern": "^[1-9][0-9]*(,[1-9][0-9]*)*$"
+            },
+            "in": "query",
+            "name": "member_ids",
+            "required": false,
+            "description": "Comma-separated task member user IDs. Any selected user may match."
+          },
+          {
+            "schema": { "type": "string", "format": "date" },
+            "in": "query",
+            "name": "date",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "format": "date" },
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "format": "date" },
+            "in": "query",
+            "name": "to",
+            "required": false
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "project_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "tasks": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "id",
+                              "organization_id",
+                              "project_id",
+                              "name",
+                              "title",
+                              "description",
+                              "description_type",
+                              "status",
+                              "priority",
+                              "start_at",
+                              "due_at",
+                              "completed_at",
+                              "created_by",
+                              "parent_task_id",
+                              "routine_id",
+                              "members",
+                              "files",
+                              "subtasks",
+                              "subtasks_count",
+                              "created_at",
+                              "updated_at"
+                            ],
+                            "properties": {
+                              "id": { "type": "integer", "minimum": 1 },
+                              "organization_id": {
+                                "type": "integer",
+                                "minimum": 1
+                              },
+                              "project_id": { "type": "integer", "minimum": 1 },
+                              "name": { "type": "string" },
+                              "title": { "type": "string" },
+                              "description": { "type": ["null", "string"] },
+                              "description_type": {
+                                "type": "string",
+                                "enum": ["text", "audio"]
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "todo",
+                                  "in_progress",
+                                  "done",
+                                  "not_done"
+                                ]
+                              },
+                              "priority": {
+                                "type": "string",
+                                "enum": ["low", "medium", "high"]
+                              },
+                              "start_at": {
+                                "type": ["null", "string"],
+                                "format": "date-time"
+                              },
+                              "due_at": {
+                                "type": ["null", "string"],
+                                "format": "date-time"
+                              },
+                              "completed_at": {
+                                "type": ["null", "string"],
+                                "format": "date-time"
+                              },
+                              "created_by": { "type": "integer", "minimum": 1 },
+                              "parent_task_id": { "type": ["null", "integer"] },
+                              "routine_id": { "type": ["null", "integer"] },
+                              "members": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "required": [
+                                    "user_id",
+                                    "first_name",
+                                    "last_name",
+                                    "phone_number",
+                                    "telegram_username",
+                                    "telegram_avatar_url"
+                                  ],
+                                  "properties": {
+                                    "user_id": {
+                                      "type": "integer",
+                                      "minimum": 1
+                                    },
+                                    "first_name": { "type": "string" },
+                                    "last_name": { "type": "string" },
+                                    "phone_number": { "type": "string" },
+                                    "telegram_username": {
+                                      "type": ["null", "string"]
+                                    },
+                                    "telegram_avatar_url": {
+                                      "type": ["null", "string"]
+                                    }
+                                  }
+                                }
+                              },
+                              "files": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "required": [
+                                    "id",
+                                    "kind",
+                                    "file_name",
+                                    "mime_type",
+                                    "size_bytes",
+                                    "url",
+                                    "created_at"
+                                  ],
+                                  "properties": {
+                                    "id": { "type": "integer", "minimum": 1 },
+                                    "kind": {
+                                      "type": "string",
+                                      "enum": [
+                                        "attachment",
+                                        "description_audio"
+                                      ]
+                                    },
+                                    "file_name": { "type": "string" },
+                                    "mime_type": { "type": "string" },
+                                    "size_bytes": {
+                                      "type": "integer",
+                                      "minimum": 1
+                                    },
+                                    "url": { "type": "string" },
+                                    "created_at": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                    }
+                                  }
+                                }
+                              },
+                              "subtasks": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "required": ["id", "name", "checked"],
+                                  "properties": {
+                                    "id": { "type": "integer", "minimum": 1 },
+                                    "name": { "type": "string" },
+                                    "checked": { "type": "boolean" }
+                                  }
+                                }
+                              },
+                              "subtasks_count": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "created_at": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "updated_at": {
+                                "type": "string",
+                                "format": "date-time"
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["page", "limit", "total", "total_pages"],
+                          "properties": {
+                            "page": { "type": "integer" },
+                            "limit": { "type": "integer" },
+                            "total": { "type": "integer" },
+                            "total_pages": { "type": "integer" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a task",
+        "tags": ["Tasks"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["data"],
+                "additionalProperties": false,
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200,
+                        "pattern": "\\S"
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200,
+                        "pattern": "\\S"
+                      },
+                      "members": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["user_id"],
+                          "properties": {
+                            "user_id": { "type": "integer", "minimum": 1 }
+                          }
+                        },
+                        "maxItems": 500
+                      },
+                      "description": {
+                        "anyOf": [
+                          { "type": ["string", "null"], "maxLength": 10000 },
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["type"],
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": ["text", "audio"]
+                              },
+                              "text": {
+                                "type": ["string", "null"],
+                                "maxLength": 10000
+                              },
+                              "file_id": { "type": "integer", "minimum": 1 }
+                            }
+                          }
+                        ]
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": ["todo", "in_progress", "done", "not_done"]
+                      },
+                      "priority": {
+                        "type": "string",
+                        "enum": ["low", "medium", "high"]
+                      },
+                      "start_at": {
+                        "type": ["string", "null"],
+                        "format": "date-time"
+                      },
+                      "due_at": {
+                        "type": ["string", "null"],
+                        "format": "date-time"
+                      },
+                      "file_ids": {
+                        "type": "array",
+                        "items": { "type": "integer", "minimum": 1 },
+                        "maxItems": 5,
+                        "uniqueItems": true
+                      },
+                      "subtasks": {
+                        "type": "array",
+                        "maxItems": 500,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["name"],
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 200,
+                              "pattern": "\\S"
+                            },
+                            "checked": { "type": "boolean" }
+                          }
+                        }
+                      }
+                    },
+                    "anyOf": [
+                      { "required": ["name"] },
+                      { "required": ["title"] }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "project_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "task": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "id",
+                            "organization_id",
+                            "project_id",
+                            "name",
+                            "title",
+                            "description",
+                            "description_type",
+                            "status",
+                            "priority",
+                            "start_at",
+                            "due_at",
+                            "completed_at",
+                            "created_by",
+                            "parent_task_id",
+                            "routine_id",
+                            "members",
+                            "files",
+                            "subtasks",
+                            "subtasks_count",
+                            "created_at",
+                            "updated_at"
+                          ],
+                          "properties": {
+                            "id": { "type": "integer", "minimum": 1 },
+                            "organization_id": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "project_id": { "type": "integer", "minimum": 1 },
+                            "name": { "type": "string" },
+                            "title": { "type": "string" },
+                            "description": { "type": ["null", "string"] },
+                            "description_type": {
+                              "type": "string",
+                              "enum": ["text", "audio"]
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "todo",
+                                "in_progress",
+                                "done",
+                                "not_done"
+                              ]
+                            },
+                            "priority": {
+                              "type": "string",
+                              "enum": ["low", "medium", "high"]
+                            },
+                            "start_at": {
+                              "type": ["null", "string"],
+                              "format": "date-time"
+                            },
+                            "due_at": {
+                              "type": ["null", "string"],
+                              "format": "date-time"
+                            },
+                            "completed_at": {
+                              "type": ["null", "string"],
+                              "format": "date-time"
+                            },
+                            "created_by": { "type": "integer", "minimum": 1 },
+                            "parent_task_id": { "type": ["null", "integer"] },
+                            "routine_id": { "type": ["null", "integer"] },
+                            "members": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "user_id",
+                                  "first_name",
+                                  "last_name",
+                                  "phone_number",
+                                  "telegram_username",
+                                  "telegram_avatar_url"
+                                ],
+                                "properties": {
+                                  "user_id": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                  },
+                                  "first_name": { "type": "string" },
+                                  "last_name": { "type": "string" },
+                                  "phone_number": { "type": "string" },
+                                  "telegram_username": {
+                                    "type": ["null", "string"]
+                                  },
+                                  "telegram_avatar_url": {
+                                    "type": ["null", "string"]
+                                  }
+                                }
+                              }
+                            },
+                            "files": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "id",
+                                  "kind",
+                                  "file_name",
+                                  "mime_type",
+                                  "size_bytes",
+                                  "url",
+                                  "created_at"
+                                ],
+                                "properties": {
+                                  "id": { "type": "integer", "minimum": 1 },
+                                  "kind": {
+                                    "type": "string",
+                                    "enum": ["attachment", "description_audio"]
+                                  },
+                                  "file_name": { "type": "string" },
+                                  "mime_type": { "type": "string" },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                  },
+                                  "url": { "type": "string" },
+                                  "created_at": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                  }
+                                }
+                              }
+                            },
+                            "subtasks": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": ["id", "name", "checked"],
+                                "properties": {
+                                  "id": { "type": "integer", "minimum": 1 },
+                                  "name": { "type": "string" },
+                                  "checked": { "type": "boolean" }
+                                }
+                              }
+                            },
+                            "subtasks_count": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationID}/projects/{project_id}/tasks/{task_id}": {
+      "get": {
+        "tags": ["Tasks"],
+        "parameters": [
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "project_id",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "task_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "task": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "id",
+                            "organization_id",
+                            "project_id",
+                            "name",
+                            "title",
+                            "description",
+                            "description_type",
+                            "status",
+                            "priority",
+                            "start_at",
+                            "due_at",
+                            "completed_at",
+                            "created_by",
+                            "parent_task_id",
+                            "routine_id",
+                            "members",
+                            "files",
+                            "subtasks",
+                            "subtasks_count",
+                            "created_at",
+                            "updated_at"
+                          ],
+                          "properties": {
+                            "id": { "type": "integer", "minimum": 1 },
+                            "organization_id": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "project_id": { "type": "integer", "minimum": 1 },
+                            "name": { "type": "string" },
+                            "title": { "type": "string" },
+                            "description": { "type": ["null", "string"] },
+                            "description_type": {
+                              "type": "string",
+                              "enum": ["text", "audio"]
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "todo",
+                                "in_progress",
+                                "done",
+                                "not_done"
+                              ]
+                            },
+                            "priority": {
+                              "type": "string",
+                              "enum": ["low", "medium", "high"]
+                            },
+                            "start_at": {
+                              "type": ["null", "string"],
+                              "format": "date-time"
+                            },
+                            "due_at": {
+                              "type": ["null", "string"],
+                              "format": "date-time"
+                            },
+                            "completed_at": {
+                              "type": ["null", "string"],
+                              "format": "date-time"
+                            },
+                            "created_by": { "type": "integer", "minimum": 1 },
+                            "parent_task_id": { "type": ["null", "integer"] },
+                            "routine_id": { "type": ["null", "integer"] },
+                            "members": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "user_id",
+                                  "first_name",
+                                  "last_name",
+                                  "phone_number",
+                                  "telegram_username",
+                                  "telegram_avatar_url"
+                                ],
+                                "properties": {
+                                  "user_id": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                  },
+                                  "first_name": { "type": "string" },
+                                  "last_name": { "type": "string" },
+                                  "phone_number": { "type": "string" },
+                                  "telegram_username": {
+                                    "type": ["null", "string"]
+                                  },
+                                  "telegram_avatar_url": {
+                                    "type": ["null", "string"]
+                                  }
+                                }
+                              }
+                            },
+                            "files": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "id",
+                                  "kind",
+                                  "file_name",
+                                  "mime_type",
+                                  "size_bytes",
+                                  "url",
+                                  "created_at"
+                                ],
+                                "properties": {
+                                  "id": { "type": "integer", "minimum": 1 },
+                                  "kind": {
+                                    "type": "string",
+                                    "enum": ["attachment", "description_audio"]
+                                  },
+                                  "file_name": { "type": "string" },
+                                  "mime_type": { "type": "string" },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                  },
+                                  "url": { "type": "string" },
+                                  "created_at": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                  }
+                                }
+                              }
+                            },
+                            "subtasks": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": ["id", "name", "checked"],
+                                "properties": {
+                                  "id": { "type": "integer", "minimum": 1 },
+                                  "name": { "type": "string" },
+                                  "checked": { "type": "boolean" }
+                                }
+                              }
+                            },
+                            "subtasks_count": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Tasks"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["data"],
+                "additionalProperties": false,
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200,
+                        "pattern": "\\S"
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200,
+                        "pattern": "\\S"
+                      },
+                      "members": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["user_id"],
+                          "properties": {
+                            "user_id": { "type": "integer", "minimum": 1 }
+                          }
+                        },
+                        "maxItems": 500
+                      },
+                      "description": {
+                        "anyOf": [
+                          { "type": ["string", "null"], "maxLength": 10000 },
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["type"],
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": ["text", "audio"]
+                              },
+                              "text": {
+                                "type": ["string", "null"],
+                                "maxLength": 10000
+                              },
+                              "file_id": { "type": "integer", "minimum": 1 }
+                            }
+                          }
+                        ]
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": ["todo", "in_progress", "done", "not_done"]
+                      },
+                      "priority": {
+                        "type": "string",
+                        "enum": ["low", "medium", "high"]
+                      },
+                      "start_at": {
+                        "type": ["string", "null"],
+                        "format": "date-time"
+                      },
+                      "due_at": {
+                        "type": ["string", "null"],
+                        "format": "date-time"
+                      },
+                      "file_ids": {
+                        "type": "array",
+                        "items": { "type": "integer", "minimum": 1 },
+                        "maxItems": 5,
+                        "uniqueItems": true
+                      },
+                      "subtasks": {
+                        "type": "array",
+                        "maxItems": 500,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["name"],
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 200,
+                              "pattern": "\\S"
+                            },
+                            "checked": { "type": "boolean" }
+                          }
+                        }
+                      }
+                    },
+                    "minProperties": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "project_id",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "task_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "task": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "id",
+                            "organization_id",
+                            "project_id",
+                            "name",
+                            "title",
+                            "description",
+                            "description_type",
+                            "status",
+                            "priority",
+                            "start_at",
+                            "due_at",
+                            "completed_at",
+                            "created_by",
+                            "parent_task_id",
+                            "routine_id",
+                            "members",
+                            "files",
+                            "subtasks",
+                            "subtasks_count",
+                            "created_at",
+                            "updated_at"
+                          ],
+                          "properties": {
+                            "id": { "type": "integer", "minimum": 1 },
+                            "organization_id": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "project_id": { "type": "integer", "minimum": 1 },
+                            "name": { "type": "string" },
+                            "title": { "type": "string" },
+                            "description": { "type": ["null", "string"] },
+                            "description_type": {
+                              "type": "string",
+                              "enum": ["text", "audio"]
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "todo",
+                                "in_progress",
+                                "done",
+                                "not_done"
+                              ]
+                            },
+                            "priority": {
+                              "type": "string",
+                              "enum": ["low", "medium", "high"]
+                            },
+                            "start_at": {
+                              "type": ["null", "string"],
+                              "format": "date-time"
+                            },
+                            "due_at": {
+                              "type": ["null", "string"],
+                              "format": "date-time"
+                            },
+                            "completed_at": {
+                              "type": ["null", "string"],
+                              "format": "date-time"
+                            },
+                            "created_by": { "type": "integer", "minimum": 1 },
+                            "parent_task_id": { "type": ["null", "integer"] },
+                            "routine_id": { "type": ["null", "integer"] },
+                            "members": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "user_id",
+                                  "first_name",
+                                  "last_name",
+                                  "phone_number",
+                                  "telegram_username",
+                                  "telegram_avatar_url"
+                                ],
+                                "properties": {
+                                  "user_id": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                  },
+                                  "first_name": { "type": "string" },
+                                  "last_name": { "type": "string" },
+                                  "phone_number": { "type": "string" },
+                                  "telegram_username": {
+                                    "type": ["null", "string"]
+                                  },
+                                  "telegram_avatar_url": {
+                                    "type": ["null", "string"]
+                                  }
+                                }
+                              }
+                            },
+                            "files": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "id",
+                                  "kind",
+                                  "file_name",
+                                  "mime_type",
+                                  "size_bytes",
+                                  "url",
+                                  "created_at"
+                                ],
+                                "properties": {
+                                  "id": { "type": "integer", "minimum": 1 },
+                                  "kind": {
+                                    "type": "string",
+                                    "enum": ["attachment", "description_audio"]
+                                  },
+                                  "file_name": { "type": "string" },
+                                  "mime_type": { "type": "string" },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                  },
+                                  "url": { "type": "string" },
+                                  "created_at": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                  }
+                                }
+                              }
+                            },
+                            "subtasks": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": ["id", "name", "checked"],
+                                "properties": {
+                                  "id": { "type": "integer", "minimum": 1 },
+                                  "name": { "type": "string" },
+                                  "checked": { "type": "boolean" }
+                                }
+                              }
+                            },
+                            "subtasks_count": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Tasks"],
+        "parameters": [
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "project_id",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "task_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "deleted": { "type": "boolean", "enum": [true] }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationID}/projects/{project_id}/files": {
+      "post": {
+        "tags": ["Task files"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["attachment", "description_audio"],
+              "default": "attachment"
+            },
+            "in": "query",
+            "name": "kind",
+            "required": false
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "project_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "files": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "id",
+                              "kind",
+                              "file_name",
+                              "mime_type",
+                              "size_bytes",
+                              "url",
+                              "created_at"
+                            ],
+                            "properties": {
+                              "id": { "type": "integer", "minimum": 1 },
+                              "kind": {
+                                "type": "string",
+                                "enum": ["attachment", "description_audio"]
+                              },
+                              "file_name": { "type": "string" },
+                              "mime_type": { "type": "string" },
+                              "size_bytes": { "type": "integer", "minimum": 1 },
+                              "url": { "type": "string" },
+                              "created_at": {
+                                "type": "string",
+                                "format": "date-time"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationID}/projects/{project_id}/tasks/{task_id}/files/{file_id}": {
+      "delete": {
+        "tags": ["Task files"],
+        "parameters": [
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "project_id",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "task_id",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "file_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "deleted": { "type": "boolean", "enum": [true] }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationID}/projects/{project_id}/task-routines": {
+      "get": {
+        "tags": ["Task routines"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["daily", "weekly", "monthly", "yearly"]
+            },
+            "in": "query",
+            "name": "type",
+            "required": false
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "project_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "routines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "id",
+                              "organization_id",
+                              "project_id",
+                              "title",
+                              "description",
+                              "priority",
+                              "member_ids",
+                              "frequency",
+                              "weekdays",
+                              "month_days",
+                              "time_of_day",
+                              "timezone",
+                              "start_date",
+                              "end_date",
+                              "next_run_at",
+                              "last_run_at",
+                              "active",
+                              "created_by",
+                              "created_at",
+                              "updated_at"
+                            ],
+                            "properties": {
+                              "id": { "type": "integer", "minimum": 1 },
+                              "organization_id": {
+                                "type": "integer",
+                                "minimum": 1
+                              },
+                              "project_id": { "type": "integer", "minimum": 1 },
+                              "title": { "type": "string" },
+                              "description": { "type": ["null", "string"] },
+                              "priority": {
+                                "type": "string",
+                                "enum": ["low", "medium", "high"]
+                              },
+                              "member_ids": {
+                                "type": "array",
+                                "items": { "type": "integer", "minimum": 1 }
+                              },
+                              "frequency": {
+                                "type": "string",
+                                "enum": ["daily", "weekly", "monthly", "yearly"]
+                              },
+                              "weekdays": {
+                                "type": "array",
+                                "items": {
+                                  "type": "integer",
+                                  "minimum": 1,
+                                  "maximum": 7
+                                }
+                              },
+                              "month_days": {
+                                "type": "array",
+                                "items": {
+                                  "type": "integer",
+                                  "minimum": 1,
+                                  "maximum": 31
+                                }
+                              },
+                              "time_of_day": {
+                                "type": "string",
+                                "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d"
+                              },
+                              "timezone": { "type": "string" },
+                              "start_date": {
+                                "type": "string",
+                                "format": "date"
+                              },
+                              "end_date": {
+                                "type": ["null", "string"],
+                                "format": "date"
+                              },
+                              "next_run_at": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "last_run_at": {
+                                "type": ["null", "string"],
+                                "format": "date-time"
+                              },
+                              "active": { "type": "boolean" },
+                              "created_by": { "type": "integer", "minimum": 1 },
+                              "created_at": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "updated_at": {
+                                "type": "string",
+                                "format": "date-time"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Task routines"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["data"],
+                "additionalProperties": false,
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["name", "frequency", "time", "start_date"],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200,
+                        "pattern": "\\S"
+                      },
+                      "description": {
+                        "type": ["string", "null"],
+                        "maxLength": 10000
+                      },
+                      "priority": {
+                        "type": "string",
+                        "enum": ["low", "medium", "high"]
+                      },
+                      "members": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["user_id"],
+                          "properties": {
+                            "user_id": { "type": "integer", "minimum": 1 }
+                          }
+                        },
+                        "maxItems": 500
+                      },
+                      "frequency": {
+                        "type": "string",
+                        "enum": ["daily", "weekly", "monthly", "yearly"]
+                      },
+                      "weekdays": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 7
+                        },
+                        "maxItems": 7
+                      },
+                      "month_days": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 31
+                        },
+                        "maxItems": 31
+                      },
+                      "time": {
+                        "type": "string",
+                        "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                      },
+                      "timezone": {
+                        "type": "string",
+                        "enum": ["Asia/Tashkent"]
+                      },
+                      "start_date": { "type": "string", "format": "date" },
+                      "end_date": {
+                        "type": ["string", "null"],
+                        "format": "date"
+                      },
+                      "active": { "type": "boolean" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "project_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "routine": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "id",
+                            "organization_id",
+                            "project_id",
+                            "title",
+                            "description",
+                            "priority",
+                            "member_ids",
+                            "frequency",
+                            "weekdays",
+                            "month_days",
+                            "time_of_day",
+                            "timezone",
+                            "start_date",
+                            "end_date",
+                            "next_run_at",
+                            "last_run_at",
+                            "active",
+                            "created_by",
+                            "created_at",
+                            "updated_at"
+                          ],
+                          "properties": {
+                            "id": { "type": "integer", "minimum": 1 },
+                            "organization_id": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "project_id": { "type": "integer", "minimum": 1 },
+                            "title": { "type": "string" },
+                            "description": { "type": ["null", "string"] },
+                            "priority": {
+                              "type": "string",
+                              "enum": ["low", "medium", "high"]
+                            },
+                            "member_ids": {
+                              "type": "array",
+                              "items": { "type": "integer", "minimum": 1 }
+                            },
+                            "frequency": {
+                              "type": "string",
+                              "enum": ["daily", "weekly", "monthly", "yearly"]
+                            },
+                            "weekdays": {
+                              "type": "array",
+                              "items": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 7
+                              }
+                            },
+                            "month_days": {
+                              "type": "array",
+                              "items": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 31
+                              }
+                            },
+                            "time_of_day": {
+                              "type": "string",
+                              "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d"
+                            },
+                            "timezone": { "type": "string" },
+                            "start_date": {
+                              "type": "string",
+                              "format": "date"
+                            },
+                            "end_date": {
+                              "type": ["null", "string"],
+                              "format": "date"
+                            },
+                            "next_run_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "last_run_at": {
+                              "type": ["null", "string"],
+                              "format": "date-time"
+                            },
+                            "active": { "type": "boolean" },
+                            "created_by": { "type": "integer", "minimum": 1 },
+                            "created_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationID}/projects/{project_id}/task-routines/{routine_id}": {
+      "get": {
+        "tags": ["Task routines"],
+        "parameters": [
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "project_id",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "routine_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "routine": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "id",
+                            "organization_id",
+                            "project_id",
+                            "title",
+                            "description",
+                            "priority",
+                            "member_ids",
+                            "frequency",
+                            "weekdays",
+                            "month_days",
+                            "time_of_day",
+                            "timezone",
+                            "start_date",
+                            "end_date",
+                            "next_run_at",
+                            "last_run_at",
+                            "active",
+                            "created_by",
+                            "created_at",
+                            "updated_at"
+                          ],
+                          "properties": {
+                            "id": { "type": "integer", "minimum": 1 },
+                            "organization_id": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "project_id": { "type": "integer", "minimum": 1 },
+                            "title": { "type": "string" },
+                            "description": { "type": ["null", "string"] },
+                            "priority": {
+                              "type": "string",
+                              "enum": ["low", "medium", "high"]
+                            },
+                            "member_ids": {
+                              "type": "array",
+                              "items": { "type": "integer", "minimum": 1 }
+                            },
+                            "frequency": {
+                              "type": "string",
+                              "enum": ["daily", "weekly", "monthly", "yearly"]
+                            },
+                            "weekdays": {
+                              "type": "array",
+                              "items": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 7
+                              }
+                            },
+                            "month_days": {
+                              "type": "array",
+                              "items": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 31
+                              }
+                            },
+                            "time_of_day": {
+                              "type": "string",
+                              "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d"
+                            },
+                            "timezone": { "type": "string" },
+                            "start_date": {
+                              "type": "string",
+                              "format": "date"
+                            },
+                            "end_date": {
+                              "type": ["null", "string"],
+                              "format": "date"
+                            },
+                            "next_run_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "last_run_at": {
+                              "type": ["null", "string"],
+                              "format": "date-time"
+                            },
+                            "active": { "type": "boolean" },
+                            "created_by": { "type": "integer", "minimum": 1 },
+                            "created_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Task routines"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["data"],
+                "additionalProperties": false,
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200,
+                        "pattern": "\\S"
+                      },
+                      "description": {
+                        "type": ["string", "null"],
+                        "maxLength": 10000
+                      },
+                      "priority": {
+                        "type": "string",
+                        "enum": ["low", "medium", "high"]
+                      },
+                      "members": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["user_id"],
+                          "properties": {
+                            "user_id": { "type": "integer", "minimum": 1 }
+                          }
+                        },
+                        "maxItems": 500
+                      },
+                      "frequency": {
+                        "type": "string",
+                        "enum": ["daily", "weekly", "monthly", "yearly"]
+                      },
+                      "weekdays": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 7
+                        },
+                        "maxItems": 7
+                      },
+                      "month_days": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 31
+                        },
+                        "maxItems": 31
+                      },
+                      "time": {
+                        "type": "string",
+                        "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                      },
+                      "timezone": {
+                        "type": "string",
+                        "enum": ["Asia/Tashkent"]
+                      },
+                      "start_date": { "type": "string", "format": "date" },
+                      "end_date": {
+                        "type": ["string", "null"],
+                        "format": "date"
+                      },
+                      "active": { "type": "boolean" }
+                    },
+                    "minProperties": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "project_id",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "routine_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "routine": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "id",
+                            "organization_id",
+                            "project_id",
+                            "title",
+                            "description",
+                            "priority",
+                            "member_ids",
+                            "frequency",
+                            "weekdays",
+                            "month_days",
+                            "time_of_day",
+                            "timezone",
+                            "start_date",
+                            "end_date",
+                            "next_run_at",
+                            "last_run_at",
+                            "active",
+                            "created_by",
+                            "created_at",
+                            "updated_at"
+                          ],
+                          "properties": {
+                            "id": { "type": "integer", "minimum": 1 },
+                            "organization_id": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "project_id": { "type": "integer", "minimum": 1 },
+                            "title": { "type": "string" },
+                            "description": { "type": ["null", "string"] },
+                            "priority": {
+                              "type": "string",
+                              "enum": ["low", "medium", "high"]
+                            },
+                            "member_ids": {
+                              "type": "array",
+                              "items": { "type": "integer", "minimum": 1 }
+                            },
+                            "frequency": {
+                              "type": "string",
+                              "enum": ["daily", "weekly", "monthly", "yearly"]
+                            },
+                            "weekdays": {
+                              "type": "array",
+                              "items": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 7
+                              }
+                            },
+                            "month_days": {
+                              "type": "array",
+                              "items": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 31
+                              }
+                            },
+                            "time_of_day": {
+                              "type": "string",
+                              "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d"
+                            },
+                            "timezone": { "type": "string" },
+                            "start_date": {
+                              "type": "string",
+                              "format": "date"
+                            },
+                            "end_date": {
+                              "type": ["null", "string"],
+                              "format": "date"
+                            },
+                            "next_run_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "last_run_at": {
+                              "type": ["null", "string"],
+                              "format": "date-time"
+                            },
+                            "active": { "type": "boolean" },
+                            "created_by": { "type": "integer", "minimum": 1 },
+                            "created_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Task routines"],
+        "parameters": [
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "project_id",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "routine_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "deleted": { "type": "boolean", "enum": [true] }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationID}/projects/{project_id}/task-routines/{routine_id}/run": {
+      "post": {
+        "tags": ["Task routines"],
+        "parameters": [
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "project_id",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "routine_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "result": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["task", "routine"],
+                          "properties": {
+                            "task": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "required": [
+                                "id",
+                                "organization_id",
+                                "project_id",
+                                "name",
+                                "title",
+                                "description",
+                                "description_type",
+                                "status",
+                                "priority",
+                                "start_at",
+                                "due_at",
+                                "completed_at",
+                                "created_by",
+                                "parent_task_id",
+                                "routine_id",
+                                "members",
+                                "files",
+                                "subtasks",
+                                "subtasks_count",
+                                "created_at",
+                                "updated_at"
+                              ],
+                              "properties": {
+                                "id": { "type": "integer", "minimum": 1 },
+                                "organization_id": {
+                                  "type": "integer",
+                                  "minimum": 1
+                                },
+                                "project_id": {
+                                  "type": "integer",
+                                  "minimum": 1
+                                },
+                                "name": { "type": "string" },
+                                "title": { "type": "string" },
+                                "description": { "type": ["null", "string"] },
+                                "description_type": {
+                                  "type": "string",
+                                  "enum": ["text", "audio"]
+                                },
+                                "status": {
+                                  "type": "string",
+                                  "enum": [
+                                    "todo",
+                                    "in_progress",
+                                    "done",
+                                    "not_done"
+                                  ]
+                                },
+                                "priority": {
+                                  "type": "string",
+                                  "enum": ["low", "medium", "high"]
+                                },
+                                "start_at": {
+                                  "type": ["null", "string"],
+                                  "format": "date-time"
+                                },
+                                "due_at": {
+                                  "type": ["null", "string"],
+                                  "format": "date-time"
+                                },
+                                "completed_at": {
+                                  "type": ["null", "string"],
+                                  "format": "date-time"
+                                },
+                                "created_by": {
+                                  "type": "integer",
+                                  "minimum": 1
+                                },
+                                "parent_task_id": {
+                                  "type": ["null", "integer"]
+                                },
+                                "routine_id": { "type": ["null", "integer"] },
+                                "members": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "required": [
+                                      "user_id",
+                                      "first_name",
+                                      "last_name",
+                                      "phone_number",
+                                      "telegram_username",
+                                      "telegram_avatar_url"
+                                    ],
+                                    "properties": {
+                                      "user_id": {
+                                        "type": "integer",
+                                        "minimum": 1
+                                      },
+                                      "first_name": { "type": "string" },
+                                      "last_name": { "type": "string" },
+                                      "phone_number": { "type": "string" },
+                                      "telegram_username": {
+                                        "type": ["null", "string"]
+                                      },
+                                      "telegram_avatar_url": {
+                                        "type": ["null", "string"]
+                                      }
+                                    }
+                                  }
+                                },
+                                "files": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "required": [
+                                      "id",
+                                      "kind",
+                                      "file_name",
+                                      "mime_type",
+                                      "size_bytes",
+                                      "url",
+                                      "created_at"
+                                    ],
+                                    "properties": {
+                                      "id": { "type": "integer", "minimum": 1 },
+                                      "kind": {
+                                        "type": "string",
+                                        "enum": [
+                                          "attachment",
+                                          "description_audio"
+                                        ]
+                                      },
+                                      "file_name": { "type": "string" },
+                                      "mime_type": { "type": "string" },
+                                      "size_bytes": {
+                                        "type": "integer",
+                                        "minimum": 1
+                                      },
+                                      "url": { "type": "string" },
+                                      "created_at": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                      }
+                                    }
+                                  }
+                                },
+                                "subtasks": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "required": ["id", "name", "checked"],
+                                    "properties": {
+                                      "id": { "type": "integer", "minimum": 1 },
+                                      "name": { "type": "string" },
+                                      "checked": { "type": "boolean" }
+                                    }
+                                  }
+                                },
+                                "subtasks_count": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                "created_at": {
+                                  "type": "string",
+                                  "format": "date-time"
+                                },
+                                "updated_at": {
+                                  "type": "string",
+                                  "format": "date-time"
+                                }
+                              }
+                            },
+                            "routine": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "required": [
+                                "id",
+                                "organization_id",
+                                "project_id",
+                                "title",
+                                "description",
+                                "priority",
+                                "member_ids",
+                                "frequency",
+                                "weekdays",
+                                "month_days",
+                                "time_of_day",
+                                "timezone",
+                                "start_date",
+                                "end_date",
+                                "next_run_at",
+                                "last_run_at",
+                                "active",
+                                "created_by",
+                                "created_at",
+                                "updated_at"
+                              ],
+                              "properties": {
+                                "id": { "type": "integer", "minimum": 1 },
+                                "organization_id": {
+                                  "type": "integer",
+                                  "minimum": 1
+                                },
+                                "project_id": {
+                                  "type": "integer",
+                                  "minimum": 1
+                                },
+                                "title": { "type": "string" },
+                                "description": { "type": ["null", "string"] },
+                                "priority": {
+                                  "type": "string",
+                                  "enum": ["low", "medium", "high"]
+                                },
+                                "member_ids": {
+                                  "type": "array",
+                                  "items": { "type": "integer", "minimum": 1 }
+                                },
+                                "frequency": {
+                                  "type": "string",
+                                  "enum": [
+                                    "daily",
+                                    "weekly",
+                                    "monthly",
+                                    "yearly"
+                                  ]
+                                },
+                                "weekdays": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 7
+                                  }
+                                },
+                                "month_days": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 31
+                                  }
+                                },
+                                "time_of_day": {
+                                  "type": "string",
+                                  "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d"
+                                },
+                                "timezone": { "type": "string" },
+                                "start_date": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "end_date": {
+                                  "type": ["null", "string"],
+                                  "format": "date"
+                                },
+                                "next_run_at": {
+                                  "type": "string",
+                                  "format": "date-time"
+                                },
+                                "last_run_at": {
+                                  "type": ["null", "string"],
+                                  "format": "date-time"
+                                },
+                                "active": { "type": "boolean" },
+                                "created_by": {
+                                  "type": "integer",
+                                  "minimum": 1
+                                },
+                                "created_at": {
+                                  "type": "string",
+                                  "format": "date-time"
+                                },
+                                "updated_at": {
+                                  "type": "string",
+                                  "format": "date-time"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/organizations/{organizationID}/members/{user_id}": {
       "patch": {
         "summary": "Change an organization member role",
@@ -3472,6 +7238,7 @@
                             "telegram_username",
                             "telegram_avatar_url",
                             "index_quality",
+                            "phone_number",
                             "organization_role",
                             "created_at"
                           ],
@@ -3488,6 +7255,7 @@
                               "minimum": 0,
                               "maximum": 100
                             },
+                            "phone_number": { "type": "string" },
                             "organization_role": {
                               "type": "string",
                               "enum": ["admin", "viewer", "member"]
@@ -3775,7 +7543,7 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100,
+              "maximum": 1000,
               "default": 20
             },
             "in": "query",
@@ -3825,6 +7593,7 @@
                               "telegram_username",
                               "telegram_avatar_url",
                               "index_quality",
+                              "phone_number",
                               "organization_role",
                               "created_at"
                             ],
@@ -3843,6 +7612,7 @@
                                 "minimum": 0,
                                 "maximum": 100
                               },
+                              "phone_number": { "type": "string" },
                               "organization_role": {
                                 "type": "string",
                                 "enum": ["admin", "viewer", "member"]
@@ -3999,7 +7769,7 @@
     },
     "/api/v1/organizations/{organizationID}/invitations/search": {
       "get": {
-        "summary": "Find a registered employee and load invite choices",
+        "summary": "Search registered employees and load invite choices",
         "tags": ["Organization invitations"],
         "parameters": [
           {
@@ -4053,6 +7823,37 @@
                               "type": "integer",
                               "minimum": 0,
                               "maximum": 100
+                            }
+                          }
+                        },
+                        "employees": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "id",
+                              "first_name",
+                              "last_name",
+                              "telegram_username",
+                              "telegram_avatar_url",
+                              "index_quality"
+                            ],
+                            "properties": {
+                              "id": { "type": "integer", "minimum": 1 },
+                              "first_name": { "type": "string" },
+                              "last_name": { "type": "string" },
+                              "telegram_username": {
+                                "type": ["null", "string"]
+                              },
+                              "telegram_avatar_url": {
+                                "type": ["null", "string"]
+                              },
+                              "index_quality": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 100
+                              }
                             }
                           }
                         },
@@ -4519,7 +8320,7 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100,
+              "maximum": 1000,
               "default": 20
             },
             "in": "query",
@@ -4826,7 +8627,7 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100,
+              "maximum": 1000,
               "default": 20
             },
             "in": "query",
@@ -5109,7 +8910,7 @@
     },
     "/api/v1/organization-invitations/{invitation_id}/respond": {
       "post": {
-        "summary": "Accept or reject an invitation",
+        "summary": "Accept an invitation or reject/cancel a pending invitation",
         "tags": ["Organization invitations"],
         "requestBody": {
           "required": true,

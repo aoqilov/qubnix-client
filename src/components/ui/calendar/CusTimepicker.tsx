@@ -1,6 +1,8 @@
 import { Text } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { LuClock, LuX } from "react-icons/lu";
+import { CusDialog } from "@/components/ui/dialog/CusDialog";
+import { CusButton } from "@/components/ui/buttons/CusButton";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -8,12 +10,17 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const MINUTES = Array.from({ length: 60 }, (_, i) => i);
+const MINUTES_STEP5 = Array.from({ length: 12 }, (_, i) => i * 5);
 const SECS = Array.from({ length: 60 }, (_, i) => i);
 
 const ITEM_H = 32;
 const VISIBLE = 5;
 const COL_H = ITEM_H * VISIBLE;
 const PAD = ITEM_H * Math.floor(VISIBLE / 2);
+
+const MODAL_ITEM_H = 40;
+const MODAL_COL_H = MODAL_ITEM_H * VISIBLE;
+const MODAL_PAD = MODAL_ITEM_H * Math.floor(VISIBLE / 2);
 
 function parseTime(v: string) {
   const [h = "0", m = "0", s = "0"] = v.split(":");
@@ -99,6 +106,78 @@ function TimeColumn({ items, selected, onSelect }: ColProps) {
   );
 }
 
+// ── ModalTimeColumn — "modal" variant uchun, tanlangan qiymat to'liq pill fon bilan ──
+
+interface ModalColProps extends ColProps {
+  /** Berilsa, shu qaytargan `true` qiymatlar bosib bo'lmaydigan (kulrang) holatda ko'rsatiladi. */
+  isDisabled?: (n: number) => boolean;
+}
+
+function ModalTimeColumn({ items, selected, onSelect, isDisabled }: ModalColProps) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      const index = items.indexOf(selected);
+      ref.current.scrollTop = Math.max(index, 0) * MODAL_ITEM_H;
+    }
+  }, [selected, items]);
+
+  return (
+    <div
+      ref={ref}
+      className="rounded-input bg-surface-secondary"
+      style={{
+        height: MODAL_COL_H,
+        flex: "none",
+        overflowY: "auto",
+        scrollSnapType: "y mandatory",
+        scrollBehavior: "smooth",
+        scrollbarWidth: "none",
+      }}
+    >
+      <div style={{ height: MODAL_PAD, flexShrink: 0 }} />
+
+      {items.map((n) => {
+        const isSelected = selected === n;
+        const disabled = isDisabled?.(n) ?? false;
+        return (
+          <button
+            key={n}
+            type="button"
+            disabled={disabled}
+            onClick={() => !disabled && onSelect(n)}
+            className="flex items-center justify-center font-semibold"
+            style={{
+              height: MODAL_ITEM_H,
+              width: "100%",
+              scrollSnapAlign: "center",
+              background: isSelected ? "var(--brand-default)" : "transparent",
+              color: disabled
+                ? "var(--text-disabled)"
+                : isSelected
+                  ? "var(--text-on-brand)"
+                  : "var(--text-primary)",
+              fontSize: 16,
+              fontVariantNumeric: "tabular-nums",
+              borderRadius: 10,
+              cursor: disabled ? "not-allowed" : "pointer",
+              opacity: disabled ? 0.5 : 1,
+              transition: "background 0.15s, color 0.15s",
+              border: "none",
+              outline: "none",
+            }}
+          >
+            {pad(n)}
+          </button>
+        );
+      })}
+
+      <div style={{ height: MODAL_PAD, flexShrink: 0 }} />
+    </div>
+  );
+}
+
 // ── CusTimepicker ─────────────────────────────────────────────────────────────
 
 interface CusTimepickerProps {
@@ -111,6 +190,20 @@ interface CusTimepickerProps {
   clearable?: boolean;
   label?: string;
   inputSize?: "sm" | "md" | "lg";
+  /**
+   * "dropdown" (standart) — input ostida kichik popover.
+   * "modal" — CusDialog orqali to'liq ekranga yaqin, katta raqam +
+   * SOAT/DAQIQA ustunlari + "TASDIQLASH" tugmasi bilan ochiladi.
+   */
+  variant?: "dropdown" | "modal";
+  /** Faqat variant="modal" uchun — dialog headeridagi matn. */
+  modalTitle?: string;
+  /**
+   * Faqat variant="modal" uchun — "HH:mm". Berilsa, shu vaqtdan oldingi
+   * soat/daqiqalar tanlab bo'lmaydigan holatda ko'rsatiladi (masalan bugungi
+   * kun uchun — allaqachon o'tib ketgan vaqtni tanlab bo'lmasin).
+   */
+  minTime?: string;
 }
 
 const SIZE: Record<string, { py: number; fontSize: number; height: number }> = {
@@ -118,6 +211,10 @@ const SIZE: Record<string, { py: number; fontSize: number; height: number }> = {
   md: { py: 8, fontSize: 14, height: 38 },
   lg: { py: 10, fontSize: 15, height: 44 },
 };
+
+function snapToStep(n: number, step: number): number {
+  return (Math.round(n / step) * step) % 60;
+}
 
 export function CusTimepicker({
   value,
@@ -129,7 +226,11 @@ export function CusTimepicker({
   clearable = true,
   label,
   inputSize = "md",
+  variant = "dropdown",
+  modalTitle,
+  minTime,
 }: CusTimepickerProps) {
+  const minuteStep = variant === "modal" ? 5 : 1;
   const resolvedPlaceholder = placeholder ?? "ЧЧ:ММ";
   const [open, setOpen] = useState(false);
   const [inputText, setInputText] = useState(value ?? "");
@@ -138,7 +239,7 @@ export function CusTimepicker({
 
   const parsed = value ? parseTime(value) : null;
   const [tempH, setTempH] = useState(parsed?.h ?? 0);
-  const [tempM, setTempM] = useState(parsed?.m ?? 0);
+  const [tempM, setTempM] = useState(snapToStep(parsed?.m ?? 0, minuteStep));
   const [tempS, setTempS] = useState(parsed?.s ?? 0);
 
   // Sync display when value prop changes from outside
@@ -147,7 +248,7 @@ export function CusTimepicker({
     if (value) {
       const p = parseTime(value);
       setTempH(p.h);
-      setTempM(p.m);
+      setTempM(snapToStep(p.m, minuteStep));
       setTempS(p.s);
     }
   }, [value]);
@@ -164,6 +265,30 @@ export function CusTimepicker({
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
+  // "modal" variant + minTime — dialog ochilganda joriy tanlov minTime'dan
+  // oldin bo'lsa, minTime'ning o'ziga ko'taramiz (o'tib ketgan vaqt ochilishi bilan ko'rinmasin).
+  useEffect(() => {
+    if (!open || variant !== "modal" || !minTime) return;
+    const [minH, minM] = minTime.split(":").map(Number);
+    if (tempH < minH || (tempH === minH && tempM < minM)) {
+      setTempH(minH);
+      setTempM(snapToStep(minM, minuteStep));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, minTime]);
+
+  function isHourDisabled(h: number): boolean {
+    if (!minTime) return false;
+    const [minH] = minTime.split(":").map(Number);
+    return h < minH;
+  }
+
+  function isMinuteDisabled(m: number): boolean {
+    if (!minTime) return false;
+    const [minH, minM] = minTime.split(":").map(Number);
+    return tempH === minH && m < minM;
+  }
+
   function applyChange(h: number, m: number, s: number) {
     const str = formatTime(h, m, s, format);
     onChange?.(str);
@@ -175,7 +300,7 @@ export function CusTimepicker({
     setTempH(next.h);
     setTempM(next.m);
     setTempS(next.s);
-    if (!needConfirm) applyChange(next.h, next.m, next.s);
+    if (!needConfirm && variant !== "modal") applyChange(next.h, next.m, next.s);
   }
 
   function handleConfirm() {
@@ -289,7 +414,11 @@ export function CusTimepicker({
           transition: "border-color 0.15s, box-shadow 0.15s",
           cursor: disabled ? "not-allowed" : "text",
         }}
-        onClick={() => !disabled && inputRef.current?.focus()}
+        onClick={() => {
+          if (disabled) return;
+          if (variant === "modal") setOpen(true);
+          else inputRef.current?.focus();
+        }}
       >
         <LuClock
           size={14}
@@ -304,12 +433,17 @@ export function CusTimepicker({
           ref={inputRef}
           type="text"
           disabled={disabled}
+          readOnly={variant === "modal"}
           value={inputText}
           placeholder={resolvedPlaceholder}
           maxLength={format === "HH:mm:ss" ? 8 : 5}
-          onChange={handleInputChange}
-          onFocus={() => !disabled && setOpen(true)}
-          onBlur={handleInputBlur}
+          onChange={variant === "modal" ? undefined : handleInputChange}
+          onFocus={() => {
+            // "modal" variantda dialog yopilganda fokus shu inputga qaytadi —
+            // agar shu yerda ham setOpen(true) chaqirilsa, dialog darhol qayta ochilib qoladi.
+            if (!disabled && variant !== "modal") setOpen(true);
+          }}
+          onBlur={variant === "modal" ? undefined : handleInputBlur}
           style={{
             flex: 1,
             background: "transparent",
@@ -339,7 +473,7 @@ export function CusTimepicker({
       </div>
 
       {/* ── Dropdown ── */}
-      {open && (
+      {variant === "dropdown" && open && (
         <div
           style={{
             position: "absolute",
@@ -448,6 +582,75 @@ export function CusTimepicker({
             </div>
           )}
         </div>
+      )}
+
+      {/* ── Modal — CusDialog'ning o'zi (rangi/tuzilmasi o'zgartirilmagan) ── */}
+      {variant === "modal" && (
+        <CusDialog
+          open={open}
+          onClose={() => setOpen(false)}
+          title={modalTitle ?? "Vaqtni tanlang"}
+          centered
+          size="xs"
+          footer={
+            <CusButton
+              className="w-full"
+              onClick={handleConfirm}
+              style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
+            >
+              Tasdiqlash
+            </CusButton>
+          }
+        >
+          <div className="flex flex-col items-center gap-4">
+            <span
+              style={{
+                fontSize: 36,
+                fontWeight: 700,
+                color: "var(--brand-default)",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {formatTime(tempH, tempM, tempS, format)}
+            </span>
+            <div className="flex w-full gap-3">
+              <div className="flex flex-1 flex-col gap-2">
+                <p className="text-center text-xs font-semibold uppercase tracking-wide text-secondary">
+                  Soat
+                </p>
+                <ModalTimeColumn
+                  items={HOURS}
+                  selected={tempH}
+                  onSelect={(v) => handleColChange("h", v)}
+                  isDisabled={isHourDisabled}
+                />
+              </div>
+              <div className="flex flex-1 flex-col gap-2">
+                <p className="text-center text-xs font-semibold uppercase tracking-wide text-secondary">
+                  Daqiqa
+                </p>
+                <ModalTimeColumn
+                  items={MINUTES_STEP5}
+                  selected={tempM}
+                  onSelect={(v) => handleColChange("m", v)}
+                  isDisabled={isMinuteDisabled}
+                />
+              </div>
+              {withSeconds && (
+                <div className="flex flex-1 flex-col gap-2">
+                  <p className="text-center text-xs font-semibold uppercase tracking-wide text-secondary">
+                    Soniya
+                  </p>
+                  <ModalTimeColumn
+                    items={SECS}
+                    selected={tempS}
+                    onSelect={(v) => handleColChange("s", v)}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </CusDialog>
       )}
     </div>
   );

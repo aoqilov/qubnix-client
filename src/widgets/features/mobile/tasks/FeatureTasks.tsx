@@ -1,17 +1,20 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import {
   LuCircle,
   LuLoaderCircle,
   LuCircleCheck,
   LuCircleX,
+  LuListChecks,
   LuTriangleAlert,
   LuX,
 } from "react-icons/lu";
 import type { TaskStatusColor } from "@/components/shared/task-card/mini-components/TaskStatusLabel";
 import { projectsApi } from "@/api/projects/projects.api";
+import type { RawTask, TaskStatus } from "@/api/tasks/tasks.types";
 import { fromApiDate, todayApiDate } from "@/utils/apiDate";
 import { formatWeekdayDate } from "@/utils/formatWeekdayDate";
 import ProjectsTabs from "@/components/shared/project-tab/ProjectsTabs";
@@ -19,24 +22,36 @@ import PageTitleDynamic from "@/components/shared/page-title-dynamic/PageTitleDy
 import StatusTab from "@/components/shared/status-tab/StatusTab";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import TaskCard from "@/components/shared/task-card/TaskCard";
-import type { TaskCardMember } from "@/components/shared/task-card/mini-components/TaskAvatarGroup";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import FilterSectionTask from "./components/FilterSectionTask";
 import TaskAddButton, {
   TASK_ADD_BUTTON_OFFSET,
 } from "@/components/shared/task-button/TaskAddButton";
-import TaskModalAdd, {
-  type TaskModalAddValues,
-} from "@/components/shared/task-modals/TaskModalAdd";
+import TaskModalAdd, { type TaskModalAddValues } from "@/components/shared/task-modals/TaskModalAdd";
 import TaskModalEdit from "@/components/shared/task-modals/TaskModalEdit";
 import TaskModalDelete from "@/components/shared/task-modals/TaskModalDelete";
+import {
+  toTaskMemberCard,
+  useCreateTask,
+  useDeleteTask,
+  useProjectMembersForTask,
+  useTasksList,
+  useUpdateTask,
+  useUploadTaskFile,
+} from "./hooks/useApiTasks";
 
 const SORT_OPTIONS = [
   { value: "deadline", label: "Muddat bo'yicha" },
   { value: "priority", label: "Muhimlik bo'yicha" },
   { value: "created", label: "Yaratilgan sana bo'yicha" },
 ];
+
+const SORT_TO_API = {
+  deadline: "deadline",
+  priority: "priority",
+  created: "created_at",
+} as const;
 
 // Statik metama'lumot (id/label/rang) — sonlar esa aktiv loyihaning
 // `task_counts`'idan dinamik olinadi (pastga qarang, komponent ichida).
@@ -70,303 +85,44 @@ const STATUS_MENU_OPTIONS = STATUS_META.map((meta) => ({
   iconColor: STATUS_ICON_COLOR[meta.color],
 }));
 
-interface DemoTask {
-  id: string;
-  /** STATUS_TABS'dagi id bilan mos — filtrlash shu bo'yicha ishlaydi. */
-  statusId: string;
-  title: string;
-  flagged: boolean;
-  expanded: boolean;
-  dateRangeLabel: string;
-  subtaskCountLabel: string;
-  fileCount: number;
-  members: TaskCardMember[];
-  overflowCount?: number;
-  statusLabel: string;
-  statusColor: TaskStatusColor;
-  description: string;
-  /** Berilsa, TaskCard description o'rniga shu ovozli xabarni ko'rsatadi. */
-  descriptionAudio?: { url: string; durationLabel: string };
-  projectTag: string;
-  subtasks: { id: string; label: string; checked: boolean }[];
-  files: { id: string; name: string; sizeLabel: string }[];
-  photos: { id: string; url: string }[];
+/** Backend xato javobi `{statusCode, message, code, details}` shaklida keladi. */
+function getErrorMessage(err: unknown): string {
+  if (axios.isAxiosError(err)) {
+    const message = err.response?.data?.message;
+    if (typeof message === "string" && message) return message;
+  }
+  return "Amalni bajarib bo'lmadi. Qaytadan urinib ko'ring.";
 }
 
-const INITIAL_TASKS: DemoTask[] = [
-  {
-    id: "t1",
-    statusId: "assigned",
-    title:
-      "Tuzilma bo'yicha texnik topshiriq wwwwwwwww eeeeeeeee rrrrrrr tttttt fg er etrhetw",
-    flagged: false,
-    expanded: false,
-    dateRangeLabel: "12.09 - 14.09",
-    subtaskCountLabel: "0/2",
-    fileCount: 1,
-    members: [
-      {
-        id: "u1",
-        initials: "MK",
-        name: "Malika Karimova",
-        avatarUrl: "https://i.pravatar.cc/64?u=u1",
-        readStatus: "sent",
-      },
-    ],
-    statusLabel: "Berildi",
-    statusColor: "gray",
-    description: "Yangi bo'lim uchun texnik topshiriqni tayyorlash.",
-    projectTag: "РЕДИЗАЙН",
-    subtasks: [
-      { id: "s1", label: "Talablarni yig'ish", checked: false },
-      { id: "s2", label: "Maketlarni ko'rib chiqish", checked: false },
-    ],
-    files: [{ id: "f1", name: "tz.pdf", sizeLabel: "210 KB" }],
-    photos: [],
-  },
-  {
-    id: "t1",
-    statusId: "assigned",
-    title:
-      "Tuzilma bo'yicha texnik topshiriq wwwwwwwww eeeeeeeee rrrrrrr tttttt fg er etrhetw",
-    flagged: false,
-    expanded: false,
-    dateRangeLabel: "12.09 - 14.09",
-    subtaskCountLabel: "0/2",
-    fileCount: 1,
-    members: [
-      {
-        id: "u1",
-        initials: "MK",
-        name: "Malika Karimova",
-        avatarUrl: "https://i.pravatar.cc/64?u=u1",
-        readStatus: "sent",
-      },
-    ],
-    statusLabel: "Berildi",
-    statusColor: "gray",
-    description: "Yangi bo'lim uchun texnik topshiriqni tayyorlash.",
-    projectTag: "РЕДИЗАЙН",
-    subtasks: [
-      { id: "s1", label: "Talablarni yig'ish", checked: false },
-      { id: "s2", label: "Maketlarni ko'rib chiqish", checked: false },
-    ],
-    files: [{ id: "f1", name: "tz.pdf", sizeLabel: "210 KB" }],
-    photos: [],
-  },
-  {
-    id: "t1",
-    statusId: "assigned",
-    title:
-      "Tuzilma bo'yicha texnik topshiriq wwwwwwwww eeeeeeeee rrrrrrr tttttt fg er etrhetw",
-    flagged: false,
-    expanded: false,
-    dateRangeLabel: "12.09 - 14.09",
-    subtaskCountLabel: "0/2",
-    fileCount: 1,
-    members: [
-      {
-        id: "u1",
-        initials: "MK",
-        name: "Malika Karimova",
-        avatarUrl: "https://i.pravatar.cc/64?u=u1",
-        readStatus: "sent",
-      },
-    ],
-    statusLabel: "Berildi",
-    statusColor: "gray",
-    description: "Yangi bo'lim uchun texnik topshiriqni tayyorlash.",
-    projectTag: "РЕДИЗАЙН",
-    subtasks: [
-      { id: "s1", label: "Talablarni yig'ish", checked: false },
-      { id: "s2", label: "Maketlarni ko'rib chiqish", checked: false },
-    ],
-    files: [{ id: "f1", name: "tz.pdf", sizeLabel: "210 KB" }],
-    photos: [],
-  },
-  {
-    id: "t1",
-    statusId: "assigned",
-    title:
-      "Tuzilma bo'yicha texnik topshiriq wwwwwwwww eeeeeeeee rrrrrrr tttttt fg er etrhetw",
-    flagged: false,
-    expanded: false,
-    dateRangeLabel: "12.09 - 14.09",
-    subtaskCountLabel: "0/2",
-    fileCount: 1,
-    members: [
-      {
-        id: "u1",
-        initials: "MK",
-        name: "Malika Karimova",
-        avatarUrl: "https://i.pravatar.cc/64?u=u1",
-        readStatus: "sent",
-      },
-    ],
-    statusLabel: "Berildi",
-    statusColor: "gray",
-    description: "Yangi bo'lim uchun texnik topshiriqni tayyorlash.",
-    projectTag: "РЕДИЗАЙН",
-    subtasks: [
-      { id: "s1", label: "Talablarni yig'ish", checked: false },
-      { id: "s2", label: "Maketlarni ko'rib chiqish", checked: false },
-    ],
-    files: [{ id: "f1", name: "tz.pdf", sizeLabel: "210 KB" }],
-    photos: [],
-  },
-  {
-    id: "t1",
-    statusId: "assigned",
-    title:
-      "Tuzilma bo'yicha texnik topshiriq wwwwwwwww eeeeeeeee rrrrrrr tttttt fg er etrhetw",
-    flagged: false,
-    expanded: false,
-    dateRangeLabel: "12.09 - 14.09",
-    subtaskCountLabel: "0/2",
-    fileCount: 1,
-    members: [
-      {
-        id: "u1",
-        initials: "MK",
-        name: "Malika Karimova",
-        avatarUrl: "https://i.pravatar.cc/64?u=u1",
-        readStatus: "sent",
-      },
-    ],
-    statusLabel: "Berildi",
-    statusColor: "gray",
-    description: "Yangi bo'lim uchun texnik topshiriqni tayyorlash.",
-    projectTag: "РЕДИЗАЙН",
-    subtasks: [
-      { id: "s1", label: "Talablarni yig'ish", checked: false },
-      { id: "s2", label: "Maketlarni ko'rib chiqish", checked: false },
-    ],
-    files: [{ id: "f1", name: "tz.pdf", sizeLabel: "210 KB" }],
-    photos: [],
-  },
-  {
-    id: "t2",
-    statusId: "in_progress",
-    title: "Обновить набор иконок",
-    flagged: false,
-    expanded: false,
-    dateRangeLabel: "14.09 - 16.09",
-    subtaskCountLabel: "1/2",
-    fileCount: 5,
-    members: [
-      {
-        id: "u1",
-        initials: "MK",
-        name: "Malika Karimova",
-        avatarUrl: "https://i.pravatar.cc/64?u=u1",
-        readStatus: "seen",
-      },
-      {
-        id: "u2",
-        initials: "HC",
-        name: "Husan Choriyev",
-        avatarUrl: "https://i.pravatar.cc/64?u=u2",
-        readStatus: "seen",
-      },
-      {
-        id: "u3",
-        initials: "TK",
-        name: "Tohir Qodirov",
-        avatarUrl: "https://i.pravatar.cc/100?u=u5",
-        readStatus: "sent",
-      },
-    ],
-    overflowCount: 7,
-    statusLabel: "В процессе",
-    statusColor: "brand",
-    description: "Единый визуальный язык для всех разделов.",
-    descriptionAudio: {
-      url: "https://www.w3schools.com/html/horse.ogg",
-      durationLabel: "0:14",
-    },
-    projectTag: "РЕДИЗАЙН",
-    subtasks: [
-      { id: "s1", label: "Список иконок", checked: true },
-      { id: "s2", label: "Иконки навигации", checked: false },
-    ],
-    files: [{ id: "f1", name: "tz-redesign.pdf", sizeLabel: "840 KB" }],
-    photos: [
-      { id: "p1", url: "https://picsum.photos/seed/icon-set-1/1920/1080" },
-      { id: "p2", url: "https://picsum.photos/seed/icon-set-2/1920/1080" },
-      { id: "p3", url: "https://picsum.photos/seed/icon-set-3/1920/1080" },
-    ],
-  },
-  {
-    id: "t3",
-    statusId: "done",
-    title: "Onboarding oqimini yangilash",
-    flagged: false,
-    expanded: false,
-    dateRangeLabel: "08.09 - 10.09",
-    subtaskCountLabel: "3/3",
-    fileCount: 2,
-    members: [
-      {
-        id: "u4",
-        initials: "AB",
-        name: "Aziz Boltayev",
-        avatarUrl: "https://i.pravatar.cc/64?u=u4",
-        readStatus: "seen",
-      },
-      {
-        id: "u5",
-        initials: "DN",
-        name: "Dilnoza Nazarova",
-        avatarUrl: "https://i.pravatar.cc/64?u=u5",
-        readStatus: "seen",
-      },
-    ],
-    statusLabel: "Bajarildi",
-    statusColor: "success",
-    description:
-      "Yangi foydalanuvchilar uchun onboarding ekranlari yangilandi.",
-    projectTag: "ONBOARDING",
-    subtasks: [
-      { id: "s1", label: "Wireframe", checked: true },
-      { id: "s2", label: "UI dizayn", checked: true },
-      { id: "s3", label: "Ko'rib chiqish", checked: true },
-    ],
-    files: [],
-    photos: [],
-  },
-  {
-    id: "t4",
-    statusId: "failed",
-    title: "API integratsiyasini yakunlash",
-    flagged: true,
-    expanded: false,
-    dateRangeLabel: "05.09 - 09.09",
-    subtaskCountLabel: "1/4",
-    fileCount: 0,
-    members: [
-      {
-        id: "u6",
-        initials: "RZ",
-        name: "Rustam Zokirov",
-        avatarUrl: "https://i.pravatar.cc/64?u=u6",
-        readStatus: "sent",
-      },
-    ],
-    statusLabel: "Просрочено",
-    statusColor: "error",
-    description:
-      "Backend bilan asosiy endpointlar ulanmagan, muddat o'tib ketdi.",
-    projectTag: "BACKEND",
-    subtasks: [
-      { id: "s1", label: "Auth", checked: true },
-      { id: "s2", label: "Tasks API", checked: false },
-      { id: "s3", label: "Workspace API", checked: false },
-      { id: "s4", label: "Testlash", checked: false },
-    ],
-    files: [],
-    photos: [],
-  },
-];
+function TaskCardSkeleton() {
+  return <div className="h-[132px] animate-pulse rounded-input border border-subtle bg-surface" />;
+}
+
+function TasksEmptyState({ statusLabel }: { statusLabel: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 py-12 text-center">
+      <span className="flex size-11 items-center justify-center rounded-avatar bg-surface-secondary text-secondary">
+        <LuListChecks size={20} />
+      </span>
+      <p className="text-sm font-medium text-primary">
+        Sizda "{statusLabel}" vazifalar yo'q
+      </p>
+      <p className="text-xs text-secondary">
+        Boshqa statusni tanlang
+      </p>
+    </div>
+  );
+}
+
+function formatDueLabel(task: RawTask): string {
+  if (!task.due_at) return "Muddatsiz";
+  const d = new Date(task.due_at);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${day}.${month} ${hh}:${mm}`;
+}
 
 interface TasksNavigationState {
   /** /calendar'dan "shu kunga o't" bilan kelganda beriladi — YYYY-MM-DD. */
@@ -419,9 +175,27 @@ export default function FeatureTasks() {
     count: activeProjectCounts?.[meta.countKey] ?? 0,
   }));
 
-  const [sort, setSort] = useState("deadline");
+  const [sort, setSort] = useState<keyof typeof SORT_TO_API>("deadline");
   const [statusId, setStatusId] = useState("in_progress");
-  const [tasks, setTasks] = useState(INITIAL_TASKS);
+  const activeStatusMeta = STATUS_META.find((m) => m.id === statusId);
+
+  const tasksQuery = useTasksList(organizationId, activeTabId, {
+    status: activeStatusMeta?.countKey as TaskStatus | undefined,
+    sort_by: SORT_TO_API[sort],
+    date: selectedDate,
+    limit: 100,
+  });
+  const tasks = tasksQuery.data?.tasks ?? [];
+
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+  const toggleExpanded = (id: number) =>
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
   // "Bajarildi"ga o'tkazishdan oldin, hali bajarilmagan subtasklar bo'lsa,
@@ -431,60 +205,90 @@ export default function FeatureTasks() {
     nextStatusId: string;
   } | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const { data: projectMembersForTask, isPending: isProjectMembersPending } =
+    useProjectMembersForTask(organizationId, activeTabId, isAddOpen);
 
-  const updateTask = (id: string, patch: Partial<DemoTask>) => {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+  const [errorToast, setErrorToast] = useState<string | null>(null);
+  useEffect(() => {
+    if (!errorToast) return;
+    const t = setTimeout(() => setErrorToast(null), 4000);
+    return () => clearTimeout(t);
+  }, [errorToast]);
+
+  const createTask = useCreateTask(organizationId, activeTabId);
+  const updateTask = useUpdateTask(organizationId, activeTabId);
+  const deleteTask = useDeleteTask(organizationId, activeTabId);
+  const uploadFile = useUploadTaskFile(organizationId, activeTabId);
+
+  const addTask = async (values: TaskModalAddValues) => {
+    if (!organizationId || !activeTabId) return;
+    try {
+      let descriptionPayload: string | { type: "audio"; file_id: number } | undefined;
+      if (values.descriptionAudio) {
+        const audioFile = new File(
+          [values.descriptionAudio.blob],
+          "voice-note.webm",
+          { type: values.descriptionAudio.blob.type || "audio/webm" },
+        );
+        const uploaded = await uploadFile.mutateAsync({
+          file: audioFile,
+          kind: "description_audio",
+        });
+        descriptionPayload = { type: "audio", file_id: uploaded[0].id };
+      } else if (values.description) {
+        descriptionPayload = values.description;
+      }
+
+      let fileIds: number[] | undefined;
+      if (values.files.length > 0) {
+        const uploads = await Promise.all(
+          values.files.map((f) => uploadFile.mutateAsync({ file: f.file, kind: "attachment" })),
+        );
+        fileIds = uploads.flatMap((uploadedFiles) => uploadedFiles.map((f) => f.id));
+      }
+
+      const members = values.assignees.map((a) => ({ user_id: Number(a.id) }));
+      const subtasks = values.subtasks.map((s) => ({ name: s.label, checked: s.checked }));
+
+      await createTask.mutateAsync({
+        title: values.title,
+        members,
+        description: descriptionPayload,
+        priority: values.priority,
+        due_at: values.dueAt,
+        file_ids: fileIds,
+        subtasks,
+      });
+    } catch (err) {
+      setErrorToast(getErrorMessage(err));
+      // Qayta tashlanadi — TaskModalAdd shuni ko'rib, drawer'ni yopmay ochiq qoldiradi.
+      throw err;
+    }
   };
 
-  const addTask = ({ title, description }: TaskModalAddValues) => {
-    const assigned = STATUS_META.find((meta) => meta.id === "assigned")!;
-    setTasks((prev) => [
-      ...prev,
-      {
-        id: `t${Date.now()}`,
-        statusId: assigned.id,
-        title,
-        flagged: false,
-        expanded: false,
-        dateRangeLabel: "",
-        subtaskCountLabel: "0/0",
-        fileCount: 0,
-        members: [],
-        statusLabel: assigned.label,
-        statusColor: assigned.color,
-        description,
-        projectTag: "",
-        subtasks: [],
-        files: [],
-        photos: [],
-      },
-    ]);
-  };
-
-  const editingTask = tasks.find((t) => t.id === editingTaskId);
-  const deletingTask = tasks.find((t) => t.id === deletingTaskId);
+  const editingTask = tasks.find((t) => String(t.id) === editingTaskId);
+  const deletingTask = tasks.find((t) => String(t.id) === deletingTaskId);
 
   const applyStatusChange = (taskId: string, nextStatusId: string) => {
     const meta = STATUS_META.find((m) => m.id === nextStatusId);
     if (!meta) return;
-    updateTask(taskId, {
-      statusId: nextStatusId,
-      statusLabel: meta.label,
-      statusColor: meta.color,
-    });
+    updateTask.mutate(
+      { taskId, payload: { status: meta.countKey } },
+      { onError: (err) => setErrorToast(getErrorMessage(err)) },
+    );
   };
 
-  const requestStatusChange = (task: DemoTask, nextStatusId: string) => {
+  const requestStatusChange = (task: RawTask, nextStatusId: string) => {
     const hasUnfinishedSubtasks = task.subtasks.some((s) => !s.checked);
     if (nextStatusId === "done" && hasUnfinishedSubtasks) {
-      setPendingStatusChange({ taskId: task.id, nextStatusId });
+      setPendingStatusChange({ taskId: String(task.id), nextStatusId });
       return;
     }
-    applyStatusChange(task.id, nextStatusId);
+    applyStatusChange(String(task.id), nextStatusId);
   };
 
   const pendingTask = pendingStatusChange
-    ? tasks.find((t) => t.id === pendingStatusChange.taskId)
+    ? tasks.find((t) => String(t.id) === pendingStatusChange.taskId)
     : undefined;
 
   // Bugungi kun bo'lsa — oddiy matn; kalendardan boshqa sana bilan kelingan
@@ -519,8 +323,8 @@ export default function FeatureTasks() {
         <PageTitleDynamic
           title="Mening vazifalarim"
           date={dateLabel}
-          doneCount={1}
-          totalCount={6}
+          doneCount={activeProjectCounts?.done ?? 0}
+          totalCount={activeProjectCounts?.total ?? 0}
           statusLabel="Выполнено"
         />
         <ProjectsTabs
@@ -531,7 +335,7 @@ export default function FeatureTasks() {
         <FilterSectionTask
           label="ПО СРОКАМ"
           value={sort}
-          onValueChange={setSort}
+          onValueChange={(v) => setSort(v as keyof typeof SORT_TO_API)}
           menulist={SORT_OPTIONS}
         />
         <StatusTab
@@ -541,48 +345,93 @@ export default function FeatureTasks() {
           className="sticky top-0 z-sticky -mx-4 bg-canvas px-4 py-2"
         />
 
-        {tasks
-          .filter((task) => task.statusId === statusId)
-          .map((task) => (
-            <TaskCard
-              key={task.id}
-              title={task.title}
-              statusOptions={STATUS_MENU_OPTIONS}
-              statusId={task.statusId}
-              onStatusChange={(nextStatusId) =>
-                requestStatusChange(task, nextStatusId)
-              }
-              flagged={task.flagged}
-              dateRangeLabel={task.dateRangeLabel}
-              subtaskCountLabel={task.subtaskCountLabel}
-              fileCount={task.fileCount}
-              members={task.members}
-              overflowCount={task.overflowCount}
-              statusLabel={task.statusLabel}
-              statusColor={task.statusColor}
-              expanded={task.expanded}
-              onToggleExpanded={() =>
-                updateTask(task.id, { expanded: !task.expanded })
-              }
-              description={task.description}
-              descriptionAudio={task.descriptionAudio}
-              projectTag={task.projectTag}
-              subtasks={task.subtasks}
-              onSubtaskChange={(id, checked) =>
-                updateTask(task.id, {
-                  subtasks: task.subtasks.map((s) =>
-                    s.id === id ? { ...s, checked } : s,
-                  ),
-                })
-              }
-              photos={task.photos}
-              files={task.files}
-              onDownloadFile={() => {}}
-              onAttachFile={() => {}}
-              onDelete={() => setDeletingTaskId(task.id)}
-              onEdit={() => setEditingTaskId(task.id)}
-            />
-          ))}
+        {tasksQuery.isPending ? (
+          <>
+            <TaskCardSkeleton />
+            <TaskCardSkeleton />
+          </>
+        ) : tasksQuery.isError ? (
+          <p className="px-1 text-sm text-error-strong">
+            Vazifalarni yuklab bo'lmadi.
+          </p>
+        ) : tasks.length === 0 ? (
+          <TasksEmptyState statusLabel={activeStatusMeta?.label ?? ""} />
+        ) : (
+          tasks.map((task) => {
+            const expanded = expandedIds.has(task.id);
+            const meta = STATUS_META.find((m) => m.countKey === task.status);
+            const descriptionAudioFile = task.files.find(
+              (f) => f.kind === "description_audio",
+            );
+            const attachments = task.files.filter((f) => f.kind === "attachment");
+            const imageAttachments = attachments.filter((f) =>
+              f.mime_type.startsWith("image/"),
+            );
+            const nonImageAttachments = attachments.filter(
+              (f) => !f.mime_type.startsWith("image/"),
+            );
+            return (
+              <TaskCard
+                key={task.id}
+                title={task.title}
+                statusOptions={STATUS_MENU_OPTIONS}
+                statusId={meta?.id ?? "assigned"}
+                onStatusChange={(nextStatusId) => requestStatusChange(task, nextStatusId)}
+                priority={task.priority}
+                dateRangeLabel={formatDueLabel(task)}
+                subtaskCountLabel={`${task.subtasks.filter((s) => s.checked).length}/${task.subtasks.length}`}
+                fileCount={attachments.length}
+                members={task.members.map(toTaskMemberCard)}
+                statusLabel={meta?.label ?? ""}
+                statusColor={meta?.color ?? "gray"}
+                expanded={expanded}
+                onToggleExpanded={() => toggleExpanded(task.id)}
+                description={task.description_type === "text" ? (task.description ?? "") : ""}
+                descriptionAudio={
+                  descriptionAudioFile
+                    ? { url: descriptionAudioFile.url, durationLabel: "0:00" }
+                    : undefined
+                }
+                projectTag={projects.find((p) => p.id === task.project_id)?.name ?? ""}
+                subtasks={task.subtasks.map((s) => ({
+                  id: String(s.id),
+                  label: s.name,
+                  checked: s.checked,
+                }))}
+                onSubtaskChange={(id, checked) =>
+                  updateTask.mutate(
+                    {
+                      taskId: String(task.id),
+                      payload: {
+                        subtasks: task.subtasks.map((s) => ({
+                          name: s.name,
+                          checked: String(s.id) === id ? checked : s.checked,
+                        })),
+                      },
+                    },
+                    { onError: (err) => setErrorToast(getErrorMessage(err)) },
+                  )
+                }
+                photos={imageAttachments.map((f) => ({
+                  id: String(f.id),
+                  url: f.url,
+                }))}
+                files={nonImageAttachments.map((f) => ({
+                  id: String(f.id),
+                  name: f.file_name,
+                  sizeLabel: `${Math.round(f.size_bytes / 1024)} KB`,
+                }))}
+                onDownloadFile={(id) => {
+                  const file = task.files.find((f) => String(f.id) === id);
+                  if (file) window.open(file.url, "_blank", "noopener,noreferrer");
+                }}
+                onAttachFile={() => {}}
+                onDelete={() => setDeletingTaskId(String(task.id))}
+                onEdit={() => setEditingTaskId(String(task.id))}
+              />
+            );
+          })
+        )}
       </div>
 
       <CusDialog
@@ -665,6 +514,8 @@ export default function FeatureTasks() {
         open={isAddOpen}
         onClose={() => setIsAddOpen(false)}
         onSubmit={addTask}
+        members={projectMembersForTask ?? []}
+        isLoadingMembers={isProjectMembersPending}
       />
 
       <TaskModalEdit
@@ -672,10 +523,16 @@ export default function FeatureTasks() {
         onClose={() => setEditingTaskId(null)}
         initialValues={{
           title: editingTask?.title ?? "",
-          description: editingTask?.description ?? "",
+          description:
+            editingTask?.description_type === "text" ? (editingTask?.description ?? "") : "",
         }}
         onSubmit={(values) => {
-          if (editingTaskId) updateTask(editingTaskId, values);
+          if (editingTaskId) {
+            updateTask.mutate(
+              { taskId: editingTaskId, payload: values },
+              { onError: (err) => setErrorToast(getErrorMessage(err)) },
+            );
+          }
         }}
       />
 
@@ -683,10 +540,36 @@ export default function FeatureTasks() {
         open={deletingTaskId !== null}
         onClose={() => setDeletingTaskId(null)}
         taskTitle={deletingTask?.title}
-        onConfirm={() =>
-          setTasks((prev) => prev.filter((t) => t.id !== deletingTaskId))
-        }
+        onConfirm={() => {
+          if (deletingTaskId) {
+            deleteTask.mutate(deletingTaskId, {
+              onError: (err) => setErrorToast(getErrorMessage(err)),
+            });
+          }
+        }}
       />
+
+      {errorToast && (
+        <div
+          className="fixed inset-x-4 top-4 z-toast flex items-center gap-2 rounded-card border px-4 py-3 shadow-md"
+          style={{
+            background: "var(--status-error-bg)",
+            borderColor: "var(--status-error-text)",
+            color: "var(--status-error-text)",
+          }}
+        >
+          <LuTriangleAlert size={16} className="flex-none" />
+          <span className="flex-1 text-sm font-medium">{errorToast}</span>
+          <button
+            type="button"
+            aria-label="Yopish"
+            onClick={() => setErrorToast(null)}
+            className="flex-none"
+          >
+            <LuX size={14} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
