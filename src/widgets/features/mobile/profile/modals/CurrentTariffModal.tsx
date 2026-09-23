@@ -25,15 +25,15 @@ export function CurrentTariffModal({ open, onClose }: CurrentTariffModalProps) {
       closeOnEscape={false}
       title="Mening tariflarim"
     >
-      <CusCardbox>
+      <CusCardbox className="rounded-card">
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-base font-semibold">{CURRENT_TARIFF.name}</div>
-            <div className="mt-0.5 text-sm text-[var(--text-muted)]">
+            <div className="mt-0.5 text-sm text-secondary">
               {CURRENT_TARIFF.description}
             </div>
           </div>
-          <span className="flex-none whitespace-nowrap bg-[var(--vio-10)] px-2.5 py-1 text-[11px] font-semibold tracking-wide text-vio">
+          <span className="flex-none whitespace-nowrap rounded-chip bg-brand-subtle px-2.5 py-1 text-[11px] font-semibold tracking-wide text-brand">
             {CURRENT_TARIFF.validUntil} gacha
           </span>
         </div>

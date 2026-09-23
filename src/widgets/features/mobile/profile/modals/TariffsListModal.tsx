@@ -22,15 +22,13 @@ export function TariffsListModal({ open, onClose }: TariffsListModalProps) {
       closeOnEscape={false}
       title="Tariflar va narxlar"
     >
-      <CusCardbox>
+      <CusCardbox className="rounded-card">
         {isPending && (
-          <p className="text-sm text-[var(--text-muted)]">
-            Yuklanmoqda...
-          </p>
+          <p className="text-sm text-secondary">Yuklanmoqda...</p>
         )}
 
         {isError && (
-          <p className="text-sm text-[var(--text-muted)]">
+          <p className="text-sm text-secondary">
             Tariflarni olishda xatolik yuz berdi
           </p>
         )}
@@ -41,7 +39,7 @@ export function TariffsListModal({ open, onClose }: TariffsListModalProps) {
               <div key={tariff.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
                 <div className="min-w-0 flex-1">
                   <div className="font-medium">{tariff.name}</div>
-                  <div className="text-sm text-[var(--text-muted)]">
+                  <div className="text-sm text-secondary">
                     {tariff.price} {tariff.currency}
                   </div>
                 </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LuChevronRight, LuSettings } from "react-icons/lu";
+import { LuChevronRight, LuSlidersVertical } from "react-icons/lu";
 import { CusPageTitle } from "@/components/ui/page-title/CusPageTitle";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { ProfileUserCard } from "./components/ProfileUserCard";
@@ -24,20 +24,14 @@ export default function FeatureProfile() {
 
       <ProfileUserCard onEdit={() => setActiveDrawer("edit-profile")} />
 
-      <CusCardbox style={{ padding: 0 }}>
+      <CusCardbox style={{ padding: 0 }} className="rounded-card">
         <button
           onClick={() => setActiveDrawer("settings")}
-          className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-[var(--bg-hover)]"
+          className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-surface-secondary"
         >
-          <LuSettings
-            size={18}
-            className="flex-none text-[var(--text-muted)]"
-          />
+          <LuSlidersVertical size={18} className="flex-none text-secondary" />
           <span className="flex-1 text-sm font-medium">Sozlamalar</span>
-          <LuChevronRight
-            size={16}
-            className="flex-none text-[var(--text-muted)]"
-          />
+          <LuChevronRight size={16} className="flex-none text-secondary" />
         </button>
       </CusCardbox>
 

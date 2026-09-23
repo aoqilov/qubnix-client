@@ -36,8 +36,7 @@ const TriggerButton = forwardRef<HTMLButtonElement, TriggerButtonProps>(
       <button
         ref={ref}
         {...rest}
-        className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-medium transition ${className ?? ""}`}
-        style={{ background: "var(--vio-10)", color: "var(--vio)" }}
+        className={`flex items-center gap-1 rounded-full bg-brand-subtle px-2.5 py-1 text-sm font-medium text-brand transition ${className ?? ""}`}
       >
         <span>{label}</span>
         <LuChevronDown
@@ -81,7 +80,7 @@ export function ProfileSettingsModal({ open, onClose }: ProfileSettingsModalProp
     >
       <CusCardbox
         style={{ padding: 0 }}
-        className="flex flex-col divide-y divide-[var(--border-default)]"
+        className="flex flex-col divide-y divide-[var(--border-default)] rounded-card"
       >
         <div className="flex items-center gap-3 px-4 py-3 text-sm">
           <span>Rejim</span>

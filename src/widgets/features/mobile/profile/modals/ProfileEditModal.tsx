@@ -80,7 +80,7 @@ export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
                 preview={false}
               />
             ) : (
-              <span className="flex h-14 w-14 items-center justify-center bg-vio font-condensed text-xl text-[var(--text-on-accent)]">
+              <span className="flex h-14 w-14 items-center justify-center rounded-card bg-brand font-condensed text-xl text-on-brand">
                 {getInitials(fullName || user.fullName)}
               </span>
             )}
@@ -88,8 +88,7 @@ export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               aria-label="Rasmni almashtirish"
-              className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[var(--bg-second)] text-[var(--text-on-accent)]"
-              style={{ background: "var(--vio)" }}
+              className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[var(--bg-surface)] bg-brand text-on-brand"
             >
               <LuCamera size={12} />
             </button>
@@ -101,7 +100,7 @@ export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
               onChange={handleFileChange}
             />
           </div>
-          <div className="text-sm text-[var(--text-muted)]">
+          <div className="text-sm text-secondary">
             Rasmni almashtirish uchun kamera belgisini bosing
           </div>
         </div>

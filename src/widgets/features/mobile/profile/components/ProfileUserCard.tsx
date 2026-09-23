@@ -21,7 +21,7 @@ export function ProfileUserCard({ onEdit }: ProfileUserCardProps) {
   if (!user) return null;
 
   return (
-    <CusCardbox className="flex items-center gap-4">
+    <CusCardbox className="flex items-center gap-4 rounded-card">
       {user.avatarUrl ? (
         <CusImagePreview
           src={user.avatarUrl}
@@ -32,25 +32,22 @@ export function ProfileUserCard({ onEdit }: ProfileUserCardProps) {
           preview={true}
         />
       ) : (
-        <span className="flex h-14 w-14 flex-none items-center justify-center bg-vio font-condensed text-xl text-[var(--text-on-accent)]">
+        <span className="flex h-14 w-14 flex-none items-center justify-center rounded-card bg-brand font-condensed text-xl text-on-brand">
           {getInitials(user.fullName)}
         </span>
       )}
       <div className="min-w-0 flex-1">
         <div className="text-lg font-semibold">{user.fullName}</div>
-        <div className="mt-0.5 text-sm text-[var(--text-muted)]">
-          {user.phone ? `  ${user.phone}` : ""}
-        </div>
+        {user.phone && (
+          <div className="mt-0.5 text-sm text-secondary">{user.phone}</div>
+        )}
       </div>
       <button
         onClick={onEdit}
         aria-label="Profilni tahrirlash"
-        className="flex-none rounded-lg p-2 transition hover:bg-[var(--bg-hover)]"
+        className="flex-none rounded-lg p-2 transition hover:bg-surface-secondary"
       >
-        <LuPencil
-          size={16}
-          className="text-[var(--text-muted)]"
-        />
+        <LuPencil size={16} className="text-secondary" />
       </button>
     </CusCardbox>
   );
