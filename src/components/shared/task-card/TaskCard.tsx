@@ -185,16 +185,20 @@ function TaskCard({
           bg="var(--bg-surface-secondary, #E2E8F0)"
         />
         <div className="flex items-center gap-2">
-          <TaskMetaBadge
-            icon={<LuSquareCheck size={14} />}
-            label={subtaskCountLabel}
-            bg="color-mix(in srgb, var(--accent-orange) 16%, transparent)"
-          />
-          <TaskMetaBadge
-            icon={<LuPaperclip size={14} />}
-            label={String(fileCount)}
-            bg="var(--status-error-bg)"
-          />
+          {Number(subtaskCountLabel.split("/")[1] ?? 0) > 0 && (
+            <TaskMetaBadge
+              icon={<LuSquareCheck size={14} />}
+              label={subtaskCountLabel}
+              bg="color-mix(in srgb, var(--accent-orange) 16%, transparent)"
+            />
+          )}
+          {fileCount > 0 && (
+            <TaskMetaBadge
+              icon={<LuPaperclip size={14} />}
+              label={String(fileCount)}
+              bg="var(--status-error-bg)"
+            />
+          )}
         </div>
       </div>
 

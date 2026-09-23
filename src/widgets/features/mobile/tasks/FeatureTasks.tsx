@@ -29,13 +29,14 @@ import TaskAddButton, {
   TASK_ADD_BUTTON_OFFSET,
 } from "@/components/shared/task-button/TaskAddButton";
 import TaskModalAdd, { type TaskModalAddValues } from "@/components/shared/task-modals/TaskModalAdd";
-import TaskModalEdit from "@/components/shared/task-modals/TaskModalEdit";
+import TaskModalEdit, { type TaskModalEditValues } from "@/components/shared/task-modals/TaskModalEdit";
 import TaskModalDelete from "@/components/shared/task-modals/TaskModalDelete";
 import {
   toTaskMemberCard,
   useCreateTask,
   useDeleteTask,
   useProjectMembersForTask,
+  useRemoveTaskFile,
   useTasksList,
   useUpdateTask,
   useUploadTaskFile,
@@ -206,7 +207,7 @@ export default function FeatureTasks() {
   } | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const { data: projectMembersForTask, isPending: isProjectMembersPending } =
-    useProjectMembersForTask(organizationId, activeTabId, isAddOpen);
+    useProjectMembersForTask(organizationId, activeTabId, isAddOpen || editingTaskId !== null);
 
   const [errorToast, setErrorToast] = useState<string | null>(null);
   useEffect(() => {
@@ -219,6 +220,7 @@ export default function FeatureTasks() {
   const updateTask = useUpdateTask(organizationId, activeTabId);
   const deleteTask = useDeleteTask(organizationId, activeTabId);
   const uploadFile = useUploadTaskFile(organizationId, activeTabId);
+  const removeFile = useRemoveTaskFile(organizationId, activeTabId);
 
   const addTask = async (values: TaskModalAddValues) => {
     if (!organizationId || !activeTabId) return;
@@ -262,6 +264,64 @@ export default function FeatureTasks() {
     } catch (err) {
       setErrorToast(getErrorMessage(err));
       // Qayta tashlanadi — TaskModalAdd shuni ko'rib, drawer'ni yopmay ochiq qoldiradi.
+      throw err;
+    }
+  };
+
+  const editTask = async (values: TaskModalEditValues) => {
+    if (!organizationId || !activeTabId || !editingTaskId) return;
+    try {
+      let descriptionPayload: string | { type: "audio"; file_id: number } | null | undefined;
+      if (values.descriptionMode === "text") {
+        descriptionPayload = values.description;
+      } else if (values.descriptionAudio) {
+        const audioFile = new File(
+          [values.descriptionAudio.blob],
+          "voice-note.webm",
+          { type: values.descriptionAudio.blob.type || "audio/webm" },
+        );
+        const uploaded = await uploadFile.mutateAsync({
+          file: audioFile,
+          kind: "description_audio",
+        });
+        descriptionPayload = { type: "audio", file_id: uploaded[0].id };
+      } else if (values.audioRemoved) {
+        descriptionPayload = null;
+        if (values.removedAudioFileId) {
+          await removeFile.mutateAsync({ taskId: editingTaskId, fileId: values.removedAudioFileId });
+        }
+      }
+      // aks holda (ovozli izoh o'zgartirilmagan) — description umuman yuborilmaydi.
+
+      for (const fileId of values.removedFileIds) {
+        await removeFile.mutateAsync({ taskId: editingTaskId, fileId });
+      }
+
+      let fileIds: number[] | undefined;
+      if (values.newFiles.length > 0) {
+        const uploads = await Promise.all(
+          values.newFiles.map((f) => uploadFile.mutateAsync({ file: f.file, kind: "attachment" })),
+        );
+        fileIds = uploads.flatMap((uploadedFiles) => uploadedFiles.map((f) => f.id));
+      }
+
+      const members = values.assignees.map((a) => ({ user_id: Number(a.id) }));
+      const subtasks = values.subtasks.map((s) => ({ name: s.label, checked: s.checked }));
+
+      await updateTask.mutateAsync({
+        taskId: editingTaskId,
+        payload: {
+          title: values.title,
+          members,
+          description: descriptionPayload,
+          priority: values.priority,
+          due_at: values.dueAt,
+          file_ids: fileIds,
+          subtasks,
+        },
+      });
+    } catch (err) {
+      setErrorToast(getErrorMessage(err));
       throw err;
     }
   };
@@ -521,19 +581,10 @@ export default function FeatureTasks() {
       <TaskModalEdit
         open={editingTaskId !== null}
         onClose={() => setEditingTaskId(null)}
-        initialValues={{
-          title: editingTask?.title ?? "",
-          description:
-            editingTask?.description_type === "text" ? (editingTask?.description ?? "") : "",
-        }}
-        onSubmit={(values) => {
-          if (editingTaskId) {
-            updateTask.mutate(
-              { taskId: editingTaskId, payload: values },
-              { onError: (err) => setErrorToast(getErrorMessage(err)) },
-            );
-          }
-        }}
+        task={editingTask ?? null}
+        members={projectMembersForTask ?? []}
+        isLoadingMembers={isProjectMembersPending}
+        onSubmit={editTask}
       />
 
       <TaskModalDelete

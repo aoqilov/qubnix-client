@@ -100,7 +100,7 @@ function IconToggle({
       type="button"
       aria-label={ariaLabel}
       onClick={onClick}
-      className="flex size-7 items-center justify-center rounded-full"
+      className="flex size-9 items-center justify-center rounded-full"
       style={
         active
           ? {
@@ -427,7 +427,7 @@ function TaskModalAdd({
                   type="button"
                   aria-label="Matn"
                   onClick={() => setDescriptionMode("text")}
-                  className="flex size-7 items-center justify-center rounded-full"
+                  className="flex size-9 items-center justify-center rounded-full"
                   style={
                     descriptionMode === "text"
                       ? {
@@ -437,13 +437,13 @@ function TaskModalAdd({
                       : { color: "var(--text-secondary)" }
                   }
                 >
-                  <LuType size={14} />
+                  <LuType size={16} />
                 </button>
                 <button
                   type="button"
                   aria-label="Ovoz"
                   onClick={() => setDescriptionMode("voice")}
-                  className="flex size-7 items-center justify-center rounded-full"
+                  className="flex size-9 items-center justify-center rounded-full"
                   style={
                     descriptionMode === "voice"
                       ? {
@@ -453,7 +453,7 @@ function TaskModalAdd({
                       : { color: "var(--text-secondary)" }
                   }
                 >
-                  <LuMic size={14} />
+                  <LuMic size={16} />
                 </button>
               </div>
             </div>
@@ -477,13 +477,13 @@ function TaskModalAdd({
               </span>
               <div className="flex gap-1 rounded-full border border-default bg-surface p-1">
                 <IconToggle
-                  icon={<LuCalendar size={14} />}
+                  icon={<LuCalendar size={16} />}
                   ariaLabel="Sanani tanlash"
                   active={activeDueIcon === "custom"}
                   onClick={() => setDueMode("custom")}
                 />
                 <IconToggle
-                  icon={<LuClock size={14} />}
+                  icon={<LuClock size={16} />}
                   ariaLabel="Tezkor vaqt tanlash"
                   active={activeDueIcon === "quick"}
                   onClick={() => setDueMode("quick")}

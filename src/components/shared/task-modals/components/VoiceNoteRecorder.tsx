@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { LuMic, LuSquare, LuTrash2 } from "react-icons/lu";
+import { LuCheck, LuMic, LuPause, LuPlay, LuTrash2, LuX } from "react-icons/lu";
 
 export interface VoiceNoteValue {
   url: string;
@@ -19,23 +19,46 @@ function formatDuration(totalSeconds: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+type Phase = "idle" | "recording" | "review";
+
+interface ReviewRecording {
+  url: string;
+  blob: Blob;
+}
+
+// Telegram uslubidagi "bosib turib yozish": mikrofonni bosib turgancha
+// yozadi, qo'yib yuborganda to'xtaydi va Qabul qilish/Bekor qilish
+// tugmalari chiqadi — faqat Qabul qilinganda `onChange` chaqiriladi.
 export function VoiceNoteRecorder({ value, onChange }: VoiceNoteRecorderProps) {
-  const [isRecording, setIsRecording] = useState(false);
+  const [phase, setPhase] = useState<Phase>("idle");
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [review, setReview] = useState<ReviewRecording | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  function togglePlay() {
+    const el = audioRef.current;
+    if (!el) return;
+    if (isPlaying) el.pause();
+    else el.play();
+  }
 
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       streamRef.current?.getTracks().forEach((track) => track.stop());
+      if (review) URL.revokeObjectURL(review.url);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function startRecording() {
+    if (phase !== "idle") return;
     setError(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -47,13 +70,14 @@ export function VoiceNoteRecorder({ value, onChange }: VoiceNoteRecorderProps) {
       };
       recorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        onChange({ url: URL.createObjectURL(blob), durationLabel: formatDuration(elapsed), blob });
+        setReview({ url: URL.createObjectURL(blob), blob });
+        setPhase("review");
         stream.getTracks().forEach((track) => track.stop());
       };
       recorder.start();
       recorderRef.current = recorder;
       setElapsed(0);
-      setIsRecording(true);
+      setPhase("recording");
       timerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000);
     } catch {
       setError("Mikrofonga ruxsat berilmadi");
@@ -61,17 +85,48 @@ export function VoiceNoteRecorder({ value, onChange }: VoiceNoteRecorderProps) {
   }
 
   function stopRecording() {
+    if (phase !== "recording") return;
     recorderRef.current?.stop();
-    setIsRecording(false);
     if (timerRef.current) clearInterval(timerRef.current);
   }
 
-  if (value && !isRecording) {
+  function handleAccept() {
+    if (!review) return;
+    audioRef.current?.pause();
+    setIsPlaying(false);
+    onChange({ url: review.url, durationLabel: formatDuration(elapsed), blob: review.blob });
+    setReview(null);
+    setPhase("idle");
+  }
+
+  function handleDiscard() {
+    audioRef.current?.pause();
+    setIsPlaying(false);
+    if (review) URL.revokeObjectURL(review.url);
+    setReview(null);
+    setPhase("idle");
+    setElapsed(0);
+  }
+
+  if (value && phase === "idle") {
     return (
       <div className="flex items-center gap-3 rounded-input border border-default bg-surface p-3">
-        <span className="flex size-9 flex-none items-center justify-center rounded-avatar bg-brand text-on-brand">
-          <LuMic size={16} />
-        </span>
+        <audio
+          ref={audioRef}
+          src={value.url}
+          style={{ display: "none" }}
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onEnded={() => setIsPlaying(false)}
+        />
+        <button
+          type="button"
+          onClick={togglePlay}
+          aria-label={isPlaying ? "To'xtatish" : "Tinglash"}
+          className="flex size-9 flex-none items-center justify-center rounded-avatar bg-brand text-on-brand"
+        >
+          {isPlaying ? <LuPause size={16} /> : <LuPlay size={16} style={{ marginLeft: 1 }} />}
+        </button>
         <span className="flex-1 text-sm text-secondary">Ovozli izoh yozildi</span>
         <span className="text-sm font-medium text-primary">{value.durationLabel}</span>
         <button
@@ -87,27 +142,89 @@ export function VoiceNoteRecorder({ value, onChange }: VoiceNoteRecorderProps) {
     );
   }
 
+  if (phase === "review" && review) {
+    return (
+      <div className="flex flex-col gap-2 rounded-input border border-default bg-surface p-3">
+        <div className="flex items-center gap-3">
+          <audio
+            ref={audioRef}
+            src={review.url}
+            style={{ display: "none" }}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onEnded={() => setIsPlaying(false)}
+          />
+          <button
+            type="button"
+            onClick={togglePlay}
+            aria-label={isPlaying ? "To'xtatish" : "Tinglash"}
+            className="flex size-9 flex-none items-center justify-center rounded-avatar"
+            style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
+          >
+            {isPlaying ? <LuPause size={16} /> : <LuPlay size={16} style={{ marginLeft: 1 }} />}
+          </button>
+          <span className="flex-1 text-sm text-secondary">Ovozli izoh tayyor</span>
+          <span className="flex-none text-sm font-medium text-primary">
+            {formatDuration(elapsed)}
+          </span>
+          <button
+            type="button"
+            onClick={handleDiscard}
+            aria-label="Bekor qilish"
+            className="flex size-9 flex-none items-center justify-center rounded-avatar"
+            style={{ color: "var(--status-error-text)" }}
+          >
+            <LuX size={18} />
+          </button>
+          <button
+            type="button"
+            onClick={handleAccept}
+            aria-label="Qabul qilish"
+            className="flex size-9 flex-none items-center justify-center rounded-avatar"
+            style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
+          >
+            <LuCheck size={16} />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2 rounded-input border border-default bg-surface p-3">
       <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={isRecording ? stopRecording : startRecording}
-          aria-label={isRecording ? "To'xtatish" : "Yozib olish"}
-          className="flex size-9 flex-none items-center justify-center rounded-avatar"
-          style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
-        >
-          {isRecording ? <LuSquare size={14} /> : <LuMic size={16} />}
-        </button>
         <div className="h-1 flex-1 overflow-hidden rounded-full bg-surface-secondary">
-          {isRecording && <div className="h-full w-full animate-pulse bg-brand" />}
+          {phase === "recording" && <div className="h-full w-full animate-pulse bg-brand" />}
         </div>
         <span className="flex-none text-sm font-medium text-secondary">
           {formatDuration(elapsed)}
         </span>
+        <button
+          type="button"
+          aria-label={phase === "recording" ? "Yozib olinmoqda — qo'yib yuboring" : "Bosib turib yozib oling"}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            startRecording();
+          }}
+          onPointerUp={stopRecording}
+          onPointerLeave={stopRecording}
+          onPointerCancel={stopRecording}
+          className="flex size-9 flex-none items-center justify-center rounded-avatar select-none"
+          style={{
+            background:
+              phase === "recording" ? "var(--status-error-solid)" : "var(--brand-default)",
+            color: "var(--text-on-brand)",
+            touchAction: "none",
+          }}
+        >
+          <LuMic size={16} />
+        </button>
       </div>
       <p className="text-xs text-secondary">
-        {error ?? "Ovozli eslatma yozish uchun mikrofonni bosing"}
+        {error ??
+          (phase === "recording"
+            ? "Yozib olinmoqda — qo'yib yuboring to'xtatish uchun"
+            : "Yozib olish uchun mikrofonni bosib turing")}
       </p>
     </div>
   );

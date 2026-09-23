@@ -118,3 +118,13 @@ export function useUploadTaskFile(organizationId: string | null, projectId: stri
       taskFilesApi.upload(organizationId!, projectId, file, kind),
   });
 }
+
+/** Tahrirlashda mavjud attachment'ni taskdan olib tashlash uchun. */
+export function useRemoveTaskFile(organizationId: string | null, projectId: string) {
+  const invalidate = useInvalidateTasks(organizationId);
+  return useMutation({
+    mutationFn: ({ taskId, fileId }: { taskId: string; fileId: string }) =>
+      taskFilesApi.remove(organizationId!, projectId, taskId, fileId),
+    onSuccess: invalidate,
+  });
+}

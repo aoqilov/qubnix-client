@@ -71,6 +71,13 @@ export interface CusCalendarProps {
   variant?: "dropdown" | "modal";
   /** Faqat variant="modal" uchun — dialog headeridagi matn. */
   modalTitle?: string;
+  /**
+   * Faqat variant="modal" uchun. false bo'lsa "Bir kunlik"/"Oraliq
+   * kunlarni belgilash" toggle butunlay ko'rsatilmaydi — doim bitta sana
+   * tanlanadi (masalan yillik takrorlanish uchun faqat kun/oy kerak,
+   * oraliq ma'nosiz). Default — true.
+   */
+  allowRange?: boolean;
 }
 
 function formatDisplayValue(v: DateValue[] | undefined): string {
@@ -104,6 +111,7 @@ export function CusCalendar({
   inline = false,
   variant = "dropdown",
   modalTitle,
+  allowRange = true,
 }: CusCalendarProps) {
   const isMonthPicker = minView === "month";
   const resolvedPlaceholder =
@@ -227,37 +235,39 @@ export function CusCalendar({
             }
           >
             <div className="flex flex-col gap-4">
-              <div className="flex gap-1 self-center rounded-full border border-default bg-surface p-1">
-                <button
-                  type="button"
-                  className="rounded-full px-3 py-1.5 text-xs font-medium"
-                  style={
-                    !rangeMode
-                      ? { background: "var(--brand-default)", color: "var(--text-on-brand)" }
-                      : { color: "var(--text-secondary)" }
-                  }
-                  onClick={() => handleModeChange(false)}
-                >
-                  Bir kunlik
-                </button>
-                <button
-                  type="button"
-                  className="rounded-full px-3 py-1.5 text-xs font-medium"
-                  style={
-                    rangeMode
-                      ? { background: "var(--brand-default)", color: "var(--text-on-brand)" }
-                      : { color: "var(--text-secondary)" }
-                  }
-                  onClick={() => handleModeChange(true)}
-                >
-                  Oraliq kunlarni belgilash
-                </button>
-              </div>
+              {allowRange && (
+                <div className="flex gap-1 self-center rounded-full border border-default bg-surface p-1">
+                  <button
+                    type="button"
+                    className="rounded-full px-3 py-1.5 text-xs font-medium"
+                    style={
+                      !rangeMode
+                        ? { background: "var(--brand-default)", color: "var(--text-on-brand)" }
+                        : { color: "var(--text-secondary)" }
+                    }
+                    onClick={() => handleModeChange(false)}
+                  >
+                    Bir kunlik
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-full px-3 py-1.5 text-xs font-medium"
+                    style={
+                      rangeMode
+                        ? { background: "var(--brand-default)", color: "var(--text-on-brand)" }
+                        : { color: "var(--text-secondary)" }
+                    }
+                    onClick={() => handleModeChange(true)}
+                  >
+                    Oraliq kunlarni belgilash
+                  </button>
+                </div>
+              )}
 
               <DatePicker.Root
                 width="100%"
                 inline
-                selectionMode={rangeMode ? "range" : "single"}
+                selectionMode={allowRange && rangeMode ? "range" : "single"}
                 value={tempValue}
                 onValueChange={(details) => setTempValue(details.value)}
                 min={min}
