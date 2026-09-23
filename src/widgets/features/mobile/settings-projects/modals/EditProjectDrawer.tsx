@@ -5,6 +5,7 @@ import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { avatarColorVar } from "@/utils/avatarColor";
 import { ProjectMemberSelectList } from "../components/ProjectMemberSelectList";
+import { RemoveMemberDialog } from "./RemoveMemberDialog";
 import { useAvailableProjectMembers, useUpdateProject } from "../hooks/useApiSettingsProjects";
 import type { ProjectMemberRole, ProjectStatsItem } from "../types";
 
@@ -27,6 +28,7 @@ export function EditProjectDrawer({
   const [isAddingOpen, setAddingOpen] = useState(false);
   // Yangi qo'shilayotgan xodimlar: userId -> rol.
   const [additions, setAdditions] = useState<Record<string, ProjectMemberRole>>({});
+  const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
 
   const updateProject = useUpdateProject(organizationId);
   const availableQuery = useAvailableProjectMembers(
@@ -46,6 +48,7 @@ export function EditProjectDrawer({
       );
       setAddingOpen(false);
       setAdditions({});
+      setRemovingMemberId(null);
       updateProject.reset();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -54,6 +57,7 @@ export function EditProjectDrawer({
   if (!project) return null;
 
   const members = project.members.filter((member) => member.id in keptRoles);
+  const removingMember = members.find((member) => member.id === removingMemberId) ?? null;
 
   const removeMember = (id: string) => {
     setKeptRoles((prev) => {
@@ -61,6 +65,12 @@ export function EditProjectDrawer({
       delete next[id];
       return next;
     });
+  };
+
+  const handleConfirmRemove = () => {
+    if (!removingMemberId) return;
+    removeMember(removingMemberId);
+    setRemovingMemberId(null);
   };
 
   const toggleAddition = (id: string) => {
@@ -173,7 +183,7 @@ export function EditProjectDrawer({
                 variant="outline"
                 colorPalette="red"
                 size="xs"
-                onClick={() => removeMember(member.id)}
+                onClick={() => setRemovingMemberId(member.id)}
               >
                 Убрать
               </CusButton>
@@ -207,6 +217,13 @@ export function EditProjectDrawer({
           </CusButton>
         )}
       </div>
+
+      <RemoveMemberDialog
+        open={removingMemberId !== null}
+        onClose={() => setRemovingMemberId(null)}
+        onConfirm={handleConfirmRemove}
+        memberName={removingMember?.name ?? null}
+      />
     </CusDrawer>
   );
 }

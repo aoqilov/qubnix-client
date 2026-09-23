@@ -9,6 +9,7 @@ import MobileSettings from "@/pages/mobile/MobileSettings";
 import MobileSettingsMembers from "@/pages/mobile/MobileSettingsMembers";
 import MobileSettingsRoles from "@/pages/mobile/MobileSettingsRoles";
 import MobileSettingsProjects from "@/pages/mobile/MobileSettingsProjects";
+import MobileSettingsProjectDetail from "@/pages/mobile/MobileSettingsProjectDetail";
 import MobileSettingsMemberStats from "@/pages/mobile/MobileSettingsMemberStats";
 import MobileSettingsRepeatingTasks from "@/pages/mobile/MobileSettingsRepeatingTasks";
 import MobileSettingsReminders from "@/pages/mobile/MobileSettingsReminders";
@@ -25,6 +26,7 @@ export const mobileRoutes: RouteObject[] = [
   { path: "/settings/members", element: <MobileSettingsMembers /> },
   { path: "/settings/roles", element: <MobileSettingsRoles /> },
   { path: "/settings/projects", element: <MobileSettingsProjects /> },
+  { path: "/settings/projects/:projectId", element: <MobileSettingsProjectDetail /> },
   { path: "/settings/member-stats", element: <MobileSettingsMemberStats /> },
   { path: "/settings/repeating-tasks", element: <MobileSettingsRepeatingTasks /> },
   { path: "/settings/reminders", element: <MobileSettingsReminders /> },

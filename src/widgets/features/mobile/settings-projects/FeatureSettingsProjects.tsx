@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { LuPlus, LuSearch, LuSearchX } from "react-icons/lu";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusInput } from "@/components/ui/inputs/CusInput";
@@ -31,6 +32,7 @@ function CardSkeleton() {
 }
 
 export default function FeatureSettingsProjects() {
+  const navigate = useNavigate();
   const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
   const projectsQuery = useProjectsList(organizationId);
   const deleteProject = useDeleteProject(organizationId);
@@ -99,6 +101,7 @@ export default function FeatureSettingsProjects() {
             <ProjectStatCard
               key={project.id}
               project={project}
+              onOpen={() => navigate(`/settings/projects/${project.id}`)}
               onEdit={() => setEditingProjectId(project.id)}
               onDelete={() => setDeletingProjectId(project.id)}
             />

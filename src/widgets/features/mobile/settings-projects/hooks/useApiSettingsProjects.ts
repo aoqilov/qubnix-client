@@ -44,6 +44,8 @@ function toMemberPickerItem(m: RawOrganizationMember): MemberPickerItem {
 
 export const PROJECTS_KEYS = {
   list: (organizationId: string) => ["organizations", organizationId, "projects"] as const,
+  detail: (organizationId: string, projectId: string) =>
+    ["organizations", organizationId, "projects", projectId] as const,
   available: (organizationId: string, projectId: string) =>
     ["organizations", organizationId, "projects", projectId, "members", "available"] as const,
   orgMembers: (organizationId: string) => ["organizations", organizationId, "members"] as const,
@@ -61,6 +63,15 @@ export function useProjectsList(organizationId: string | null) {
       }),
     select: (data) => data.projects.map(toProjectStatsItem),
     enabled: !!organizationId,
+  });
+}
+
+export function useProjectDetail(organizationId: string | null, projectId: string | null) {
+  return useQuery({
+    queryKey: PROJECTS_KEYS.detail(organizationId ?? "", projectId ?? ""),
+    queryFn: () => projectsApi.getById(organizationId!, projectId!),
+    select: toProjectStatsItem,
+    enabled: !!organizationId && !!projectId,
   });
 }
 

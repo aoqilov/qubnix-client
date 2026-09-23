@@ -8,15 +8,20 @@ import type { ProjectStatsItem } from "../types";
 
 interface ProjectStatCardProps {
   project: ProjectStatsItem;
+  onOpen?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
 }
 
-export function ProjectStatCard({ project, onEdit, onDelete }: ProjectStatCardProps) {
+export function ProjectStatCard({ project, onOpen, onEdit, onDelete }: ProjectStatCardProps) {
   const tagColor = tagColorVar(project.id);
 
   return (
-    <CusCardbox className="flex flex-col gap-4 rounded-input">
+    <CusCardbox
+      className="flex flex-col gap-4 rounded-input"
+      onClick={onOpen}
+      role={onOpen ? "button" : undefined}
+    >
       <div className="flex items-center gap-3">
         <span
           className="flex size-11 flex-none items-center justify-center rounded-input text-sm font-semibold text-on-brand"
@@ -49,7 +54,7 @@ export function ProjectStatCard({ project, onEdit, onDelete }: ProjectStatCardPr
 
       <TaskAvatarGroup members={project.members} overflowCount={project.overflowCount} />
 
-      <div className="flex gap-2">
+      <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
         <CusButton
           variant="outline"
           size="sm"

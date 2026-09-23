@@ -3,13 +3,14 @@ import { LuChevronLeft } from "react-icons/lu";
 
 interface SettingsBackHeaderProps {
   title: string;
+  to?: string;
 }
 
-export function SettingsBackHeader({ title }: SettingsBackHeaderProps) {
+export function SettingsBackHeader({ title, to = "/settings" }: SettingsBackHeaderProps) {
   return (
     <div className="relative mb-4 flex min-h-9 items-center">
       <Link
-        to="/settings"
+        to={to}
         className="-ml-4 z-10 flex flex-none items-center gap-1 rounded-r-full border-y border-r border-default bg-surface py-2 pl-4 pr-4 text-sm font-medium text-secondary shadow-dropdown hover:bg-surface-secondary"
       >
         <LuChevronLeft size={16} />
