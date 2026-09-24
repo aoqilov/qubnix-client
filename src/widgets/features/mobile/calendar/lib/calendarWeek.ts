@@ -29,7 +29,7 @@ export function formatMonthLabel(date: Date): string {
     .toUpperCase();
 }
 
-export function buildWeekDays(weekStart: Date, selectedDate: Date, eventDates: Set<string>): CalendarDayCell[] {
+export function buildWeekDays(weekStart: Date, selectedDate: Date): CalendarDayCell[] {
   const selectedKey = toDateKey(selectedDate);
   const todayKey = toDateKey(new Date());
 
@@ -45,7 +45,7 @@ export function buildWeekDays(weekStart: Date, selectedDate: Date, eventDates: S
       isSelected: toDateKey(current) === selectedKey,
       isToday: toDateKey(current) === todayKey,
       isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
-      hasEvent: eventDates.has(toDateKey(current)),
+      isPast: toDateKey(current) < todayKey,
     };
   });
 }

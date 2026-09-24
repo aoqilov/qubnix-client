@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { LuCheck, LuCheckCheck } from "react-icons/lu";
 import { avatarColorVar } from "@/utils/avatarColor";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
@@ -22,7 +23,9 @@ const STACK_AVATAR_SIZE = 28;
 const LIST_AVATAR_SIZE = 32;
 
 function MemberAvatar({ member, size }: { member: TaskCardMember; size: number }) {
-  if (member.avatarUrl) {
+  // Telegram avatar URL'i eskirgan/yopiq bo'lishi mumkin — yuklanmasa bosh harflarga qaytiladi.
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  if (member.avatarUrl && failedUrl !== member.avatarUrl) {
     return (
       <CusImagePreview
         src={member.avatarUrl}
@@ -31,6 +34,7 @@ function MemberAvatar({ member, size }: { member: TaskCardMember; size: number }
         height={size}
         borderRadius="var(--radius-avatar, 9999px)"
         preview={false}
+        onError={() => setFailedUrl(member.avatarUrl ?? null)}
       />
     );
   }

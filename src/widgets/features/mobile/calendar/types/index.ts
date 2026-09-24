@@ -5,7 +5,7 @@ export interface CalendarDayCell {
   isSelected?: boolean;
   isToday?: boolean;
   isWeekend?: boolean;
-  hasEvent?: boolean;
+  isPast?: boolean;
 }
 
 export interface DayTaskStats {

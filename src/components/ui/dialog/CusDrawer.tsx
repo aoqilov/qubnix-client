@@ -28,6 +28,8 @@ interface CusDrawerProps {
   closeOnBackdrop?: boolean;
   closeOnEscape?: boolean;
   backButton?: boolean;
+  /** Ochilganda fokus oladigan element — berilmasa, birinchi fokuslanadigan element. */
+  initialFocusEl?: () => HTMLElement | null;
 }
 
 export function CusDrawer({
@@ -42,6 +44,7 @@ export function CusDrawer({
   closeOnBackdrop = true,
   closeOnEscape = true,
   backButton = false,
+  initialFocusEl,
 }: CusDrawerProps) {
   const isBottom = placement === "bottom";
   const isTop = placement === "top";
@@ -58,6 +61,7 @@ export function CusDrawer({
       size={size}
       closeOnInteractOutside={closeOnBackdrop}
       closeOnEscape={closeOnEscape}
+      initialFocusEl={initialFocusEl}
       lazyMount
       unmountOnExit
     >

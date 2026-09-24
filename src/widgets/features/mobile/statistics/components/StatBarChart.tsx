@@ -30,7 +30,6 @@ function SegmentLabel(props: any) {
 function StatBarTooltip({ active, payload }: any) {
   if (!active || !payload?.length) return null;
   const row: StatBarChartItem = payload[0].payload;
-  const total = row.done + row.notDone;
 
   return (
     <div
@@ -44,8 +43,29 @@ function StatBarTooltip({ active, payload }: any) {
       <p className="font-semibold text-secondary">{row.label}</p>
       <p style={{ color: "var(--brand-default)" }}>{row.done} сдано</p>
       <p style={{ color: "var(--status-error-solid)" }}>{row.notDone} не выполнено</p>
-      <p className="text-primary">{total} всего</p>
+      <p className="text-primary">{row.total} всего</p>
     </div>
+  );
+}
+
+/** X o'qi yorlig'i: tepada kunning jami vazifalari, ostida kun nomi. */
+function TotalTick({ x, y, payload, data }: any) {
+  const row: StatBarChartItem | undefined = data[payload.index];
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        y={10}
+        textAnchor="middle"
+        fontSize={13}
+        fontWeight={700}
+        fill={row && row.total > 0 ? "var(--text-primary)" : "var(--text-disabled)"}
+      >
+        {row?.total ?? 0}
+      </text>
+      <text y={28} textAnchor="middle" fontSize={11} fill="var(--text-secondary)">
+        {payload.value}
+      </text>
+    </g>
   );
 }
 
@@ -73,7 +93,9 @@ export function StatBarChart({ data, height = 190 }: StatBarChartProps) {
             dataKey="label"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "var(--text-secondary)", fontSize: 11 }}
+            height={36}
+            interval={0}
+            tick={<TotalTick data={data} />}
           />
           <Tooltip content={<StatBarTooltip />} cursor={false} />
           <Bar

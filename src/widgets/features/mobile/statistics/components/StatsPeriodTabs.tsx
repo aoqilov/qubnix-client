@@ -3,7 +3,6 @@ import type { StatsPeriod } from "../types";
 const ITEMS: { id: StatsPeriod; label: string }[] = [
   { id: "week", label: "Неделя" },
   { id: "month", label: "Месяц" },
-  { id: "year", label: "Год" },
 ];
 
 interface StatsPeriodTabsProps {

@@ -11,6 +11,7 @@ import { taskFilesApi } from "@/api/task-files/task-files.api";
 import type { TaskFileKind } from "@/api/task-files/task-files.types";
 import type { RawTaskMember } from "@/api/tasks/tasks.types";
 import type { TaskCardMember } from "@/components/shared/task-card/mini-components/TaskAvatarGroup";
+import { organizationsApi } from "@/api/organizations/organizations.api";
 
 /** "Malika Qodirova" -> "MQ", bitta so'z bo'lsa -> shu so'zning birinchi 2 harfi. */
 export function initialsOf(name: string): string {
@@ -32,7 +33,10 @@ function toProjectMemberCard(m: RawProjectMember): TaskCardMember {
 }
 
 /** Bitta vazifaga biriktirilgan xodim (task javobidagi `members[]`) -> TaskCard shakli. */
-export function toTaskMemberCard(m: RawTaskMember): TaskCardMember {
+/** Task a'zosi ham, loyiha a'zosi ham bo'lishi mumkin — faqat ism/avatar maydonlari kerak. */
+export function toTaskMemberCard(
+  m: Pick<RawTaskMember, "user_id" | "first_name" | "last_name" | "telegram_avatar_url">,
+): TaskCardMember {
   const name = `${m.first_name} ${m.last_name}`;
   return {
     id: String(m.user_id),
@@ -62,6 +66,16 @@ export function useProjectMembersForTask(
     queryFn: () => projectsApi.listMembers(organizationId!, projectId),
     select: (members) => members.map(toProjectMemberCard),
     enabled: enabled && !!organizationId && !!projectId,
+  });
+}
+
+/** Joriy foydalanuvchining shu tashkilotdagi workspace-rolini bilish uchun — "xodim bo'yicha filtr"ni faqat admin/owner/project_manager'ga ko'rsatish uchun kerak. */
+export function useOrganizationRole(organizationId: string | null) {
+  return useQuery({
+    queryKey: ["organizations", organizationId ?? "", "role"] as const,
+    queryFn: () => organizationsApi.getById(organizationId!),
+    select: (org) => org.role,
+    enabled: !!organizationId,
   });
 }
 

@@ -3,6 +3,9 @@ import { useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useWorkspaceStore } from "@/store/workspace.store";
+import { useSessionStore } from "@/store/session.store";
+import { WORKSPACE_ROLES } from "@/const/roles";
+import { hasRole } from "@/components/shared/role-gate/RoleGate";
 import {
   LuCircle,
   LuLoaderCircle,
@@ -15,7 +18,7 @@ import {
 import type { TaskStatusColor } from "@/components/shared/task-card/mini-components/TaskStatusLabel";
 import { projectsApi } from "@/api/projects/projects.api";
 import type { RawTask, TaskStatus } from "@/api/tasks/tasks.types";
-import { fromApiDate, todayApiDate } from "@/utils/apiDate";
+import { fromApiDate, getDayKind, todayApiDate } from "@/utils/apiDate";
 import { formatWeekdayDate } from "@/utils/formatWeekdayDate";
 import ProjectsTabs from "@/components/shared/project-tab/ProjectsTabs";
 import PageTitleDynamic from "@/components/shared/page-title-dynamic/PageTitleDynamic";
@@ -25,6 +28,8 @@ import TaskCard from "@/components/shared/task-card/TaskCard";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import FilterSectionTask from "./components/FilterSectionTask";
+import MembersFilterButton from "./components/MembersFilterButton";
+import { MembersFilterDrawer } from "./modals/MembersFilterDrawer";
 import TaskAddButton, {
   TASK_ADD_BUTTON_OFFSET,
 } from "@/components/shared/task-button/TaskAddButton";
@@ -35,6 +40,7 @@ import {
   toTaskMemberCard,
   useCreateTask,
   useDeleteTask,
+  useOrganizationRole,
   useProjectMembersForTask,
   useRemoveTaskFile,
   useTasksList,
@@ -128,16 +134,21 @@ function formatDueLabel(task: RawTask): string {
 interface TasksNavigationState {
   /** /calendar'dan "shu kunga o't" bilan kelganda beriladi — YYYY-MM-DD. */
   date?: string;
+  /** /calendar'da loyiha bosilganda — shu loyiha tab'i aktiv ochiladi. */
+  projectId?: string;
 }
 
 export default function FeatureTasks() {
   const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
   const location = useLocation();
-  const navigationDate = (location.state as TasksNavigationState | null)?.date;
+  const navigationState = location.state as TasksNavigationState | null;
+  const navigationDate = navigationState?.date;
 
   // Kalendardan aniq sana bilan kelinishi mumkin — bo'lmasa bugungi kun.
   const [selectedDate, setSelectedDate] = useState(() => navigationDate ?? todayApiDate());
   const isToday = selectedDate === todayApiDate();
+  // O'tgan kun — faqat ko'rish rejimi: vazifa qo'shish/o'zgartirish yopiq.
+  const isPast = getDayKind(selectedDate) === "past";
 
   const projectsQuery = useQuery({
     queryKey: ["organizations", organizationId, "projects", selectedDate] as const,
@@ -152,7 +163,8 @@ export default function FeatureTasks() {
     projectTaskCount: p.task_counts.total,
   }));
 
-  const [activeTabId, setActiveTabId] = useState("");
+  // Kalendardan loyiha bilan kelinsa — o'sha tab; ro'yxatda bo'lmasa quyidagi effekt birinchisiga qaytaradi.
+  const [activeTabId, setActiveTabId] = useState(() => navigationState?.projectId ?? "");
 
   // Loyihalar yuklangach yoki workspace almashganda — javobdagi birinchi
   // loyiha ([0]) avtomatik aktiv qilinadi.
@@ -177,13 +189,46 @@ export default function FeatureTasks() {
   }));
 
   const [sort, setSort] = useState<keyof typeof SORT_TO_API>("deadline");
-  const [statusId, setStatusId] = useState("in_progress");
+  const [statusId, setStatusId] = useState(() => (isPast ? "failed" : "in_progress"));
+  // O'tgan kunda avval bajarilmaganlar qiziqtiradi; bugunga qaytilsa — "Jarayonda".
+  useEffect(() => {
+    setStatusId(isPast ? "failed" : "in_progress");
+  }, [isPast]);
   const activeStatusMeta = STATUS_META.find((m) => m.id === statusId);
+
+  // "Xodim bo'yicha" filtr workspace owner/admin/viewer yoki shu loyihaning
+  // project_manager'iga ko'rinadi — oddiy a'zolar faqat o'z vazifalarini ko'radi.
+  const currentUserId = useSessionStore((s) => s.user?.id);
+  const activeProject = projects.find((p) => String(p.id) === activeTabId);
+  const { data: workspaceRole } = useOrganizationRole(organizationId);
+  const isProjectManager = activeProject?.members.some(
+    (m) => m.user_id === currentUserId && m.role === "project_manager",
+  );
+  const canFilterByEmployee =
+    hasRole(workspaceRole ? [workspaceRole] : [], [
+      WORKSPACE_ROLES.OWNER,
+      WORKSPACE_ROLES.ADMIN,
+      WORKSPACE_ROLES.VIEWER,
+    ]) ||
+    !!isProjectManager;
+
+  // Bo'sh massiv — "hamma xodimlar".
+  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
+  const [isMembersFilterOpen, setIsMembersFilterOpen] = useState(false);
+  // Loyiha almashtirilganda — oldingi loyihaning xodim id'lari mos kelmay qolishi mumkin.
+  useEffect(() => {
+    setSelectedMemberIds([]);
+  }, [activeTabId]);
+  const activeProjectMembers = (activeProject?.members ?? []).map(toTaskMemberCard);
 
   const tasksQuery = useTasksList(organizationId, activeTabId, {
     status: activeStatusMeta?.countKey as TaskStatus | undefined,
     sort_by: SORT_TO_API[sort],
     date: selectedDate,
+    member_ids:
+      canFilterByEmployee && selectedMemberIds.length > 0
+        ? selectedMemberIds.join(",")
+        : undefined,
     limit: 100,
   });
   const tasks = tasksQuery.data?.tasks ?? [];
@@ -387,17 +432,52 @@ export default function FeatureTasks() {
           totalCount={activeProjectCounts?.total ?? 0}
           statusLabel="Выполнено"
         />
+        {isPast && (
+          <div
+            className="flex items-center justify-between gap-3 rounded-card px-3 py-2"
+            style={{
+              background: "var(--status-warning-bg)",
+              color: "var(--status-warning-text)",
+            }}
+          >
+            <span className="text-sm font-medium">
+              O'tgan kun — faqat ko'rish uchun
+            </span>
+            <CusButton
+              variant="outline"
+              size="xs"
+              rounded="9999px"
+              onClick={() => setSelectedDate(todayApiDate())}
+              style={{
+                borderColor: "var(--status-warning-text)",
+                color: "var(--status-warning-text)",
+              }}
+            >
+              Bugun
+            </CusButton>
+          </div>
+        )}
         <ProjectsTabs
           tabs={projectTabs}
           activeId={activeTabId}
           onChange={setActiveTabId}
         />
-        <FilterSectionTask
-          label="ПО СРОКАМ"
-          value={sort}
-          onValueChange={(v) => setSort(v as keyof typeof SORT_TO_API)}
-          menulist={SORT_OPTIONS}
-        />
+        <div className="flex items-center gap-2">
+          <span className="mr-auto text-xs font-medium uppercase tracking-wide text-secondary">
+            Filtr
+          </span>
+          <FilterSectionTask
+            value={sort}
+            onValueChange={(v) => setSort(v as keyof typeof SORT_TO_API)}
+            menulist={SORT_OPTIONS}
+          />
+          {canFilterByEmployee && (
+            <MembersFilterButton
+              selectedCount={selectedMemberIds.length}
+              onClick={() => setIsMembersFilterOpen(true)}
+            />
+          )}
+        </div>
         <StatusTab
           items={statusTabs}
           activeId={statusId}
@@ -439,6 +519,10 @@ export default function FeatureTasks() {
                 onStatusChange={(nextStatusId) => requestStatusChange(task, nextStatusId)}
                 priority={task.priority}
                 dateRangeLabel={formatDueLabel(task)}
+                readOnly={isPast}
+                isOverdue={
+                  task.status !== "done" && !!task.due_at && new Date(task.due_at) < new Date()
+                }
                 subtaskCountLabel={`${task.subtasks.filter((s) => s.checked).length}/${task.subtasks.length}`}
                 fileCount={attachments.length}
                 members={task.members.map(toTaskMemberCard)}
@@ -568,7 +652,15 @@ export default function FeatureTasks() {
         </div>
       </CusDialog>
 
-      <TaskAddButton onClick={() => setIsAddOpen(true)} />
+      <MembersFilterDrawer
+        open={isMembersFilterOpen}
+        onClose={() => setIsMembersFilterOpen(false)}
+        members={activeProjectMembers}
+        selectedIds={selectedMemberIds}
+        onApply={setSelectedMemberIds}
+      />
+
+      {!isPast && <TaskAddButton onClick={() => setIsAddOpen(true)} />}
 
       <TaskModalAdd
         open={isAddOpen}

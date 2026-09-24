@@ -23,7 +23,7 @@ import TaskPhotoGrid, { type TaskCardPhoto } from "./mini-components/TaskPhotoGr
 import TaskFileItem, { type TaskCardFile } from "./mini-components/TaskFileItem";
 import TaskAudioMessage, { type TaskCardAudio } from "./mini-components/TaskAudioMessage";
 
-const CAPTION_STYLE = {
+export const CAPTION_STYLE = {
   color: "var(--text-secondary, #64748B)",
   fontSize: "var(--text-caption, 12px)",
   fontWeight: 500,
@@ -38,7 +38,7 @@ export interface TaskCardStatusOption {
 
 export type TaskCardPriority = "low" | "medium" | "high";
 
-const PRIORITY_FLAG_COLOR: Record<TaskCardPriority, string> = {
+export const PRIORITY_FLAG_COLOR: Record<TaskCardPriority, string> = {
   low: "var(--text-secondary)",
   medium: "var(--accent-orange)",
   high: "var(--status-error-solid)",
@@ -65,6 +65,11 @@ interface TaskCardProps {
   expanded: boolean;
   onToggleExpanded: () => void;
 
+  /** O'tgan kun — faqat ko'rish: status, subtask, tahrirlash va o'chirish yopiq. */
+  readOnly?: boolean;
+  /** Muddati o'tgan va bajarilmagan — vaqt badge'i qizil bo'ladi. */
+  isOverdue?: boolean;
+
   // Faqat expanded holatda ishlatiladi:
   description?: string;
   /** Berilsa, matnli description o'rniga ovozli xabar (Telegram uslubida) ko'rsatiladi. */
@@ -80,7 +85,7 @@ interface TaskCardProps {
   onEdit?: () => void;
 }
 
-function SectionLabel({ children }: { children: ReactNode }) {
+export function SectionLabel({ children }: { children: ReactNode }) {
   return (
     <span className="uppercase tracking-wide" style={CAPTION_STYLE}>
       {children}
@@ -103,6 +108,8 @@ function TaskCard({
   statusColor,
   expanded,
   onToggleExpanded,
+  readOnly,
+  isOverdue,
   description,
   descriptionAudio,
   projectTag,
@@ -118,10 +125,18 @@ function TaskCard({
   const doneSubtasks = subtasks?.filter((s) => s.checked).length ?? 0;
 
   return (
-    <CusCardbox className="flex flex-col gap-3 rounded-input">
+    <CusCardbox
+      className="flex flex-col gap-3 rounded-input"
+      style={readOnly ? { opacity: 0.85 } : undefined}
+    >
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
+          {readOnly ? (
+            <span className="flex flex-none items-center justify-center">
+              <TaskCheckbox color={statusColor} />
+            </span>
+          ) : (
           <CusMenuList
             trigger={(open) => (
               <button
@@ -150,6 +165,7 @@ function TaskCard({
             onValueChange={onStatusChange}
             width={180}
           />
+          )}
           <span
             className={expanded ? undefined : "line-clamp-2"}
             style={{
@@ -182,7 +198,7 @@ function TaskCard({
         <TaskMetaBadge
           icon={<LuClock size={14} />}
           label={dateRangeLabel}
-          bg="var(--bg-surface-secondary, #E2E8F0)"
+          bg={isOverdue ? "var(--status-error-bg)" : "var(--bg-surface-secondary)"}
         />
         <div className="flex items-center gap-2">
           {Number(subtaskCountLabel.split("/")[1] ?? 0) > 0 && (
@@ -254,6 +270,7 @@ function TaskCard({
                       <SubtaskItem
                         key={subtask.id}
                         subtask={subtask}
+                        readOnly={readOnly}
                         onChange={(id, next) => onSubtaskChange?.(id, next)}
                       />
                     ))}
@@ -276,6 +293,7 @@ function TaskCard({
                       <TaskFileItem key={file.id} file={file} onDownload={onDownloadFile} />
                     ))}
                   </div>
+                  {!readOnly && (
                   <button
                     type="button"
                     onClick={onAttachFile}
@@ -284,9 +302,11 @@ function TaskCard({
                     <LuPaperclip size={14} />
                     Прикрепить файл
                   </button>
+                  )}
                 </div>
               )}
 
+              {!readOnly && (
               <div className="flex gap-2">
                 <CusButton
                   variant="outline"
@@ -306,6 +326,7 @@ function TaskCard({
                   Изменить
                 </CusButton>
               </div>
+              )}
             </div>
           </motion.div>
         )}

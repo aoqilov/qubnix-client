@@ -71,6 +71,38 @@ export interface ListTasksParams {
   to?: string;
 }
 
+/** Status bo'yicha vazifalar soni — calendar/statistics endpointlarida umumiy shakl. */
+export interface TaskStatusTotals {
+  total: number;
+  todo: number;
+  in_progress: number;
+  done: number;
+  /** Muddati o'tgan va bajarilmagan — UI'da "Просрочено". */
+  not_done: number;
+}
+
+/** GET /organizations/{id}/tasks/calendar — bitta sana (due_at, Asia/Tashkent) bo'yicha. */
+export interface TaskCalendarDay {
+  date: string;
+  totals: TaskStatusTotals;
+  projects: { id: number; name: string; totals: TaskStatusTotals }[];
+}
+
+export type TaskStatisticsType = "weekly" | "monthly";
+
+/**
+ * GET /organizations/{id}/tasks/statistics — faqat joriy foydalanuvchiga
+ * biriktirilgan vazifalar. weekly → kunlik, monthly → haftalik timeline.
+ */
+export interface TaskStatistics {
+  type: TaskStatisticsType;
+  date: string;
+  totals: TaskStatusTotals;
+  timeline: { start_date: string; end_date: string; totals: TaskStatusTotals }[];
+  projects: { id: number; name: string; totals: TaskStatusTotals }[];
+  priorities: { priority: TaskPriority; totals: TaskStatusTotals }[];
+}
+
 export interface ListTasksResponse {
   tasks: RawTask[];
   pagination: Pagination;

@@ -22,13 +22,21 @@ interface TaskStatGridProps {
   completed: number;
   inProgress: number;
   overdue: number;
+  /** 2-katak yorlig'i — default "Сделано". /statistics'da u yerda `todo` ("Назначено") turadi. */
+  completedLabel?: string;
 }
 
-function TaskStatGrid({ done, completed, inProgress, overdue }: TaskStatGridProps) {
+function TaskStatGrid({
+  done,
+  completed,
+  inProgress,
+  overdue,
+  completedLabel = "Сделано",
+}: TaskStatGridProps) {
   return (
     <div className="grid grid-cols-4 divide-x divide-subtle">
       <StatCell value={done} label="Сдано" color="var(--brand-default)" />
-      <StatCell value={completed} label="Сделано" color="var(--status-success-text)" />
+      <StatCell value={completed} label={completedLabel} color="var(--status-success-text)" />
       <StatCell value={inProgress} label="В процессе" color="var(--status-progress-text)" />
       <StatCell value={overdue} label="Просрочено" color="var(--status-error-text)" />
     </div>

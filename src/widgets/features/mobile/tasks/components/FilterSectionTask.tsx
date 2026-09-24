@@ -2,8 +2,8 @@ import { LuFilter } from "react-icons/lu";
 import { CusMenuList, type CusMenuListItem } from "@/components/ui/menu-list/CusMenuList";
 
 interface FilterSectionTaskProps {
-  /** Chapdagi bo'lim nomi — masalan "ПО СРОКАМ". */
-  label: string;
+  /** Chapdagi bo'lim nomi — masalan "ПО СРОКАМ". Berilmasa faqat tugma chiqadi. */
+  label?: string;
   /** O'ng tugma matni — default "Фильтр". */
   filterLabel?: string;
   menulist: CusMenuListItem[];
@@ -19,7 +19,8 @@ function FilterSectionTask({
   onValueChange,
 }: FilterSectionTaskProps) {
   return (
-    <div className="flex items-center justify-between">
+    <div className={label ? "flex items-center justify-between" : "flex items-center"}>
+      {label && (
       <span
         className="uppercase tracking-wide"
         style={{
@@ -31,6 +32,7 @@ function FilterSectionTask({
       >
         {label}
       </span>
+      )}
 
       <CusMenuList
         items={menulist}

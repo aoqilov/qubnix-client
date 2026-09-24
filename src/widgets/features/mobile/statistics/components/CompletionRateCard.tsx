@@ -1,6 +1,4 @@
-import { LuTrendingDown, LuTrendingUp } from "react-icons/lu";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
-import { CusBadge } from "@/components/ui/badge/CusBadge";
 import TaskStatGrid from "@/components/shared/task-stat-grid/TaskStatGrid";
 import { tasksLabel } from "@/utils/pluralRu";
 import type { CompletionSummary } from "../types";
@@ -10,8 +8,6 @@ interface CompletionRateCardProps {
 }
 
 export function CompletionRateCard({ summary }: CompletionRateCardProps) {
-  const isPositive = summary.trendDelta >= 0;
-
   return (
     <CusCardbox
       style={{ borderColor: "var(--border-subtle)" }}
@@ -22,21 +18,12 @@ export function CompletionRateCard({ summary }: CompletionRateCardProps) {
         <span className="font-condensed text-3xl font-bold leading-none text-brand">{summary.percent}%</span>
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-secondary">{tasksLabel(summary.taskCount)}</span>
-        <CusBadge
-          tone={isPositive ? "success" : "error"}
-          size="xs"
-          leftIcon={isPositive ? <LuTrendingUp size={12} /> : <LuTrendingDown size={12} />}
-        >
-          {isPositive ? "+" : ""}
-          {summary.trendDelta}%
-        </CusBadge>
-      </div>
+      <span className="text-sm text-secondary">{tasksLabel(summary.taskCount)}</span>
 
       <TaskStatGrid
         done={summary.done}
-        completed={summary.completed}
+        completed={summary.assigned}
+        completedLabel="Назначено"
         inProgress={summary.inProgress}
         overdue={summary.overdue}
       />

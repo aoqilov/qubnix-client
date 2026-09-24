@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type React from "react";
 import { Drawer } from "@chakra-ui/react";
 import axios from "axios";
@@ -25,7 +25,9 @@ import {
   useCreateRoutine,
   useProjectMembersForRoutine,
   useUpdateRoutine,
+  useUploadRoutineFile,
 } from "../hooks/useApiRepeatingTasks";
+import { MONTH_DAYS, WEEKDAY_OPTIONS } from "../lib/routineSchedule";
 
 function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -65,18 +67,6 @@ const FREQUENCY_OPTIONS: { value: RoutineFrequency; label: string }[] = [
   { value: "monthly", label: "Oylik" },
   { value: "yearly", label: "Yillik" },
 ];
-
-const WEEKDAY_OPTIONS: { value: number; label: string }[] = [
-  { value: 1, label: "Dush" },
-  { value: 2, label: "Sesh" },
-  { value: 3, label: "Chor" },
-  { value: 4, label: "Pay" },
-  { value: 5, label: "Jum" },
-  { value: 6, label: "Shan" },
-  { value: 7, label: "Yak" },
-];
-
-const MONTH_DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
 const PRIORITY_OPTIONS: { value: TaskPriority; label: string; activeColor: string }[] = [
   { value: "high", label: "Высокий", activeColor: "var(--status-error-solid)" },
@@ -121,6 +111,9 @@ function Pill({
 interface RoutineFormSubtask {
   id: string;
   label: string;
+  /** Backend'dagi id — tahrirlashda mavjud subtaskni saqlab qolish uchun. */
+  serverId?: number;
+  checked?: boolean;
 }
 
 export interface RoutineFormInitial {
@@ -161,20 +154,37 @@ export function RoutineFormDrawer({
   const [isMonthDayPickerOpen, setIsMonthDayPickerOpen] = useState(false);
   const [yearlyDates, setYearlyDates] = useState<DateValue[]>([]);
   const [isYearlyPickerOpen, setIsYearlyPickerOpen] = useState(false);
+  /** Majburiy, "HH:mm" — har bir yaratilgan vazifa shu soatgacha bajarilishi kerak. */
+  const [endTime, setEndTime] = useState("");
   const [subtaskInput, setSubtaskInput] = useState("");
   const [subtasks, setSubtasks] = useState<RoutineFormSubtask[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const subtaskInputRef = useRef<HTMLInputElement>(null);
+
+  // Ochilishdagi fokusni (nom maydoni) CusDrawer'ning initialFocusEl'i beradi;
+  // 2-qadamga o'tilganda esa subtask maydoni fokus oladi.
+  useEffect(() => {
+    if (open && step === 2) subtaskInputRef.current?.focus();
+  }, [open, step]);
 
   // Har safar ochilganda — tahrirlash bo'lsa mavjud routine bilan, aks holda bo'sh holat bilan to'ldiriladi.
   useEffect(() => {
     if (!open) return;
     setStep(1);
     setSubtaskInput("");
-    setSubtasks([]);
     setFiles([]);
     if (initial) {
       const r = initial.routine;
+      setSubtasks(
+        r.subtasks.map((s) => ({
+          id: `srv${s.id}`,
+          label: s.name,
+          serverId: s.id,
+          checked: s.checked,
+        })),
+      );
       setProjectId(initial.projectId);
       setName(r.title);
       setDescription(r.description ?? "");
@@ -186,7 +196,9 @@ export function RoutineFormDrawer({
       setMonthDays(r.month_days);
       const [y, m, d] = r.start_date.split("-").map(Number);
       setYearlyDates([{ year: y, month: m, day: d } as DateValue]);
+      setEndTime(r.end_time ?? "");
     } else {
+      setSubtasks([]);
       setProjectId(projects[0]?.id ?? "");
       setName("");
       setDescription("");
@@ -197,6 +209,7 @@ export function RoutineFormDrawer({
       setWeekdays([]);
       setMonthDays([]);
       setYearlyDates([]);
+      setEndTime("");
     }
     setIsSubmitting(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -211,6 +224,7 @@ export function RoutineFormDrawer({
 
   const createRoutine = useCreateRoutine(organizationId);
   const updateRoutine = useUpdateRoutine(organizationId);
+  const uploadFile = useUploadRoutineFile(organizationId);
 
   function toggleMember(id: string) {
     setMemberIds((prev) => (prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]));
@@ -227,6 +241,8 @@ export function RoutineFormDrawer({
   }
 
   function addSubtask() {
+    // Plus bosilganda ham fokus inputda qoladi — keyingi bandni darhol yozish uchun.
+    subtaskInputRef.current?.focus();
     const label = subtaskInput.trim();
     if (!label) return;
     setSubtasks((prev) => [...prev, { id: `st${Date.now()}`, label }]);
@@ -237,7 +253,12 @@ export function RoutineFormDrawer({
     setSubtasks((prev) => prev.filter((s) => s.id !== id));
   }
 
+  // "HH:mm" satrlari leksikografik solishtirishda ham to'g'ri tartiblanadi.
+  const isEndTimeValid = !endTime || endTime > time;
+
   const canSubmit =
+    !!endTime &&
+    isEndTimeValid &&
     !!name.trim() &&
     !!projectId &&
     (frequency !== "weekly" || weekdays.length > 0) &&
@@ -248,6 +269,24 @@ export function RoutineFormDrawer({
     if (isSubmitting || !canSubmit || !projectId) return;
     setIsSubmitting(true);
     try {
+      const targetProjectId = initial?.projectId ?? projectId;
+
+      // Har bir routine o'z fayl nusxasini oladi — yillik rejimda bir nechta routine
+      // yaratilganda bitta yuklangan fayl id'si ikki joyga biriktirilmaydi.
+      const uploadFiles = async (): Promise<number[] | undefined> => {
+        if (files.length === 0) return undefined;
+        const uploads = await Promise.all(
+          files.map((file) => uploadFile.mutateAsync({ projectId: targetProjectId, file })),
+        );
+        return uploads.flatMap((uploaded) => uploaded.map((f) => f.id));
+      };
+
+      const subtaskPayload = subtasks.map((s) => ({
+        id: s.serverId,
+        name: s.label,
+        checked: s.checked,
+      }));
+
       const basePayload = {
         name: name.trim(),
         description: description.trim() || undefined,
@@ -258,6 +297,9 @@ export function RoutineFormDrawer({
         timezone: "Asia/Tashkent",
         weekdays: frequency === "weekly" ? weekdays : undefined,
         month_days: frequency === "monthly" ? monthDays : undefined,
+        end_time: endTime,
+        // Tahrirlashda bo'sh ro'yxat ham yuboriladi — hamma subtask o'chirilgan bo'lishi mumkin.
+        subtasks: isEditing || subtaskPayload.length > 0 ? subtaskPayload : undefined,
       };
 
       if (isEditing && initial) {
@@ -266,7 +308,7 @@ export function RoutineFormDrawer({
         await updateRoutine.mutateAsync({
           projectId: initial.projectId,
           routineId: String(initial.routine.id),
-          payload: { ...basePayload, start_date: startDate },
+          payload: { ...basePayload, start_date: startDate, file_ids: await uploadFiles() },
         });
       } else if (frequency === "yearly") {
         // Yillik uchun bir nechta kun tanlansa — har biri alohida routine
@@ -274,13 +316,13 @@ export function RoutineFormDrawer({
         for (const d of yearlyDates) {
           await createRoutine.mutateAsync({
             projectId,
-            payload: { ...basePayload, start_date: toApiDate(d) },
+            payload: { ...basePayload, start_date: toApiDate(d), file_ids: await uploadFiles() },
           });
         }
       } else {
         await createRoutine.mutateAsync({
           projectId,
-          payload: { ...basePayload, start_date: todayApiDate() },
+          payload: { ...basePayload, start_date: todayApiDate(), file_ids: await uploadFiles() },
         });
       }
       onClose();
@@ -302,6 +344,7 @@ export function RoutineFormDrawer({
       size="full"
       closeOnBackdrop={false}
       closeOnEscape={false}
+      initialFocusEl={() => nameInputRef.current}
       title={isEditing ? "Vazifani tahrirlash" : "Yangi doimiy vazifa"}
       footer={
         step === 1 ? (
@@ -347,223 +390,244 @@ export function RoutineFormDrawer({
       <StepIndicator step={step} />
 
       {step === 1 ? (
-      <div className="flex flex-col gap-4">
-        <CusSelect
-          label="Loyiha"
-          required
-          disabled={isEditing}
-          placeholder="Loyihani tanlang"
-          options={projects.map((p) => ({ label: p.name, value: p.id }))}
-          value={projectId}
-          onChange={setProjectId}
-        />
+        <div className="flex flex-col gap-4">
+          <CusSelect
+            label="Loyiha"
+            required
+            disabled={isEditing}
+            placeholder="Loyihani tanlang"
+            options={projects.map((p) => ({ label: p.name, value: p.id }))}
+            value={projectId}
+            onChange={setProjectId}
+          />
 
-        <CusInput
-          label="Vazifa nomi"
-          isRequired
-          placeholder="Masalan: Oylik hisobot"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+          <CusInput
+            ref={nameInputRef}
+            label="Vazifa nomi"
+            isRequired
+            placeholder="Masalan: Oylik hisobot"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
 
-        <CusTextArea
-          label="Tavsif"
-          placeholder="Ixtiyoriy"
-          autoresize
-          maxH="8lh"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
+          <CusTextArea
+            label="Tavsif"
+            placeholder="Ixtiyoriy"
+            autoresize
+            maxH="8lh"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
 
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-            Takrorlanish
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {FREQUENCY_OPTIONS.map((opt) => (
-              <Pill
-                key={opt.value}
-                label={opt.label}
-                active={frequency === opt.value}
-                onClick={() => setFrequency(opt.value)}
-              />
-            ))}
-          </div>
-        </div>
-
-        {frequency === "weekly" && (
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              Hafta kunlari *
+              Takrorlanish
             </span>
-            <div className="grid grid-cols-4 gap-2">
-              {WEEKDAY_OPTIONS.map((opt) => (
+            <div className="flex flex-wrap gap-2">
+              {FREQUENCY_OPTIONS.map((opt) => (
                 <Pill
                   key={opt.value}
                   label={opt.label}
-                  className="w-full"
-                  active={weekdays.includes(opt.value)}
-                  onClick={() => toggleWeekday(opt.value)}
+                  active={frequency === opt.value}
+                  onClick={() => setFrequency(opt.value)}
                 />
               ))}
             </div>
           </div>
-        )}
 
-        {frequency === "monthly" && (
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              Oyning kuni *
-            </span>
-            <div
-              onClick={() => setIsMonthDayPickerOpen(true)}
-              className="flex h-10 w-full cursor-pointer items-center justify-between rounded-input border border-default bg-surface px-3"
-              style={{ fontSize: 14 }}
-            >
-              <span
-                className="truncate"
-                style={{ color: monthDays.length ? "var(--text-primary)" : "var(--text-dim)" }}
-              >
-                {monthDays.length === 0
-                  ? "Kunlarni tanlang"
-                  : monthDays.length <= 3
-                    ? monthDays.map((d) => `${d}-sana`).join(", ")
-                    : `${monthDays.length} ta kun tanlandi`}
+          {frequency === "weekly" && (
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                Hafta kunlari *
               </span>
-              <LuCalendar size={15} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
-            </div>
-
-            <CusDialog
-              open={isMonthDayPickerOpen}
-              onClose={() => setIsMonthDayPickerOpen(false)}
-              title="Oyning kunlarini tanlang"
-              centered
-              size="xs"
-              footer={
-                <CusButton
-                  className="w-full"
-                  isDisabled={monthDays.length === 0}
-                  onClick={() => setIsMonthDayPickerOpen(false)}
-                  style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
-                >
-                  Tasdiqlash
-                </CusButton>
-              }
-            >
-              <div className="grid grid-cols-7 gap-2">
-                {MONTH_DAYS.map((d) => {
-                  const active = monthDays.includes(d);
-                  return (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => toggleMonthDay(d)}
-                      className="flex aspect-square items-center justify-center rounded-input text-sm font-semibold"
-                      style={
-                        active
-                          ? { background: "var(--brand-default)", color: "var(--text-on-brand)" }
-                          : { background: "var(--bg-surface-secondary)", color: "var(--text-primary)" }
-                      }
-                    >
-                      {d}
-                    </button>
-                  );
-                })}
+              <div className="grid grid-cols-4 gap-2">
+                {WEEKDAY_OPTIONS.map((opt) => (
+                  <Pill
+                    key={opt.value}
+                    label={opt.label}
+                    className="w-full"
+                    active={weekdays.includes(opt.value)}
+                    onClick={() => toggleWeekday(opt.value)}
+                  />
+                ))}
               </div>
-            </CusDialog>
-          </div>
-        )}
+            </div>
+          )}
 
-        {frequency === "yearly" && (
+          {frequency === "monthly" && (
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                Oyning kuni *
+              </span>
+              <div
+                onClick={() => setIsMonthDayPickerOpen(true)}
+                className="flex h-10 w-full cursor-pointer items-center justify-between rounded-input border border-default bg-surface px-3"
+                style={{ fontSize: 14 }}
+              >
+                <span
+                  className="truncate"
+                  style={{ color: monthDays.length ? "var(--text-primary)" : "var(--text-dim)" }}
+                >
+                  {monthDays.length === 0
+                    ? "Kunlarni tanlang"
+                    : monthDays.length <= 3
+                      ? monthDays.map((d) => `${d}-sana`).join(", ")
+                      : `${monthDays.length} ta kun tanlandi`}
+                </span>
+                <LuCalendar size={15} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+              </div>
+
+              <CusDialog
+                open={isMonthDayPickerOpen}
+                onClose={() => setIsMonthDayPickerOpen(false)}
+                title="Oyning kunlarini tanlang"
+                centered
+                size="xs"
+                footer={
+                  <CusButton
+                    className="w-full"
+                    isDisabled={monthDays.length === 0}
+                    onClick={() => setIsMonthDayPickerOpen(false)}
+                    style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
+                  >
+                    Tasdiqlash
+                  </CusButton>
+                }
+              >
+                <div className="grid grid-cols-7 gap-2">
+                  {MONTH_DAYS.map((d) => {
+                    const active = monthDays.includes(d);
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => toggleMonthDay(d)}
+                        className="flex aspect-square items-center justify-center rounded-input text-sm font-semibold"
+                        style={
+                          active
+                            ? { background: "var(--brand-default)", color: "var(--text-on-brand)" }
+                            : {
+                                background: "var(--bg-surface-secondary)",
+                                color: "var(--text-primary)",
+                              }
+                        }
+                      >
+                        {d}
+                      </button>
+                    );
+                  })}
+                </div>
+              </CusDialog>
+            </div>
+          )}
+
+          {frequency === "yearly" && (
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                Yil kuni{isEditing ? "" : " (bir nechtasini tanlash mumkin)"} *
+              </span>
+              <div
+                onClick={() => setIsYearlyPickerOpen(true)}
+                className="flex h-10 w-full cursor-pointer items-center justify-between rounded-input border border-default bg-surface px-3"
+                style={{ fontSize: 14 }}
+              >
+                <span
+                  className="truncate"
+                  style={{ color: yearlyDates.length ? "var(--text-primary)" : "var(--text-dim)" }}
+                >
+                  {yearlyDates.length === 0
+                    ? "Sanalarni tanlang"
+                    : yearlyDates.length <= 2
+                      ? yearlyDates.map(formatDay).join(", ")
+                      : `${yearlyDates.length} ta sana tanlandi`}
+                </span>
+                <LuCalendar size={15} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+              </div>
+
+              <CusDialog
+                open={isYearlyPickerOpen}
+                onClose={() => setIsYearlyPickerOpen(false)}
+                title={isEditing ? "Sanani tanlang" : "Yil kunlarini tanlang"}
+                centered
+                size="xs"
+                footer={
+                  <CusButton
+                    className="w-full"
+                    isDisabled={yearlyDates.length === 0}
+                    onClick={() => setIsYearlyPickerOpen(false)}
+                    style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
+                  >
+                    Tasdiqlash
+                  </CusButton>
+                }
+              >
+                <CusCalendar
+                  inline
+                  selectionMode={isEditing ? "single" : "multiple"}
+                  value={yearlyDates}
+                  onValueChange={(details) => setYearlyDates(details.value)}
+                />
+              </CusDialog>
+            </div>
+          )}
+
+          <CusTimepicker
+            label="Boshlanish soati"
+            placeholder="ЧЧ:ММ"
+            value={time}
+            onChange={setTime}
+            variant="modal"
+            modalTitle="Vaqtni tanlang"
+          />
+
+          <div className="flex flex-col gap-1">
+            <CusTimepicker
+              label="Tugash soati *"
+              placeholder="ЧЧ:ММ"
+              value={endTime}
+              onChange={setEndTime}
+              minTime={time}
+              variant="modal"
+              modalTitle="Tugash vaqtini tanlang"
+            />
+            {!isEndTimeValid && (
+              <span className="text-xs text-error-strong">
+                Tugash soati boshlanish soatidan keyin bo'lishi kerak
+              </span>
+            )}
+          </div>
+
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              Yil kuni{isEditing ? "" : " (bir nechtasini tanlash mumkin)"} *
+              Сотрудники
             </span>
-            <div
-              onClick={() => setIsYearlyPickerOpen(true)}
-              className="flex h-10 w-full cursor-pointer items-center justify-between rounded-input border border-default bg-surface px-3"
-              style={{ fontSize: 14 }}
-            >
-              <span
-                className="truncate"
-                style={{ color: yearlyDates.length ? "var(--text-primary)" : "var(--text-dim)" }}
-              >
-                {yearlyDates.length === 0
-                  ? "Sanalarni tanlang"
-                  : yearlyDates.length <= 2
-                    ? yearlyDates.map(formatDay).join(", ")
-                    : `${yearlyDates.length} ta sana tanlandi`}
-              </span>
-              <LuCalendar size={15} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+            <AssigneeChecklist
+              members={members}
+              selectedIds={memberIds}
+              onToggle={toggleMember}
+              isLoading={isMembersPending}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+              Приоритет
+            </span>
+            <div className="flex gap-2">
+              {PRIORITY_OPTIONS.map((p) => (
+                <Pill
+                  key={p.value}
+                  label={p.label}
+                  icon={<IoFlagSharp size={14} />}
+                  active={priority === p.value}
+                  activeColor={p.activeColor}
+                  className="flex-1"
+                  onClick={() => setPriority(p.value)}
+                />
+              ))}
             </div>
-
-            <CusDialog
-              open={isYearlyPickerOpen}
-              onClose={() => setIsYearlyPickerOpen(false)}
-              title={isEditing ? "Sanani tanlang" : "Yil kunlarini tanlang"}
-              centered
-              size="xs"
-              footer={
-                <CusButton
-                  className="w-full"
-                  isDisabled={yearlyDates.length === 0}
-                  onClick={() => setIsYearlyPickerOpen(false)}
-                  style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
-                >
-                  Tasdiqlash
-                </CusButton>
-              }
-            >
-              <CusCalendar
-                inline
-                selectionMode={isEditing ? "single" : "multiple"}
-                value={yearlyDates}
-                onValueChange={(details) => setYearlyDates(details.value)}
-              />
-            </CusDialog>
-          </div>
-        )}
-
-        <CusTimepicker
-          label="Soat"
-          placeholder="ЧЧ:ММ"
-          value={time}
-          onChange={setTime}
-          variant="modal"
-          modalTitle="Vaqtni tanlang"
-        />
-
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-            Сотрудники
-          </span>
-          <AssigneeChecklist
-            members={members}
-            selectedIds={memberIds}
-            onToggle={toggleMember}
-            isLoading={isMembersPending}
-          />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-            Приоритет
-          </span>
-          <div className="flex gap-2">
-            {PRIORITY_OPTIONS.map((p) => (
-              <Pill
-                key={p.value}
-                label={p.label}
-                icon={<IoFlagSharp size={14} />}
-                active={priority === p.value}
-                activeColor={p.activeColor}
-                className="flex-1"
-                onClick={() => setPriority(p.value)}
-              />
-            ))}
           </div>
         </div>
-      </div>
       ) : (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
@@ -572,6 +636,7 @@ export function RoutineFormDrawer({
             </span>
             <div className="flex gap-2">
               <CusInput
+                ref={subtaskInputRef}
                 placeholder="Новый Sub-Task"
                 value={subtaskInput}
                 onChange={(e) => setSubtaskInput(e.target.value)}

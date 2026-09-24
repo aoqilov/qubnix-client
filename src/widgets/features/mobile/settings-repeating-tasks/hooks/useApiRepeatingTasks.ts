@@ -2,6 +2,7 @@ import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/rea
 import { projectsApi } from "@/api/projects/projects.api";
 import { organizationsApi } from "@/api/organizations/organizations.api";
 import { taskRoutinesApi } from "@/api/task-routines/task-routines.api";
+import { taskFilesApi } from "@/api/task-files/task-files.api";
 import type {
   CreateTaskRoutineRequest,
   RawTaskRoutine,
@@ -105,5 +106,22 @@ export function useUpdateRoutine(organizationId: string | null) {
       payload: UpdateTaskRoutineRequest;
     }) => taskRoutinesApi.update(organizationId!, projectId, routineId, payload),
     onSuccess: invalidate,
+  });
+}
+
+export function useDeleteRoutine(organizationId: string | null) {
+  const invalidate = useInvalidateRoutines(organizationId);
+  return useMutation({
+    mutationFn: ({ projectId, routineId }: { projectId: string; routineId: string }) =>
+      taskRoutinesApi.remove(organizationId!, projectId, routineId),
+    onSuccess: invalidate,
+  });
+}
+
+/** Routine attachment'lari — avval loyihaga yuklanadi, qaytgan id'lar `file_ids` sifatida yuboriladi. */
+export function useUploadRoutineFile(organizationId: string | null) {
+  return useMutation({
+    mutationFn: ({ projectId, file }: { projectId: string; file: File }) =>
+      taskFilesApi.upload(organizationId!, projectId, file, "attachment"),
   });
 }

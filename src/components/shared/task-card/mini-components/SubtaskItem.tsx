@@ -11,7 +11,9 @@ export interface TaskCardSubtask {
 
 interface SubtaskItemProps {
   subtask: TaskCardSubtask;
-  onChange: (id: string, checked: boolean) => void;
+  onChange?: (id: string, checked: boolean) => void;
+  /** Routine shablonidagi kabi — faqat ko'rsatiladi, bosib bo'lmaydi. */
+  readOnly?: boolean;
 }
 
 const POP_STYLE = `
@@ -25,16 +27,17 @@ const POP_STYLE = `
 }
 `;
 
-function SubtaskItem({ subtask, onChange }: SubtaskItemProps) {
+function SubtaskItem({ subtask, onChange, readOnly }: SubtaskItemProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleClick = () => {
+    if (readOnly) return;
     // Bajarilgan bandni qayta bosganda darhol bekor qilinmaydi — avval tasdiq so'raladi.
     if (subtask.checked) {
       setConfirmOpen(true);
       return;
     }
-    onChange(subtask.id, true);
+    onChange?.(subtask.id, true);
   };
 
   return (
@@ -42,7 +45,10 @@ function SubtaskItem({ subtask, onChange }: SubtaskItemProps) {
       <button
         type="button"
         onClick={handleClick}
-        className="flex w-full items-center text-left transition-transform duration-150 active:scale-[0.98]"
+        disabled={readOnly}
+        className={`flex w-full items-center text-left transition-transform duration-150 ${
+          readOnly ? "cursor-default" : "active:scale-[0.98]"
+        }`}
         style={{
           padding: "var(--space-3, 12px)",
           gap: "var(--space-2, 8px)",
@@ -94,7 +100,7 @@ function SubtaskItem({ subtask, onChange }: SubtaskItemProps) {
             </CusButton>
             <CusButton
               onClick={() => {
-                onChange(subtask.id, false);
+                onChange?.(subtask.id, false);
                 setConfirmOpen(false);
               }}
               style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}

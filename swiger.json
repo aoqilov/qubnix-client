@@ -3418,6 +3418,498 @@
         }
       }
     },
+    "/api/v1/organizations/{organizationID}/tasks/calendar": {
+      "get": {
+        "summary": "Get task counts for one calendar date",
+        "tags": ["Tasks"],
+        "description": "Returns counts for projects and tasks visible to the authenticated user's role. The calendar date uses task due_at in Asia/Tashkent.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "format": "date" },
+            "in": "query",
+            "name": "date",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "date": { "type": "string", "format": "date" },
+                        "totals": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "total",
+                            "todo",
+                            "in_progress",
+                            "done",
+                            "not_done"
+                          ],
+                          "properties": {
+                            "total": { "type": "integer", "minimum": 0 },
+                            "todo": { "type": "integer", "minimum": 0 },
+                            "in_progress": { "type": "integer", "minimum": 0 },
+                            "done": { "type": "integer", "minimum": 0 },
+                            "not_done": { "type": "integer", "minimum": 0 }
+                          }
+                        },
+                        "projects": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["id", "name", "totals"],
+                            "properties": {
+                              "id": { "type": "integer", "minimum": 1 },
+                              "name": { "type": "string" },
+                              "totals": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "total",
+                                  "todo",
+                                  "in_progress",
+                                  "done",
+                                  "not_done"
+                                ],
+                                "properties": {
+                                  "total": { "type": "integer", "minimum": 0 },
+                                  "todo": { "type": "integer", "minimum": 0 },
+                                  "in_progress": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                  },
+                                  "done": { "type": "integer", "minimum": 0 },
+                                  "not_done": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationID}/tasks/statistics": {
+      "get": {
+        "summary": "Get statistics for the authenticated user's assigned tasks",
+        "tags": ["Tasks"],
+        "description": "Roles do not expand the result: only tasks assigned to the authenticated user are counted. Weekly statistics have daily timeline buckets; monthly statistics have weekly timeline buckets.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "enum": ["weekly", "monthly"] },
+            "in": "query",
+            "name": "type",
+            "required": true
+          },
+          {
+            "schema": { "type": "string", "format": "date" },
+            "in": "query",
+            "name": "date",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": ["weekly", "monthly"]
+                        },
+                        "date": { "type": "string", "format": "date" },
+                        "totals": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "total",
+                            "todo",
+                            "in_progress",
+                            "done",
+                            "not_done"
+                          ],
+                          "properties": {
+                            "total": { "type": "integer", "minimum": 0 },
+                            "todo": { "type": "integer", "minimum": 0 },
+                            "in_progress": { "type": "integer", "minimum": 0 },
+                            "done": { "type": "integer", "minimum": 0 },
+                            "not_done": { "type": "integer", "minimum": 0 }
+                          }
+                        },
+                        "timeline": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["start_date", "end_date", "totals"],
+                            "properties": {
+                              "start_date": {
+                                "type": "string",
+                                "format": "date"
+                              },
+                              "end_date": {
+                                "type": "string",
+                                "format": "date"
+                              },
+                              "totals": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "total",
+                                  "todo",
+                                  "in_progress",
+                                  "done",
+                                  "not_done"
+                                ],
+                                "properties": {
+                                  "total": { "type": "integer", "minimum": 0 },
+                                  "todo": { "type": "integer", "minimum": 0 },
+                                  "in_progress": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                  },
+                                  "done": { "type": "integer", "minimum": 0 },
+                                  "not_done": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "projects": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["id", "name", "totals"],
+                            "properties": {
+                              "id": { "type": "integer", "minimum": 1 },
+                              "name": { "type": "string" },
+                              "totals": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "total",
+                                  "todo",
+                                  "in_progress",
+                                  "done",
+                                  "not_done"
+                                ],
+                                "properties": {
+                                  "total": { "type": "integer", "minimum": 0 },
+                                  "todo": { "type": "integer", "minimum": 0 },
+                                  "in_progress": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                  },
+                                  "done": { "type": "integer", "minimum": 0 },
+                                  "not_done": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "priorities": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["priority", "totals"],
+                            "properties": {
+                              "priority": {
+                                "type": "string",
+                                "enum": ["low", "medium", "high"]
+                              },
+                              "totals": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "total",
+                                  "todo",
+                                  "in_progress",
+                                  "done",
+                                  "not_done"
+                                ],
+                                "properties": {
+                                  "total": { "type": "integer", "minimum": 0 },
+                                  "todo": { "type": "integer", "minimum": 0 },
+                                  "in_progress": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                  },
+                                  "done": { "type": "integer", "minimum": 0 },
+                                  "not_done": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/organizations/{organizationID}/projects/{project_id}/tasks": {
       "get": {
         "tags": ["Tasks"],
@@ -5288,6 +5780,157 @@
         }
       }
     },
+    "/api/v1/organizations/{organizationID}/projects/{project_id}/files/{file_id}": {
+      "delete": {
+        "tags": ["Task files"],
+        "parameters": [
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "project_id",
+            "required": true
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "file_id",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "deleted": { "type": "boolean", "enum": [true] }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/organizations/{organizationID}/projects/{project_id}/tasks/{task_id}/files/{file_id}": {
       "delete": {
         "tags": ["Task files"],
@@ -5497,6 +6140,7 @@
                               "project_id",
                               "title",
                               "description",
+                              "description_type",
                               "priority",
                               "member_ids",
                               "frequency",
@@ -5510,6 +6154,9 @@
                               "last_run_at",
                               "active",
                               "created_by",
+                              "files",
+                              "subtasks",
+                              "subtasks_count",
                               "created_at",
                               "updated_at"
                             ],
@@ -5522,6 +6169,10 @@
                               "project_id": { "type": "integer", "minimum": 1 },
                               "title": { "type": "string" },
                               "description": { "type": ["null", "string"] },
+                              "description_type": {
+                                "type": "string",
+                                "enum": ["text", "audio"]
+                              },
                               "priority": {
                                 "type": "string",
                                 "enum": ["low", "medium", "high"]
@@ -5573,6 +6224,60 @@
                               },
                               "active": { "type": "boolean" },
                               "created_by": { "type": "integer", "minimum": 1 },
+                              "files": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "required": [
+                                    "id",
+                                    "kind",
+                                    "file_name",
+                                    "mime_type",
+                                    "size_bytes",
+                                    "url",
+                                    "created_at"
+                                  ],
+                                  "properties": {
+                                    "id": { "type": "integer", "minimum": 1 },
+                                    "kind": {
+                                      "type": "string",
+                                      "enum": [
+                                        "attachment",
+                                        "description_audio"
+                                      ]
+                                    },
+                                    "file_name": { "type": "string" },
+                                    "mime_type": { "type": "string" },
+                                    "size_bytes": {
+                                      "type": "integer",
+                                      "minimum": 1
+                                    },
+                                    "url": { "type": "string" },
+                                    "created_at": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                    }
+                                  }
+                                }
+                              },
+                              "subtasks": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "required": ["id", "name", "checked"],
+                                  "properties": {
+                                    "id": { "type": "integer", "minimum": 1 },
+                                    "name": { "type": "string" },
+                                    "checked": { "type": "boolean" }
+                                  }
+                                }
+                              },
+                              "subtasks_count": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
                               "created_at": {
                                 "type": "string",
                                 "format": "date-time"
@@ -5718,8 +6423,25 @@
                         "pattern": "\\S"
                       },
                       "description": {
-                        "type": ["string", "null"],
-                        "maxLength": 10000
+                        "anyOf": [
+                          { "type": ["string", "null"], "maxLength": 10000 },
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["type"],
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": ["text", "audio"]
+                              },
+                              "text": {
+                                "type": ["string", "null"],
+                                "maxLength": 10000
+                              },
+                              "file_id": { "type": "integer", "minimum": 1 }
+                            }
+                          }
+                        ]
                       },
                       "priority": {
                         "type": "string",
@@ -5736,6 +6458,31 @@
                           }
                         },
                         "maxItems": 500
+                      },
+                      "file_ids": {
+                        "type": "array",
+                        "items": { "type": "integer", "minimum": 1 },
+                        "maxItems": 5,
+                        "uniqueItems": true
+                      },
+                      "subtasks": {
+                        "type": "array",
+                        "maxItems": 500,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["name"],
+                          "properties": {
+                            "id": { "type": "integer", "minimum": 1 },
+                            "name": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 200,
+                              "pattern": "\\S"
+                            },
+                            "checked": { "type": "boolean" }
+                          }
+                        }
                       },
                       "frequency": {
                         "type": "string",
@@ -5818,6 +6565,7 @@
                             "project_id",
                             "title",
                             "description",
+                            "description_type",
                             "priority",
                             "member_ids",
                             "frequency",
@@ -5831,6 +6579,9 @@
                             "last_run_at",
                             "active",
                             "created_by",
+                            "files",
+                            "subtasks",
+                            "subtasks_count",
                             "created_at",
                             "updated_at"
                           ],
@@ -5843,6 +6594,10 @@
                             "project_id": { "type": "integer", "minimum": 1 },
                             "title": { "type": "string" },
                             "description": { "type": ["null", "string"] },
+                            "description_type": {
+                              "type": "string",
+                              "enum": ["text", "audio"]
+                            },
                             "priority": {
                               "type": "string",
                               "enum": ["low", "medium", "high"]
@@ -5894,6 +6649,57 @@
                             },
                             "active": { "type": "boolean" },
                             "created_by": { "type": "integer", "minimum": 1 },
+                            "files": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "id",
+                                  "kind",
+                                  "file_name",
+                                  "mime_type",
+                                  "size_bytes",
+                                  "url",
+                                  "created_at"
+                                ],
+                                "properties": {
+                                  "id": { "type": "integer", "minimum": 1 },
+                                  "kind": {
+                                    "type": "string",
+                                    "enum": ["attachment", "description_audio"]
+                                  },
+                                  "file_name": { "type": "string" },
+                                  "mime_type": { "type": "string" },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                  },
+                                  "url": { "type": "string" },
+                                  "created_at": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                  }
+                                }
+                              }
+                            },
+                            "subtasks": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": ["id", "name", "checked"],
+                                "properties": {
+                                  "id": { "type": "integer", "minimum": 1 },
+                                  "name": { "type": "string" },
+                                  "checked": { "type": "boolean" }
+                                }
+                              }
+                            },
+                            "subtasks_count": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
                             "created_at": {
                               "type": "string",
                               "format": "date-time"
@@ -6063,6 +6869,7 @@
                             "project_id",
                             "title",
                             "description",
+                            "description_type",
                             "priority",
                             "member_ids",
                             "frequency",
@@ -6076,6 +6883,9 @@
                             "last_run_at",
                             "active",
                             "created_by",
+                            "files",
+                            "subtasks",
+                            "subtasks_count",
                             "created_at",
                             "updated_at"
                           ],
@@ -6088,6 +6898,10 @@
                             "project_id": { "type": "integer", "minimum": 1 },
                             "title": { "type": "string" },
                             "description": { "type": ["null", "string"] },
+                            "description_type": {
+                              "type": "string",
+                              "enum": ["text", "audio"]
+                            },
                             "priority": {
                               "type": "string",
                               "enum": ["low", "medium", "high"]
@@ -6139,6 +6953,57 @@
                             },
                             "active": { "type": "boolean" },
                             "created_by": { "type": "integer", "minimum": 1 },
+                            "files": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "id",
+                                  "kind",
+                                  "file_name",
+                                  "mime_type",
+                                  "size_bytes",
+                                  "url",
+                                  "created_at"
+                                ],
+                                "properties": {
+                                  "id": { "type": "integer", "minimum": 1 },
+                                  "kind": {
+                                    "type": "string",
+                                    "enum": ["attachment", "description_audio"]
+                                  },
+                                  "file_name": { "type": "string" },
+                                  "mime_type": { "type": "string" },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                  },
+                                  "url": { "type": "string" },
+                                  "created_at": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                  }
+                                }
+                              }
+                            },
+                            "subtasks": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": ["id", "name", "checked"],
+                                "properties": {
+                                  "id": { "type": "integer", "minimum": 1 },
+                                  "name": { "type": "string" },
+                                  "checked": { "type": "boolean" }
+                                }
+                              }
+                            },
+                            "subtasks_count": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
                             "created_at": {
                               "type": "string",
                               "format": "date-time"
@@ -6283,8 +7148,25 @@
                         "pattern": "\\S"
                       },
                       "description": {
-                        "type": ["string", "null"],
-                        "maxLength": 10000
+                        "anyOf": [
+                          { "type": ["string", "null"], "maxLength": 10000 },
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["type"],
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": ["text", "audio"]
+                              },
+                              "text": {
+                                "type": ["string", "null"],
+                                "maxLength": 10000
+                              },
+                              "file_id": { "type": "integer", "minimum": 1 }
+                            }
+                          }
+                        ]
                       },
                       "priority": {
                         "type": "string",
@@ -6301,6 +7183,31 @@
                           }
                         },
                         "maxItems": 500
+                      },
+                      "file_ids": {
+                        "type": "array",
+                        "items": { "type": "integer", "minimum": 1 },
+                        "maxItems": 5,
+                        "uniqueItems": true
+                      },
+                      "subtasks": {
+                        "type": "array",
+                        "maxItems": 500,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["name"],
+                          "properties": {
+                            "id": { "type": "integer", "minimum": 1 },
+                            "name": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 200,
+                              "pattern": "\\S"
+                            },
+                            "checked": { "type": "boolean" }
+                          }
+                        }
                       },
                       "frequency": {
                         "type": "string",
@@ -6390,6 +7297,7 @@
                             "project_id",
                             "title",
                             "description",
+                            "description_type",
                             "priority",
                             "member_ids",
                             "frequency",
@@ -6403,6 +7311,9 @@
                             "last_run_at",
                             "active",
                             "created_by",
+                            "files",
+                            "subtasks",
+                            "subtasks_count",
                             "created_at",
                             "updated_at"
                           ],
@@ -6415,6 +7326,10 @@
                             "project_id": { "type": "integer", "minimum": 1 },
                             "title": { "type": "string" },
                             "description": { "type": ["null", "string"] },
+                            "description_type": {
+                              "type": "string",
+                              "enum": ["text", "audio"]
+                            },
                             "priority": {
                               "type": "string",
                               "enum": ["low", "medium", "high"]
@@ -6466,6 +7381,57 @@
                             },
                             "active": { "type": "boolean" },
                             "created_by": { "type": "integer", "minimum": 1 },
+                            "files": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "id",
+                                  "kind",
+                                  "file_name",
+                                  "mime_type",
+                                  "size_bytes",
+                                  "url",
+                                  "created_at"
+                                ],
+                                "properties": {
+                                  "id": { "type": "integer", "minimum": 1 },
+                                  "kind": {
+                                    "type": "string",
+                                    "enum": ["attachment", "description_audio"]
+                                  },
+                                  "file_name": { "type": "string" },
+                                  "mime_type": { "type": "string" },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                  },
+                                  "url": { "type": "string" },
+                                  "created_at": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                  }
+                                }
+                              }
+                            },
+                            "subtasks": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": ["id", "name", "checked"],
+                                "properties": {
+                                  "id": { "type": "integer", "minimum": 1 },
+                                  "name": { "type": "string" },
+                                  "checked": { "type": "boolean" }
+                                }
+                              }
+                            },
+                            "subtasks_count": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
                             "created_at": {
                               "type": "string",
                               "format": "date-time"
@@ -6959,6 +7925,7 @@
                                 "project_id",
                                 "title",
                                 "description",
+                                "description_type",
                                 "priority",
                                 "member_ids",
                                 "frequency",
@@ -6972,6 +7939,9 @@
                                 "last_run_at",
                                 "active",
                                 "created_by",
+                                "files",
+                                "subtasks",
+                                "subtasks_count",
                                 "created_at",
                                 "updated_at"
                               ],
@@ -6987,6 +7957,10 @@
                                 },
                                 "title": { "type": "string" },
                                 "description": { "type": ["null", "string"] },
+                                "description_type": {
+                                  "type": "string",
+                                  "enum": ["text", "audio"]
+                                },
                                 "priority": {
                                   "type": "string",
                                   "enum": ["low", "medium", "high"]
@@ -7045,6 +8019,60 @@
                                 "created_by": {
                                   "type": "integer",
                                   "minimum": 1
+                                },
+                                "files": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "required": [
+                                      "id",
+                                      "kind",
+                                      "file_name",
+                                      "mime_type",
+                                      "size_bytes",
+                                      "url",
+                                      "created_at"
+                                    ],
+                                    "properties": {
+                                      "id": { "type": "integer", "minimum": 1 },
+                                      "kind": {
+                                        "type": "string",
+                                        "enum": [
+                                          "attachment",
+                                          "description_audio"
+                                        ]
+                                      },
+                                      "file_name": { "type": "string" },
+                                      "mime_type": { "type": "string" },
+                                      "size_bytes": {
+                                        "type": "integer",
+                                        "minimum": 1
+                                      },
+                                      "url": { "type": "string" },
+                                      "created_at": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                      }
+                                    }
+                                  }
+                                },
+                                "subtasks": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "required": ["id", "name", "checked"],
+                                    "properties": {
+                                      "id": { "type": "integer", "minimum": 1 },
+                                      "name": { "type": "string" },
+                                      "checked": { "type": "boolean" }
+                                    }
+                                  }
+                                },
+                                "subtasks_count": {
+                                  "type": "integer",
+                                  "minimum": 0
                                 },
                                 "created_at": {
                                   "type": "string",
@@ -7644,6 +8672,281 @@
                           }
                         },
                         "members_count": { "type": "integer", "minimum": 0 },
+                        "pagination": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["page", "limit", "total", "total_pages"],
+                          "properties": {
+                            "page": { "type": "integer" },
+                            "limit": { "type": "integer" },
+                            "total": { "type": "integer" },
+                            "total_pages": { "type": "integer" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 403 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 404 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 409 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "message"],
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 503 },
+                    "message": { "type": "string" },
+                    "code": { "type": "string" },
+                    "details": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationID}/members/statistics": {
+      "get": {
+        "summary": "Get employee task statistics",
+        "tags": ["Organizations"],
+        "description": "Owners and admins see all active organization employees. Project managers see employees in projects they manage. Counts use task due_at; ranking uses completed task counts.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "format": "date" },
+            "in": "query",
+            "name": "date",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "format": "date" },
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "format": "date" },
+            "in": "query",
+            "name": "to",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 10000,
+              "pattern": "^[1-9][0-9]*(,[1-9][0-9]*)*$"
+            },
+            "in": "query",
+            "name": "member_ids",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "\\S"
+            },
+            "in": "query",
+            "name": "search",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["most_done", "least_done"],
+              "default": "most_done"
+            },
+            "in": "query",
+            "name": "task_order",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 1
+            },
+            "in": "query",
+            "name": "page",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 20
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": { "type": "integer", "minimum": 1 },
+            "in": "path",
+            "name": "organizationID",
+            "required": true
+          }
+        ],
+        "security": [{ "InitDataHeader": [] }, { "WebSessionCookie": [] }],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["statusCode", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "statusCode": { "type": "integer", "example": 200 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "members": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "user_id",
+                              "first_name",
+                              "last_name",
+                              "phone_number",
+                              "telegram_avatar_url",
+                              "organization_role",
+                              "totals"
+                            ],
+                            "properties": {
+                              "user_id": { "type": "integer", "minimum": 1 },
+                              "first_name": { "type": "string" },
+                              "last_name": { "type": "string" },
+                              "phone_number": { "type": "string" },
+                              "telegram_avatar_url": {
+                                "type": ["null", "string"]
+                              },
+                              "organization_role": {
+                                "type": "string",
+                                "enum": ["admin", "viewer", "member"]
+                              },
+                              "totals": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "total",
+                                  "todo",
+                                  "in_progress",
+                                  "done",
+                                  "not_done"
+                                ],
+                                "properties": {
+                                  "total": { "type": "integer", "minimum": 0 },
+                                  "todo": { "type": "integer", "minimum": 0 },
+                                  "in_progress": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                  },
+                                  "done": { "type": "integer", "minimum": 0 },
+                                  "not_done": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
                         "pagination": {
                           "type": "object",
                           "additionalProperties": false,

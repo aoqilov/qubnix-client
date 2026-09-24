@@ -1,4 +1,11 @@
-import type { RawTask, TaskPriority } from "@/api/tasks/tasks.types";
+import type {
+  RawTask,
+  RawTaskFile,
+  RawTaskSubtask,
+  TaskDescriptionInput,
+  TaskDescriptionType,
+  TaskPriority,
+} from "@/api/tasks/tasks.types";
 
 export type RoutineFrequency = "daily" | "weekly" | "monthly" | "yearly";
 
@@ -8,12 +15,15 @@ export interface RawTaskRoutine {
   project_id: number;
   title: string;
   description: string | null;
+  description_type: TaskDescriptionType;
   priority: TaskPriority;
   member_ids: number[];
   frequency: RoutineFrequency;
   weekdays: number[];
   month_days: number[];
   time_of_day: string;
+  /** "HH:mm". Backend hali qaytarmaydi — qo'shilguncha undefined. */
+  end_time?: string | null;
   timezone: string;
   start_date: string;
   end_date: string | null;
@@ -21,8 +31,18 @@ export interface RawTaskRoutine {
   last_run_at: string | null;
   active: boolean;
   created_by: number;
+  files: RawTaskFile[];
+  subtasks: RawTaskSubtask[];
+  subtasks_count: number;
   created_at: string;
   updated_at: string;
+}
+
+/** `id` berilsa — mavjud subtask saqlanadi, berilmasa yangisi yaratiladi. Ro'yxat to'liq yuboriladi. */
+export interface RoutineSubtaskInput {
+  id?: number;
+  name: string;
+  checked?: boolean;
 }
 
 export interface RoutineMemberInput {
@@ -31,7 +51,7 @@ export interface RoutineMemberInput {
 
 export interface CreateTaskRoutineRequest {
   name: string;
-  description?: string | null;
+  description?: TaskDescriptionInput;
   priority?: TaskPriority;
   members?: RoutineMemberInput[];
   frequency: RoutineFrequency;
@@ -39,12 +59,20 @@ export interface CreateTaskRoutineRequest {
   month_days?: number[];
   /** "HH:mm". */
   time: string;
+  /**
+   * "HH:mm" — tugash soati. Backend hali qabul qilmaydi; `task-routines.api.ts`
+   * dagi `BACKEND_SUPPORTS_END_TIME` yoqilguncha so'rovdan olib tashlanadi.
+   */
+  end_time?: string;
   /** Hozircha faqat "Asia/Tashkent". */
   timezone?: string;
   /** YYYY-MM-DD. */
   start_date: string;
   end_date?: string | null;
   active?: boolean;
+  /** Oldindan yuklangan attachment fayllar, 5 tagacha. */
+  file_ids?: number[];
+  subtasks?: RoutineSubtaskInput[];
 }
 
 export type UpdateTaskRoutineRequest = Partial<CreateTaskRoutineRequest>;

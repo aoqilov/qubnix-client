@@ -13,6 +13,8 @@ interface CusImagePreviewProps {
   preview?: boolean;
   /** Berilsa, preview ochilganda shu ro'yxat bo'yicha chapga/o'ngga slayder sifatida siljitish mumkin bo'ladi. `src` shu ro'yxatda bo'lishi kerak. */
   gallery?: string[];
+  /** Rasm yuklanmasa — masalan, avatar o'rniga bosh harflarni ko'rsatish uchun. */
+  onError?: () => void;
 }
 
 const SWIPE_THRESHOLD = 60;
@@ -37,6 +39,7 @@ export function CusImagePreview({
   borderRadius = 0,
   preview = true,
   gallery,
+  onError,
 }: CusImagePreviewProps) {
   const [hovered, setHovered] = useState(false);
   const [open, setOpen] = useState(false);
@@ -102,6 +105,7 @@ export function CusImagePreview({
         <img
           src={src}
           alt={alt}
+          onError={onError}
           style={{
             width: "100%",
             height: "100%",

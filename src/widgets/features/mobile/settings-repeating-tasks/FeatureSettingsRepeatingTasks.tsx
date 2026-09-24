@@ -10,9 +10,11 @@ import type { TaskCardMember } from "@/components/shared/task-card/mini-componen
 import { SettingsBackHeader } from "@/widgets/features/mobile/settings/components/SettingsBackHeader";
 import { RoutineFrequencyTabs } from "./components/RoutineFrequencyTabs";
 import { RoutineFormDrawer, type RoutineFormInitial } from "./modals/RoutineFormDrawer";
+import { RoutineScheduleDialog } from "./modals/RoutineScheduleDialog";
 import {
   useOrgMembersDirectory,
   useOrgProjectsForRoutines,
+  useDeleteRoutine,
   useRoutinesForProjects,
   useUpdateRoutine,
 } from "./hooks/useApiRepeatingTasks";
@@ -42,7 +44,9 @@ export default function FeatureSettingsRepeatingTasks() {
   const [frequency, setFrequency] = useState<RoutineFilter>("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editing, setEditing] = useState<RoutineFormInitial | null>(null);
-  const [disablingRoutine, setDisablingRoutine] = useState<RoutineFormInitial | null>(null);
+  const [deletingRoutine, setDeletingRoutine] = useState<RoutineFormInitial | null>(null);
+  const [scheduleRoutine, setScheduleRoutine] = useState<RawTaskRoutine | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
   const [errorToast, setErrorToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -58,6 +62,16 @@ export default function FeatureSettingsRepeatingTasks() {
     allProjects,
   );
   const updateRoutine = useUpdateRoutine(organizationId);
+  const deleteRoutine = useDeleteRoutine(organizationId);
+
+  const toggleExpanded = (id: number) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const memberById = useMemo(() => {
     const map = new Map<number, TaskCardMember>();
@@ -75,7 +89,11 @@ export default function FeatureSettingsRepeatingTasks() {
 
   const projectTabs = useMemo(
     () => [
-      { id: ALL_PROJECTS_ID, projectName: "Все", projectTaskCount: routines.length },
+      {
+        id: ALL_PROJECTS_ID,
+        projectName: "Все",
+        projectTaskCount: routines.length,
+      },
       ...allProjects.map((project) => ({
         id: project.id,
         projectName: project.name,
@@ -93,22 +111,25 @@ export default function FeatureSettingsRepeatingTasks() {
 
   const toggleActive = (routine: RawTaskRoutine, active: boolean) => {
     updateRoutine.mutate(
-      { projectId: String(routine.project_id), routineId: String(routine.id), payload: { active } },
+      {
+        projectId: String(routine.project_id),
+        routineId: String(routine.id),
+        payload: { active },
+      },
       { onError: (err) => setErrorToast(getErrorMessage(err)) },
     );
   };
 
-  const confirmDisable = () => {
-    if (!disablingRoutine) return;
-    updateRoutine.mutate(
+  const confirmDelete = () => {
+    if (!deletingRoutine) return;
+    deleteRoutine.mutate(
       {
-        projectId: disablingRoutine.projectId,
-        routineId: String(disablingRoutine.routine.id),
-        payload: { active: false },
+        projectId: deletingRoutine.projectId,
+        routineId: String(deletingRoutine.routine.id),
       },
       { onError: (err) => setErrorToast(getErrorMessage(err)) },
     );
-    setDisablingRoutine(null);
+    setDeletingRoutine(null);
   };
 
   return (
@@ -144,28 +165,75 @@ export default function FeatureSettingsRepeatingTasks() {
       </CusButton>
 
       <div className="flex flex-col gap-3">
-        {filteredRoutines.map((routine) => (
-          <TaskCardRoutine
-            key={routine.id}
-            title={routine.title}
-            projectLabel={routine.projectName}
-            active={routine.active}
-            onToggleActive={(active) => toggleActive(routine, active)}
-            repeatLabel={formatRepeatLabel(routine)}
-            nextRunLabel={formatNextRunLabel(routine)}
-            members={routine.member_ids
-              .map((id) => memberById.get(id))
-              .filter((m): m is TaskCardMember => !!m)}
-            onEdit={() => {
-              setEditing({ projectId: String(routine.project_id), routine });
-              setIsFormOpen(true);
-            }}
-            onDisable={() =>
-              setDisablingRoutine({ projectId: String(routine.project_id), routine })
-            }
-          />
-        ))}
+        {filteredRoutines.map((routine) => {
+          const descriptionAudioFile = routine.files.find((f) => f.kind === "description_audio");
+          const attachments = routine.files.filter((f) => f.kind === "attachment");
+          const imageAttachments = attachments.filter((f) => f.mime_type.startsWith("image/"));
+          const nonImageAttachments = attachments.filter((f) => !f.mime_type.startsWith("image/"));
+          return (
+            <TaskCardRoutine
+              key={routine.id}
+              title={routine.title}
+              projectLabel={routine.projectName}
+              priority={routine.priority}
+              active={routine.active}
+              onToggleActive={(active) => toggleActive(routine, active)}
+              repeatLabel={formatRepeatLabel(routine)}
+              nextRunLabel={formatNextRunLabel(routine)}
+              onRepeatClick={() => setScheduleRoutine(routine)}
+              members={routine.member_ids
+                .map((id) => memberById.get(id))
+                .filter((m): m is TaskCardMember => !!m)}
+              expanded={expandedIds.has(routine.id)}
+              onToggleExpanded={() => toggleExpanded(routine.id)}
+              description={routine.description_type === "text" ? (routine.description ?? "") : ""}
+              descriptionAudio={
+                descriptionAudioFile
+                  ? { url: descriptionAudioFile.url, durationLabel: "0:00" }
+                  : undefined
+              }
+              subtasks={routine.subtasks.map((s) => ({
+                id: String(s.id),
+                label: s.name,
+                checked: s.checked,
+              }))}
+              photos={imageAttachments.map((f) => ({
+                id: String(f.id),
+                url: f.url,
+              }))}
+              files={nonImageAttachments.map((f) => ({
+                id: String(f.id),
+                name: f.file_name,
+                sizeLabel: `${Math.round(f.size_bytes / 1024)} KB`,
+              }))}
+              onDownloadFile={(id) => {
+                const file = routine.files.find((f) => String(f.id) === id);
+                if (file) window.open(file.url, "_blank", "noopener,noreferrer");
+              }}
+              onEdit={() => {
+                setEditing({ projectId: String(routine.project_id), routine });
+                setIsFormOpen(true);
+              }}
+              onDelete={() =>
+                setDeletingRoutine({
+                  projectId: String(routine.project_id),
+                  routine,
+                })
+              }
+            />
+          );
+        })}
       </div>
+
+      <RoutineScheduleDialog
+        routine={scheduleRoutine}
+        onClose={() => setScheduleRoutine(null)}
+        onEdit={(routine) => {
+          setScheduleRoutine(null);
+          setEditing({ projectId: String(routine.project_id), routine });
+          setIsFormOpen(true);
+        }}
+      />
 
       <RoutineFormDrawer
         open={isFormOpen}
@@ -177,19 +245,22 @@ export default function FeatureSettingsRepeatingTasks() {
       />
 
       <CusDialog
-        open={disablingRoutine !== null}
-        onClose={() => setDisablingRoutine(null)}
+        open={deletingRoutine !== null}
+        onClose={() => setDeletingRoutine(null)}
         title="Vazifani o'chirish"
         size="sm"
         centered
         footer={
           <>
-            <CusButton variant="outline" onClick={() => setDisablingRoutine(null)}>
+            <CusButton variant="outline" onClick={() => setDeletingRoutine(null)}>
               Bekor qilish
             </CusButton>
             <CusButton
-              onClick={confirmDisable}
-              style={{ background: "var(--status-error-solid)", color: "var(--text-on-brand)" }}
+              onClick={confirmDelete}
+              style={{
+                background: "var(--status-error-solid)",
+                color: "var(--text-on-brand)",
+              }}
             >
               Ha, o'chirish
             </CusButton>
@@ -212,8 +283,8 @@ export default function FeatureSettingsRepeatingTasks() {
             <LuTriangleAlert size={18} color="var(--status-warning-text)" />
           </div>
           <p style={{ fontSize: 14, color: "var(--text-primary)" }}>
-            "{disablingRoutine?.routine.title}" doimiy vazifasi o'chiriladi — yangi nusxalar
-            yaratilmaydi.
+            "{deletingRoutine?.routine.title}" doimiy vazifasi butunlay o'chiriladi — yangi nusxalar
+            yaratilmaydi. Bu amalni qaytarib bo'lmaydi.
           </p>
         </div>
       </CusDialog>

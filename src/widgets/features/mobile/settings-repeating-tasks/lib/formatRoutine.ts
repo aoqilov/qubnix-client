@@ -1,19 +1,5 @@
 import type { RawTaskRoutine } from "@/api/task-routines/task-routines.types";
-
-const WEEKDAY_SHORT: Record<number, string> = {
-  1: "Dush",
-  2: "Sesh",
-  3: "Chor",
-  4: "Pay",
-  5: "Jum",
-  6: "Shan",
-  7: "Yak",
-};
-
-const MONTH_NOMINATIVE = [
-  "yanvar", "fevral", "mart", "aprel", "may", "iyun",
-  "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr",
-];
+import { MONTH_NOMINATIVE, WEEKDAY_SHORT } from "./routineSchedule";
 
 /** Routine kartasidagi "Har kuni 09:00" / "Har hafta Dush, Chor 10:00" kabi qator. */
 export function formatRepeatLabel(routine: RawTaskRoutine): string {
@@ -39,12 +25,23 @@ export function formatRepeatLabel(routine: RawTaskRoutine): string {
   }
 }
 
-/** "Keyingisi: DD.MM.YYYY HH:mm" — `next_run_at` dan. */
-export function formatNextRunLabel(routine: RawTaskRoutine): string {
-  const d = new Date(routine.next_run_at);
+/** ISO sana-vaqtni "DD.MM.YYYY HH:mm" ko'rinishiga keltiradi. */
+export function formatDateTime(iso: string): string {
+  const d = new Date(iso);
   const day = String(d.getDate()).padStart(2, "0");
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const hh = String(d.getHours()).padStart(2, "0");
   const mm = String(d.getMinutes()).padStart(2, "0");
-  return `Keyingisi: ${day}.${month}.${d.getFullYear()} ${hh}:${mm}`;
+  return `${day}.${month}.${d.getFullYear()} ${hh}:${mm}`;
+}
+
+/** "YYYY-MM-DD" ni "DD.MM.YYYY" ko'rinishiga keltiradi. */
+export function formatApiDate(date: string): string {
+  const [y, m, d] = date.split("-");
+  return `${d}.${m}.${y}`;
+}
+
+/** "Keyingisi: DD.MM.YYYY HH:mm" — `next_run_at` dan. */
+export function formatNextRunLabel(routine: RawTaskRoutine): string {
+  return `Keyingisi: ${formatDateTime(routine.next_run_at)}`;
 }

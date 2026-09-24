@@ -1,11 +1,11 @@
-export type StatsPeriod = "week" | "month" | "year";
+export type StatsPeriod = "week" | "month";
 
 export interface CompletionSummary {
   percent: number;
   taskCount: number;
-  trendDelta: number;
   done: number;
-  completed: number;
+  /** Hali boshlanmagan (`todo`) — gridda "Назначено". */
+  assigned: number;
   inProgress: number;
   overdue: number;
 }
@@ -14,6 +14,8 @@ export interface StatBarChartItem {
   label: string;
   done: number;
   notDone: number;
+  /** Shu kun/haftadagi barcha vazifalar (todo + in_progress + done + not_done). */
+  total: number;
   muted?: boolean;
 }
 

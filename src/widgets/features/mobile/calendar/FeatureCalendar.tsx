@@ -9,8 +9,11 @@ import { CalendarDayInfoBox } from "./components/CalendarDayInfoBox";
 import { CalendarProjectsCard } from "./components/CalendarProjectsCard";
 import { CalendarWeekStrip } from "./components/CalendarWeekStrip";
 import { addDays, buildWeekDays, formatMonthLabel, getWeekStart, toDateKey } from "./lib/calendarWeek";
-import { getMockDayProjects, MOCK_EVENT_DATES } from "./lib/mockCalendar";
-import { toApiDate } from "@/utils/apiDate";
+import { useCalendarDay } from "./hooks/useApiCalendar";
+import type { CalendarProjectSummary, DayTaskStats } from "./types";
+import { getDayKind, toApiDate } from "@/utils/apiDate";
+import { useWorkspaceStore } from "@/store/workspace.store";
+import type { TaskStatusTotals } from "@/api/tasks/tasks.types";
 
 const monthToggleStyle: React.CSSProperties = {
   width: 44,
@@ -20,28 +23,51 @@ const monthToggleStyle: React.CSSProperties = {
   background: "var(--bg-surface)",
 };
 
+const EMPTY_STATS: DayTaskStats = { total: 0, done: 0, overdue: 0, left: 0 };
+
+function toDayStats(t: TaskStatusTotals): DayTaskStats {
+  return { total: t.total, done: t.done, overdue: t.not_done, left: t.todo + t.in_progress };
+}
+
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return `${parts[0].charAt(0)}${parts[1].charAt(0)}`.toUpperCase();
+  return name.trim().slice(0, 2).toUpperCase();
+}
+
 export default function FeatureCalendar() {
   const navigate = useNavigate();
+  const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [direction, setDirection] = useState(0);
   const [isCalendarOpen, setCalendarOpen] = useState(false);
 
-  const days = useMemo(
-    () => buildWeekDays(weekStart, selectedDate, MOCK_EVENT_DATES),
-    [weekStart, selectedDate]
-  );
-  const dayProjects = useMemo(() => getMockDayProjects(selectedDate), [selectedDate]);
+  const days = useMemo(() => buildWeekDays(weekStart, selectedDate), [weekStart, selectedDate]);
+
+  const dayQuery = useCalendarDay(organizationId, toApiDate(selectedDate));
+  const dayStats = dayQuery.data ? toDayStats(dayQuery.data.totals) : EMPTY_STATS;
+  // Shu kunda vazifasi yo'q loyihalar ko'rsatilmaydi.
+  const dayProjects: CalendarProjectSummary[] = (dayQuery.data?.projects ?? [])
+    .filter((p) => p.totals.total > 0)
+    .map((p) => ({
+    id: String(p.id),
+    name: p.name,
+    initials: initialsOf(p.name),
+    done: p.totals.done,
+    total: p.totals.total,
+    isOverdue: p.totals.not_done > 0,
+  }));
 
   function shiftWeek(offsetDays: number) {
     setDirection(offsetDays > 0 ? 1 : -1);
     setWeekStart((prev) => addDays(prev, offsetDays));
   }
 
-  // Loyiha ustiga bosilganda /tasks'ga shu kunni olib o'tadi — task ro'yxati
-  // doim "bugun" emas, tanlangan sana bo'yicha ochiladi.
-  function handleSelectProject() {
-    navigate("/tasks", { state: { date: toApiDate(selectedDate) } });
+  // Loyiha ustiga bosilganda /tasks'ga shu kun va shu loyiha tab'i bilan
+  // o'tadi — ro'yxat "bugun"/birinchi loyiha emas, tanlangan kontekstda ochiladi.
+  function handleSelectProject(project: CalendarProjectSummary) {
+    navigate("/tasks", { state: { date: toApiDate(selectedDate), projectId: project.id } });
   }
 
   function handlePickDate(date: Date) {
@@ -82,10 +108,16 @@ export default function FeatureCalendar() {
       />
 
       {/* day-info-box */}
-      <CalendarDayInfoBox date={selectedDate} />
+      <CalendarDayInfoBox date={selectedDate} stats={dayStats} />
 
       {/* projects-row */}
-      <CalendarProjectsCard projects={dayProjects} onSelectProject={handleSelectProject} />
+      <CalendarProjectsCard
+        projects={dayProjects}
+        dayKind={getDayKind(selectedDate)}
+        onSelectProject={handleSelectProject}
+        isLoading={dayQuery.isPending && !!organizationId}
+        isError={dayQuery.isError}
+      />
 
       <CusDialog open={isCalendarOpen} onClose={() => setCalendarOpen(false)} title="Выберите дату" centered size="sm">
         <CusCalendar

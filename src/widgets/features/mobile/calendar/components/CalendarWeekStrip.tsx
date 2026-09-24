@@ -77,7 +77,9 @@ export function CalendarWeekStrip({
                     key={toDateKey(day.date)}
                     type="button"
                     onClick={() => onSelectDay(day.date)}
-                    className="relative flex h-11 flex-1 items-center justify-center"
+                    className="relative flex h-11 flex-1 items-center justify-center transition-opacity"
+                    // O'tgan kunlar yengil xiralashadi — tanlanganda to'liq ko'rinadi.
+                    style={{ opacity: day.isPast && !day.isSelected ? 0.5 : 1 }}
                   >
                     {day.isSelected ? (
                       <motion.span
@@ -101,12 +103,6 @@ export function CalendarWeekStrip({
                           borderRadius: "var(--radius-card)",
                           borderBottom: day.isToday ? "2px solid var(--brand-default)" : undefined,
                         }}
-                      />
-                    )}
-                    {day.hasEvent && (
-                      <span
-                        className="absolute -top-0.5 h-1.5 w-1.5 rounded-full"
-                        style={{ background: "var(--status-error-solid)" }}
                       />
                     )}
                     <span

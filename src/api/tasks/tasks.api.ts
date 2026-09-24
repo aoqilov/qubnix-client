@@ -4,6 +4,9 @@ import type {
   ListTasksParams,
   ListTasksResponse,
   RawTask,
+  TaskCalendarDay,
+  TaskStatistics,
+  TaskStatisticsType,
   UpdateTaskRequest,
 } from "@/api/tasks/tasks.types";
 
@@ -13,6 +16,22 @@ interface ApiEnvelope<T> {
 }
 
 export const tasksApi = {
+  /** Faqat joriy foydalanuvchiga biriktirilgan vazifalar — `date` davr ichidagi istalgan kun. */
+  statistics: (organizationID: string, type: TaskStatisticsType, date: string) =>
+    api
+      .get<
+        ApiEnvelope<TaskStatistics>
+      >(`/api/v1/organizations/${organizationID}/tasks/statistics`, { params: { type, date } })
+      .then((r) => r.data.data),
+
+  /** Foydalanuvchi roli ko'radigan barcha loyihalar bo'yicha — `date` YYYY-MM-DD. */
+  calendar: (organizationID: string, date: string) =>
+    api
+      .get<
+        ApiEnvelope<TaskCalendarDay>
+      >(`/api/v1/organizations/${organizationID}/tasks/calendar`, { params: { date } })
+      .then((r) => r.data.data),
+
   list: (organizationID: string, projectId: string, params?: ListTasksParams) =>
     api
       .get<
