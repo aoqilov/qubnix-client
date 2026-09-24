@@ -11,6 +11,7 @@ npm run dev                # vite dev server, http://localhost:5173
 npm run build               # tsc -b && vite build
 npm run typecheck           # tsc -b --noEmit, no emit
 npm run preview             # serve the production build locally
+npm run i18n:check          # untranslated UI text in the mobile scope — must print 0
 ```
 
 There is no lint script and no test runner configured in this repo — don't invent `npm run lint`/`npm test` commands. `npm run typecheck` is the only automated correctness check available; run it after any non-trivial change.
@@ -103,9 +104,18 @@ Two components are the exception and are Chakra-free, plain Tailwind: `CusCardbo
 
 Layout chrome (`components/layout/**` — Sidebar, Header, BottomTabBar) is exempt from the Cus*-only rule since it isn't page content; it's written with raw Tailwind, using `CusPopover` where an interactive dropdown is needed (e.g. the workspace switcher).
 
-### No i18n
+### i18n (ru / uz / uz-Cyrl)
 
-All UI text is hardcoded **Russian**, written directly in components. There is no `useTranslation`/i18n abstraction anywhere — don't introduce one or reference a translation key when adding text.
+All user-facing text goes through **i18next** (`react-i18next`). Never hardcode UI text in a component — add a key and use `t()`.
+
+- **Languages:** `ru` (source of truth), `uz` (Uzbek Latin), `uz-Cyrl` (Uzbek Cyrillic). Config in `src/i18n/languages.ts`; initial language = `localStorage` (`qubnix_language`) → Telegram `language_code` (`uz*` → `uz`) → `ru`. Switcher lives in `/profile` → Settings.
+- **Dictionaries:** `src/i18n/locales/ru/<section>.ts` is written first; `locales/uz/<section>.ts` is typed `typeof ru`, so a missing/extra key is a typecheck error. Register a new section in both `locales/ru/index.ts` and `locales/uz/index.ts`. **`uz-Cyrl` has no files** — it is generated at runtime from `uz` by `src/i18n/transliterate.ts`; only fix wrong words in `locales/uz-Cyrl/overrides.ts` (key = full path, e.g. `"common.actions.save"`). Latin brand terms that must not be transliterated go in `KEEP_LATIN` there.
+- **Keys:** everything is in one `translation` namespace, so keys are full paths: `t("common.actions.save")`, `t("tasks.modal.titleAdd")`. Shared words (actions, states, statuses, priorities, roles, counts) live in `common`.
+- **Plurals:** use `count` — `t("common.count.tasks", { count })` (ru one/few/many, uz one/other). Helpers in `src/utils/countLabels.ts` (`tasksLabel`, `daysLabel`, `tasksWordLabel` for the word without the number, …). Role names: `organizationRoleLabel()` / `projectRoleLabel()` in `src/utils/roleLabels.ts`.
+- **Dates/numbers:** never hardcode `"ru-RU"`. In components use `useIntlLocale()`; in utils called during render use `currentIntlLocale()` (both in `src/i18n/useIntlLocale.ts`). `CusCalendar`/`CusCalendarMultiple` pick the current locale automatically.
+- **No text in module-level constants.** A `const ITEMS = [{ label: "..." }]` evaluated once won't update on language change — store a key (`labelKey`) or build the array inside the component/function.
+- **API errors:** `getApiErrorMessage(err)` (`src/utils/apiErrorMessage.ts`) — backend `message`, else translated fallback. Requests send `Accept-Language` (`src/api-config/interceptors.ts`).
+- **Check:** `npm run i18n:check` (`scripts/i18n-check.mjs`) finds untranslated text in the mobile scope and must report 0. Legit exceptions (brand names, debug badges) get a `// i18n-ignore` comment on that line. Desktop (`pages/desktop`, `widgets/features/desktop`, `store/workspace.store.ts` mock data) is not translated yet.
 
 ### State and data
 
