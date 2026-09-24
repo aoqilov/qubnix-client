@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { DatePicker, Field } from "@chakra-ui/react";
 import type { DateValue, DatePickerDateView } from "@ark-ui/react/date-picker";
@@ -5,11 +6,8 @@ import { parseDate } from "@internationalized/date";
 import { LuCalendar } from "react-icons/lu";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
+import { useIntlLocale } from "@/i18n/useIntlLocale";
 
-const MONTHS_NOMINATIVE = [
-  "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-  "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
-];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -104,7 +102,7 @@ export function CusCalendar({
   defaultView,
   minView = "day",
   maxView = "year",
-  locale = "ru-RU",
+  locale,
   timeZone,
   disabled,
   readOnly,
@@ -113,11 +111,18 @@ export function CusCalendar({
   modalTitle,
   allowRange = true,
 }: CusCalendarProps) {
+  const { t } = useTranslation();
+  // Berilmasa — joriy til (ru-RU / uz-Latn-UZ / uz-Cyrl-UZ).
+  const intlLocale = useIntlLocale();
+  const resolvedLocale = locale ?? intlLocale;
   const isMonthPicker = minView === "month";
   const resolvedPlaceholder =
-    placeholder ?? (isMonthPicker ? "Месяц ГГГГ" : "ДД.ММ.ГГГГ");
+    placeholder ?? (isMonthPicker ? t("ui.calendar.monthPlaceholder") : t("ui.calendar.datePlaceholder"));
   function formatMonth(v: DateValue): string {
-    return `${MONTHS_NOMINATIVE[v.month - 1]} ${v.year}`;
+    const monthName = new Intl.DateTimeFormat(resolvedLocale, { month: "long" }).format(
+      new Date(v.year, v.month - 1, 1),
+    );
+    return `${monthName.charAt(0).toUpperCase()}${monthName.slice(1)} ${v.year}`;
   }
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -230,7 +235,7 @@ export function CusCalendar({
                 onClick={handleModalConfirm}
                 style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
               >
-                Tasdiqlash
+                {t("common.actions.confirm")}
               </CusButton>
             }
           >
@@ -247,7 +252,7 @@ export function CusCalendar({
                     }
                     onClick={() => handleModeChange(false)}
                   >
-                    Bir kunlik
+                    {t("ui.calendar.singleDay")}
                   </button>
                   <button
                     type="button"
@@ -259,7 +264,7 @@ export function CusCalendar({
                     }
                     onClick={() => handleModeChange(true)}
                   >
-                    Oraliq kunlarni belgilash
+                    {t("ui.calendar.range")}
                   </button>
                 </div>
               )}
@@ -276,7 +281,7 @@ export function CusCalendar({
                 defaultView={defaultView ?? minView}
                 minView={minView}
                 maxView={maxView}
-                locale={locale}
+                locale={resolvedLocale}
                 timeZone={timeZone}
                 colorPalette={colorPalette}
                 format={isMonthPicker ? formatMonth : formatDay}
@@ -302,7 +307,7 @@ export function CusCalendar({
           defaultView={defaultView ?? minView}
           minView={minView}
           maxView={maxView}
-          locale={locale}
+          locale={resolvedLocale}
           timeZone={timeZone}
           disabled={disabled}
           readOnly={readOnly || isMonthPicker}

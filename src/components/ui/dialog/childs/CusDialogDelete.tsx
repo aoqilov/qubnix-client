@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Dialog, CloseButton } from "@chakra-ui/react";
 import { LuTriangleAlert } from "react-icons/lu";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -19,8 +20,9 @@ export default function CusDialogDelete({
   description,
   isLoading = false,
 }: CusDialogDeleteProps) {
-  const resolvedTitle = title ?? "Удалить?";
-  const resolvedDescription = description ?? "Это действие нельзя отменить.";
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t("ui.dialogDelete.titleShort");
+  const resolvedDescription = description ?? t("ui.dialogDelete.description");
   return (
     <Dialog.Root
       open={open}
@@ -94,7 +96,7 @@ export default function CusDialogDelete({
           >
             <Dialog.ActionTrigger asChild>
               <CusButton variant="outline" size="sm" isDisabled={isLoading}>
-                Отмена
+                {t("common.actions.cancel")}
               </CusButton>
             </Dialog.ActionTrigger>
             <CusButton
@@ -103,10 +105,10 @@ export default function CusDialogDelete({
               colorPalette="red"
               isDisabled={isLoading}
               isLoading={isLoading}
-              loadingText="Удаление..."
+              loadingText={t("ui.dialogDelete.deleting")}
               onClick={onConfirm}
             >
-              Удалить
+              {t("common.actions.delete")}
             </CusButton>
           </Dialog.Footer>
         </Dialog.Content>

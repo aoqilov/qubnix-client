@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Text } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { LuClock, LuX } from "react-icons/lu";
@@ -230,8 +231,9 @@ export function CusTimepicker({
   modalTitle,
   minTime,
 }: CusTimepickerProps) {
+  const { t } = useTranslation();
   const minuteStep = variant === "modal" ? 5 : 1;
-  const resolvedPlaceholder = placeholder ?? "ЧЧ:ММ";
+  const resolvedPlaceholder = placeholder ?? t("ui.timepicker.placeholder");
   const [open, setOpen] = useState(false);
   const [inputText, setInputText] = useState(value ?? "");
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -497,7 +499,11 @@ export function CusTimepicker({
               borderBottom: "1px solid var(--border-default)",
             }}
           >
-            {["Час", "Мин", ...(withSeconds ? ["Сек"] : [])].map((h) => (
+            {[
+              t("ui.timepicker.hoursShort"),
+              t("ui.timepicker.minutesShort"),
+              ...(withSeconds ? [t("ui.timepicker.secondsShort")] : []),
+            ].map((h) => (
               <p
                 key={h}
                 style={{
@@ -577,7 +583,7 @@ export function CusTimepicker({
                   cursor: "pointer",
                 }}
               >
-                OK
+                {t("ui.timepicker.ok")}
               </button>
             </div>
           )}
@@ -598,7 +604,7 @@ export function CusTimepicker({
               onClick={handleConfirm}
               style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
             >
-              Tasdiqlash
+              {t("common.actions.confirm")}
             </CusButton>
           }
         >
@@ -616,7 +622,7 @@ export function CusTimepicker({
             <div className="flex w-full gap-3">
               <div className="flex flex-1 flex-col gap-2">
                 <p className="text-center text-xs font-semibold uppercase tracking-wide text-secondary">
-                  Soat
+                  {t("ui.timepicker.hours")}
                 </p>
                 <ModalTimeColumn
                   items={HOURS}
@@ -627,7 +633,7 @@ export function CusTimepicker({
               </div>
               <div className="flex flex-1 flex-col gap-2">
                 <p className="text-center text-xs font-semibold uppercase tracking-wide text-secondary">
-                  Daqiqa
+                  {t("ui.timepicker.minutes")}
                 </p>
                 <ModalTimeColumn
                   items={MINUTES_STEP5}
@@ -639,7 +645,7 @@ export function CusTimepicker({
               {withSeconds && (
                 <div className="flex flex-1 flex-col gap-2">
                   <p className="text-center text-xs font-semibold uppercase tracking-wide text-secondary">
-                    Soniya
+                    {t("ui.timepicker.seconds")}
                   </p>
                   <ModalTimeColumn
                     items={SECS}

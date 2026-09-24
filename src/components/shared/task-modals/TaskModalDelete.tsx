@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuTrash2 } from "react-icons/lu";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -15,17 +16,18 @@ function TaskModalDelete({
   onConfirm,
   taskTitle,
 }: TaskModalDeleteProps) {
+  const { t } = useTranslation();
   return (
     <CusDialog
       open={open}
       onClose={onClose}
-      title="Vazifani o'chirish"
+      title={t("tasks.delete.title")}
       size="sm"
       centered
       footer={
         <>
           <CusButton variant="outline" onClick={onClose}>
-            Bekor qilish
+            {t("common.actions.cancel")}
           </CusButton>
           <CusButton
             onClick={() => {
@@ -37,7 +39,7 @@ function TaskModalDelete({
               color: "var(--text-on-brand)",
             }}
           >
-            O'chirish
+            {t("common.actions.delete")}
           </CusButton>
         </>
       }
@@ -75,7 +77,7 @@ function TaskModalDelete({
               lineHeight: 1.5,
             }}
           >
-            Bu vazifa butunlay o'chiriladi. Bu amalni ortga qaytarib bo'lmaydi.
+            {t("tasks.delete.text")}
           </p>
         </div>
       </div>

@@ -11,7 +11,7 @@ import { ModalAddWorkspace } from "./modals/ModalAddWorkspace";
 import { InvitationsDrawer } from "./modals/InvitationsDrawer";
 import { usePersonalSummary, useReceivedInvitations, useWorkspaceList } from "./hooks/useApiDoska";
 import { formatWeekdayDate } from "@/utils/formatWeekdayDate";
-import { orgsLabel } from "@/utils/pluralRu";
+import { orgsLabel } from "@/utils/countLabels";
 
 export default function FeatureDoska() {
   const navigate = useNavigate();

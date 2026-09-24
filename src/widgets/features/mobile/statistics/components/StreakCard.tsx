@@ -1,5 +1,5 @@
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
-import { pluralRu } from "@/utils/pluralRu";
+import { daysLabel } from "@/utils/countLabels";
 import type { StreakSummary } from "../types";
 
 interface StreakCardProps {
@@ -15,13 +15,13 @@ export function StreakCard({ streak }: StreakCardProps) {
       <div className="flex items-center justify-between">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary">Дневная серия</span>
         <span className="text-[11px] font-medium text-secondary">
-          последние {streak.windowDays} {pluralRu(streak.windowDays, "день", "дня", "дней")}
+          последние {daysLabel(streak.windowDays)}
         </span>
       </div>
 
       <div className="flex items-baseline gap-1.5">
         <span className="font-condensed text-3xl font-bold leading-none text-brand">{streak.current}</span>
-        <span className="text-sm font-medium text-secondary">{pluralRu(streak.current, "день", "дня", "дней")}</span>
+        <span className="text-sm font-medium text-secondary">{daysLabel(streak.current)}</span>
       </div>
 
       <div className="flex items-center justify-between gap-1">

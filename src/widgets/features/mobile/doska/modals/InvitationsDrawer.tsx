@@ -5,7 +5,7 @@ import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { CusAccordion } from "@/components/ui/accordion/CusAccordion";
 import { avatarColorVar } from "@/utils/avatarColor";
 import { daysSince } from "@/utils/daysSince";
-import { ORGANIZATION_ROLE_LABELS } from "@/utils/roleLabels";
+import { organizationRoleLabel } from "@/utils/roleLabels";
 import { useReceivedInvitations, useRespondInvitation } from "../hooks/useApiDoska";
 import type {
   ProjectMemberRole,
@@ -96,7 +96,7 @@ function InvitationCard({
             {daysSince(invitation.created_at)} дн. назад
           </p>
         </div>
-        <CusBadge tone="brand">{ORGANIZATION_ROLE_LABELS[invitation.role]}</CusBadge>
+        <CusBadge tone="brand">{organizationRoleLabel(invitation.role)}</CusBadge>
       </div>
 
       {projects.length > 0 && (

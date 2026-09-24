@@ -1,3 +1,5 @@
+import { currentIntlLocale } from "@/i18n/useIntlLocale";
+
 /** Haftalik lentadagi bitta kun katakchasi — kalendar va xodimlar statistikasi uchun umumiy. */
 export interface WeekDayCell {
   date: Date;
@@ -33,7 +35,7 @@ export function getWeekStart(date: Date): Date {
 }
 
 export function formatMonthLabel(date: Date): string {
-  return new Intl.DateTimeFormat("ru-RU", { month: "long", year: "numeric" })
+  return new Intl.DateTimeFormat(currentIntlLocale(), { month: "long", year: "numeric" })
     .format(date)
     .toUpperCase();
 }
@@ -45,7 +47,9 @@ export function buildWeekDays(weekStart: Date, selectedDate: Date): WeekDayCell[
   return Array.from({ length: 7 }, (_, index) => {
     const current = addDays(weekStart, index);
     const dayOfWeek = current.getDay();
-    const weekdayLabel = new Intl.DateTimeFormat("ru-RU", { weekday: "short" }).format(current).toUpperCase();
+    const weekdayLabel = new Intl.DateTimeFormat(currentIntlLocale(), { weekday: "short" })
+      .format(current)
+      .toUpperCase();
 
     return {
       date: current,

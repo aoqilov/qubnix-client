@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { CusCheckbox } from "@/components/ui/inputs/CusCheckbox";
 import { avatarColorVar } from "@/utils/avatarColor";
@@ -39,12 +40,13 @@ export function AssigneeChecklist({
   onToggle,
   isLoading = false,
 }: AssigneeChecklistProps) {
+  const { t } = useTranslation();
   if (isLoading) {
-    return <p className="py-3 text-center text-sm text-secondary">Yuklanmoqda...</p>;
+    return <p className="py-3 text-center text-sm text-secondary">{t("common.states.loading")}</p>;
   }
 
   if (members.length === 0) {
-    return <p className="py-3 text-center text-sm text-secondary">Xodimlar topilmadi</p>;
+    return <p className="py-3 text-center text-sm text-secondary">{t("tasks.assignees.empty")}</p>;
   }
 
   return (

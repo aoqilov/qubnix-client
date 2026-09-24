@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { LuRefreshCw, LuTriangleAlert } from "react-icons/lu";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
@@ -34,7 +35,7 @@ export function AuthLoading() {
           transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
         />
         <span className="text-3xl font-bold" style={{ color: "var(--brand-default)" }}>
-          Q
+          Q {/* i18n-ignore — brend belgisi */}
         </span>
       </motion.div>
 
@@ -44,7 +45,7 @@ export function AuthLoading() {
         transition={{ delay: 0.15, duration: 0.4 }}
         className="flex flex-col items-center gap-1"
       >
-        <span className="text-base font-semibold text-primary">Qubnix</span>
+        <span className="text-base font-semibold text-primary">Qubnix</span> {/* i18n-ignore — brend */}
         <div className="flex items-center gap-1.5 pt-1">
           {DOTS.map((i) => (
             <motion.span
@@ -68,6 +69,7 @@ export function AuthLoading() {
 
 /** /users/me muvaffaqiyatsiz bo'lganda (noto'g'ri/eskirgan initData va h.k.) ko'rsatiladi. */
 export function TelegramAuthError() {
+  const { t } = useTranslation();
   return (
     <div
       className="flex h-dvh w-full flex-col items-center justify-center bg-canvas"
@@ -79,14 +81,14 @@ export function TelegramAuthError() {
         closeOnBackdrop={false}
         centered
         size="sm"
-        title="Не удалось войти"
+        title={t("layout.authError.title")}
         footer={
           <CusButton
             className="w-full"
             leftIcon={<LuRefreshCw size={16} />}
             onClick={() => void enterWayTelegram()}
           >
-            Повторить
+            {t("common.actions.retry")}
           </CusButton>
         }
       >
@@ -98,7 +100,7 @@ export function TelegramAuthError() {
             <LuTriangleAlert size={24} />
           </span>
           <p className="text-sm text-secondary">
-            Не удалось подтвердить вход через Telegram. Проверьте соединение и попробуйте снова.
+            {t("layout.authError.text")}
           </p>
         </div>
       </CusDialog>

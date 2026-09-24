@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import { LuCheck, LuMic, LuPause, LuPlay, LuTrash2, LuX } from "react-icons/lu";
 
@@ -30,6 +31,7 @@ interface ReviewRecording {
 // yozadi, qo'yib yuborganda to'xtaydi va Qabul qilish/Bekor qilish
 // tugmalari chiqadi — faqat Qabul qilinganda `onChange` chaqiriladi.
 export function VoiceNoteRecorder({ value, onChange }: VoiceNoteRecorderProps) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>("idle");
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +82,7 @@ export function VoiceNoteRecorder({ value, onChange }: VoiceNoteRecorderProps) {
       setPhase("recording");
       timerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000);
     } catch {
-      setError("Mikrofonga ruxsat berilmadi");
+      setError(t("tasks.voice.micDenied"));
     }
   }
 
@@ -122,17 +124,17 @@ export function VoiceNoteRecorder({ value, onChange }: VoiceNoteRecorderProps) {
         <button
           type="button"
           onClick={togglePlay}
-          aria-label={isPlaying ? "To'xtatish" : "Tinglash"}
+          aria-label={isPlaying ? t("tasks.voice.stop") : t("tasks.voice.play")}
           className="flex size-9 flex-none items-center justify-center rounded-avatar bg-brand text-on-brand"
         >
           {isPlaying ? <LuPause size={16} /> : <LuPlay size={16} style={{ marginLeft: 1 }} />}
         </button>
-        <span className="flex-1 text-sm text-secondary">Ovozli izoh yozildi</span>
+        <span className="flex-1 text-sm text-secondary">{t("tasks.voice.recorded")}</span>
         <span className="text-sm font-medium text-primary">{value.durationLabel}</span>
         <button
           type="button"
           onClick={() => onChange(null)}
-          aria-label="Ovozli izohni o'chirish"
+          aria-label={t("tasks.voice.deleteVoice")}
           className="flex-none"
           style={{ color: "var(--status-error-text)" }}
         >
@@ -157,20 +159,20 @@ export function VoiceNoteRecorder({ value, onChange }: VoiceNoteRecorderProps) {
           <button
             type="button"
             onClick={togglePlay}
-            aria-label={isPlaying ? "To'xtatish" : "Tinglash"}
+            aria-label={isPlaying ? t("tasks.voice.stop") : t("tasks.voice.play")}
             className="flex size-9 flex-none items-center justify-center rounded-avatar"
             style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
           >
             {isPlaying ? <LuPause size={16} /> : <LuPlay size={16} style={{ marginLeft: 1 }} />}
           </button>
-          <span className="flex-1 text-sm text-secondary">Ovozli izoh tayyor</span>
+          <span className="flex-1 text-sm text-secondary">{t("tasks.voice.ready")}</span>
           <span className="flex-none text-sm font-medium text-primary">
             {formatDuration(elapsed)}
           </span>
           <button
             type="button"
             onClick={handleDiscard}
-            aria-label="Bekor qilish"
+            aria-label={t("common.actions.cancel")}
             className="flex size-9 flex-none items-center justify-center rounded-avatar"
             style={{ color: "var(--status-error-text)" }}
           >
@@ -179,7 +181,7 @@ export function VoiceNoteRecorder({ value, onChange }: VoiceNoteRecorderProps) {
           <button
             type="button"
             onClick={handleAccept}
-            aria-label="Qabul qilish"
+            aria-label={t("tasks.voice.accept")}
             className="flex size-9 flex-none items-center justify-center rounded-avatar"
             style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
           >
@@ -201,7 +203,7 @@ export function VoiceNoteRecorder({ value, onChange }: VoiceNoteRecorderProps) {
         </span>
         <button
           type="button"
-          aria-label={phase === "recording" ? "Yozib olinmoqda — qo'yib yuboring" : "Bosib turib yozib oling"}
+          aria-label={phase === "recording" ? t("tasks.voice.recordingRelease") : t("tasks.voice.holdToRecord")}
           onPointerDown={(e) => {
             e.preventDefault();
             startRecording();
@@ -223,8 +225,8 @@ export function VoiceNoteRecorder({ value, onChange }: VoiceNoteRecorderProps) {
       <p className="text-xs text-secondary">
         {error ??
           (phase === "recording"
-            ? "Yozib olinmoqda — qo'yib yuboring to'xtatish uchun"
-            : "Yozib olish uchun mikrofonni bosib turing")}
+            ? t("tasks.voice.recordingHint")
+            : t("tasks.voice.holdHint"))}
       </p>
     </div>
   );

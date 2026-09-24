@@ -2,7 +2,7 @@ import { useState } from "react";
 import { LuClock } from "react-icons/lu";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { CusAccordion } from "@/components/ui/accordion/CusAccordion";
-import { ORGANIZATION_ROLE_LABELS } from "@/utils/roleLabels";
+import { organizationRoleLabel } from "@/utils/roleLabels";
 import { daysSince } from "@/utils/daysSince";
 import { CancelInvitationDialog } from "../modals/CancelInvitationDialog";
 import { useRespondToInvitation } from "../hooks/useApiInvitations";
@@ -48,7 +48,7 @@ export function InviteRow({ invite }: InviteRowProps) {
             {daysSince(invite.created_at)} kun oldin
           </span>
           <CusBadge variant="subtle" tone="neutral">
-            {ORGANIZATION_ROLE_LABELS[invite.role]}
+            {organizationRoleLabel(invite.role)}
           </CusBadge>
         </span>
         <div>

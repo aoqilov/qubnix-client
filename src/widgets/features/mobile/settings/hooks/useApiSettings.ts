@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { organizationsApi } from "@/api/organizations/organizations.api";
 import type { OrganizationRole, RawOrganization } from "@/api/organizations/organizations.types";
 import { useWorkspaceStore } from "@/store/workspace.store";
-import { ORGANIZATION_ROLE_LABELS } from "@/utils/roleLabels";
+import { organizationRoleLabel } from "@/utils/roleLabels";
 
 export interface SettingsWorkspace {
   id: string;
@@ -18,7 +18,7 @@ function toSettingsWorkspace(org: RawOrganization): SettingsWorkspace {
     name: org.name,
     initials: org.name.trim().charAt(0).toUpperCase() || "?",
     role: org.role,
-    roleLabel: ORGANIZATION_ROLE_LABELS[org.role],
+    roleLabel: organizationRoleLabel(org.role),
   };
 }
 

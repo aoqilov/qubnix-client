@@ -4,7 +4,7 @@ import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusSegment } from "@/components/ui/segment/CusSegment";
 import { avatarColorVar } from "@/utils/avatarColor";
-import { ORGANIZATION_ROLE_LABELS } from "@/utils/roleLabels";
+import { organizationRoleLabel } from "@/utils/roleLabels";
 import { useRemoveMember, useUpdateMemberRole } from "../hooks/useApiSettingsMembers";
 import type {
   OrganizationMemberRole,
@@ -75,9 +75,9 @@ export function MemberActionsDrawer({ open, onClose, member }: MemberActionsDraw
             value={member.organization_role}
             onValueChange={(v) => handleRoleChange(v as OrganizationMemberRole)}
             items={[
-              { id: "admin", label: ORGANIZATION_ROLE_LABELS.admin },
-              { id: "member", label: ORGANIZATION_ROLE_LABELS.member },
-              { id: "viewer", label: ORGANIZATION_ROLE_LABELS.viewer },
+              { id: "admin", label: organizationRoleLabel("admin") },
+              { id: "member", label: organizationRoleLabel("member") },
+              { id: "viewer", label: organizationRoleLabel("viewer") },
             ]}
           />
           {updateRole.isError && (

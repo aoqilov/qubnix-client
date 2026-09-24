@@ -8,7 +8,7 @@ import {
 } from "react-icons/lu";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { avatarColorVar } from "@/utils/avatarColor";
-import { projectsLabel } from "@/utils/pluralRu";
+import { projectsLabel } from "@/utils/countLabels";
 import type { DayKind } from "@/utils/apiDate";
 import type { CalendarProjectSummary } from "../types";
 

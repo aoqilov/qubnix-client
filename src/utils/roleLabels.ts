@@ -1,9 +1,16 @@
+import i18n from "@/i18n";
 import type { OrganizationRole } from "@/api/organizations/organizations.types";
 
-/** Tashkilot (workspace) darajasidagi rol nomlari — rus tilida, UI uchun. */
-export const ORGANIZATION_ROLE_LABELS: Record<OrganizationRole, string> = {
-  owner: "Владелец",
-  admin: "Админ",
-  member: "Участник",
-  viewer: "Наблюдатель",
-};
+type ProjectRole = "project_manager" | "project_member";
+
+/**
+ * Rol nomlari joriy tilda. O'zgarmas obyekt emas, funksiya — modul yuklanganda bir
+ * marta hisoblangan matn til almashganda eskirib qolardi.
+ */
+export function organizationRoleLabel(role: OrganizationRole): string {
+  return i18n.t(`common.roles.${role}`);
+}
+
+export function projectRoleLabel(role: ProjectRole): string {
+  return i18n.t(`common.roles.${role}`);
+}

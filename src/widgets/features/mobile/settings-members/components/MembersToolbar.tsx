@@ -3,7 +3,7 @@ import type React from "react";
 import { LuSearch, LuFilter, LuLayoutGrid, LuList } from "react-icons/lu";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusMenuList } from "@/components/ui/menu-list/CusMenuList";
-import { ORGANIZATION_ROLE_LABELS } from "@/utils/roleLabels";
+import { organizationRoleLabel } from "@/utils/roleLabels";
 import type { MemberViewStyle } from "../hooks/useMemberViewStyle";
 import type { MemberRoleFilter } from "../lib/mockMembers";
 
@@ -14,9 +14,9 @@ const VIEW_STYLE_ITEMS = [
 
 const ROLE_FILTER_ITEMS = [
   { value: "all", label: "Barchasi" },
-  { value: "admin", label: ORGANIZATION_ROLE_LABELS.admin },
-  { value: "member", label: ORGANIZATION_ROLE_LABELS.member },
-  { value: "viewer", label: ORGANIZATION_ROLE_LABELS.viewer },
+  { value: "admin", label: organizationRoleLabel("admin") },
+  { value: "member", label: organizationRoleLabel("member") },
+  { value: "viewer", label: organizationRoleLabel("viewer") },
 ];
 
 const iconButtonStyle: React.CSSProperties = {

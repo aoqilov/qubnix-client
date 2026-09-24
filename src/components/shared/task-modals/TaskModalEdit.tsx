@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import type React from "react";
 import { Drawer } from "@chakra-ui/react";
@@ -55,15 +56,15 @@ interface TaskModalEditProps {
 
 const QUICK_TIMES = ["09:00", "12:00", "15:00", "18:00", "21:00"];
 
-const DUE_SECTION_LABEL: Record<"quick" | "custom", string> = {
-  quick: "Bugunlik",
-  custom: "Muddat",
-};
+const DUE_SECTION_LABEL = {
+  quick: "tasks.modal.dueToday",
+  custom: "tasks.modal.dueDeadline",
+} as const;
 
-const PRIORITY_OPTIONS: { value: TaskPriority; label: string; activeColor: string }[] = [
-  { value: "high", label: "Высокий", activeColor: "var(--status-error-solid)" },
-  { value: "medium", label: "Средний", activeColor: "var(--accent-orange)" },
-  { value: "low", label: "Низкий", activeColor: "var(--text-secondary)" },
+const PRIORITY_OPTIONS: { value: TaskPriority; labelKey: `common.priority.${TaskPriority}`; activeColor: string }[] = [
+  { value: "high", labelKey: "common.priority.high", activeColor: "var(--status-error-solid)" },
+  { value: "medium", labelKey: "common.priority.medium", activeColor: "var(--accent-orange)" },
+  { value: "low", labelKey: "common.priority.low", activeColor: "var(--text-secondary)" },
 ];
 
 const PRIORITY_ICON = <IoFlagSharp size={14} />;
@@ -167,6 +168,7 @@ function TaskModalEdit({
   isLoadingMembers,
   onSubmit,
 }: TaskModalEditProps) {
+  const { t } = useTranslation();
   const [step, setStep] = useState<1 | 2>(1);
 
   // ── Step 1 ──────────────────────────────────────────────────────────────────
@@ -356,13 +358,13 @@ function TaskModalEdit({
       size="full"
       closeOnBackdrop={false}
       closeOnEscape={false}
-      title="Vazifani tahrirlash"
+      title={t("tasks.modal.titleEdit")}
       footer={
         step === 1 ? (
           <>
             <Drawer.ActionTrigger asChild>
               <CusButton variant="outline" className="flex-1">
-                Bekor qilish
+                {t("common.actions.cancel")}
               </CusButton>
             </Drawer.ActionTrigger>
             <CusButton
@@ -371,7 +373,7 @@ function TaskModalEdit({
               onClick={() => setStep(2)}
               style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
             >
-              Далее
+              {t("common.actions.next")}
             </CusButton>
           </>
         ) : (
@@ -382,16 +384,16 @@ function TaskModalEdit({
               isDisabled={isSubmitting}
               onClick={() => setStep(1)}
             >
-              Orqaga
+              {t("common.actions.back")}
             </CusButton>
             <CusButton
               className="flex-1"
               isLoading={isSubmitting}
-              loadingText="Yuborilmoqda..."
+              loadingText={t("common.states.sending")}
               onClick={handleSubmit}
               style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
             >
-              Saqlash
+              {t("common.actions.save")}
             </CusButton>
           </>
         )
@@ -402,9 +404,9 @@ function TaskModalEdit({
       {step === 1 ? (
         <div className="flex flex-col gap-4">
           <CusInput
-            label="Название задачи"
+            label={t("tasks.modal.nameLabel")}
             isRequired
-            placeholder="Напишите название"
+            placeholder={t("tasks.modal.namePlaceholder")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
@@ -412,12 +414,12 @@ function TaskModalEdit({
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-                Описание
+                {t("tasks.modal.description")}
               </span>
               <div className="flex gap-1 rounded-full border border-default bg-surface p-1">
                 <button
                   type="button"
-                  aria-label="Matn"
+                  aria-label={t("tasks.modal.descriptionText")}
                   onClick={() => setDescriptionMode("text")}
                   className="flex size-9 items-center justify-center rounded-full"
                   style={
@@ -430,7 +432,7 @@ function TaskModalEdit({
                 </button>
                 <button
                   type="button"
-                  aria-label="Ovoz"
+                  aria-label={t("tasks.modal.descriptionVoice")}
                   onClick={() => setDescriptionMode("voice")}
                   className="flex size-9 items-center justify-center rounded-full"
                   style={
@@ -445,7 +447,7 @@ function TaskModalEdit({
             </div>
             {descriptionMode === "text" ? (
               <CusTextArea
-                placeholder="Vazifa haqida qisqacha ma'lumot"
+                placeholder={t("tasks.modal.descriptionPlaceholder")}
                 autoresize
                 maxH="10lh"
                 value={description}
@@ -459,18 +461,18 @@ function TaskModalEdit({
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-                {DUE_SECTION_LABEL[activeDueIcon]}
+                {t(DUE_SECTION_LABEL[activeDueIcon])}
               </span>
               <div className="flex gap-1 rounded-full border border-default bg-surface p-1">
                 <IconToggle
                   icon={<LuCalendar size={16} />}
-                  ariaLabel="Sanani tanlash"
+                  ariaLabel={t("tasks.modal.pickDate")}
                   active={activeDueIcon === "custom"}
                   onClick={() => setDueMode("custom")}
                 />
                 <IconToggle
                   icon={<LuClock size={16} />}
-                  ariaLabel="Tezkor vaqt tanlash"
+                  ariaLabel={t("tasks.modal.quickTime")}
                   active={activeDueIcon === "quick"}
                   onClick={() => setDueMode("quick")}
                 />
@@ -480,34 +482,34 @@ function TaskModalEdit({
               <>
                 <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-0.5">
                   <Pill
-                    label="O'zi belgilash"
+                    label={t("tasks.modal.customTime")}
                     className="flex-none"
                     active={isCustomQuickTime}
                     onClick={() => setIsCustomQuickTime(true)}
                   />
                   {[...QUICK_TIMES]
                     .sort((a, b) => Number(isPastQuickTime(a)) - Number(isPastQuickTime(b)))
-                    .map((t) => (
+                    .map((time) => (
                       <Pill
-                        key={t}
-                        label={t}
+                        key={time}
+                        label={time}
                         className="flex-none"
-                        active={!isCustomQuickTime && quickTime === t}
-                        disabled={isPastQuickTime(t)}
+                        active={!isCustomQuickTime && quickTime === time}
+                        disabled={isPastQuickTime(time)}
                         onClick={() => {
                           setIsCustomQuickTime(false);
-                          setQuickTime(t);
+                          setQuickTime(time);
                         }}
                       />
                     ))}
                 </div>
                 {isCustomQuickTime && (
                   <CusTimepicker
-                    placeholder="ЧЧ:ММ"
+                    placeholder={t("ui.timepicker.placeholder")}
                     value={quickTime}
                     onChange={setQuickTime}
                     variant="modal"
-                    modalTitle="Vaqtni tanlang"
+                    modalTitle={t("tasks.modal.pickTimeTitle")}
                     minTime={todayMinTime}
                   />
                 )}
@@ -516,19 +518,19 @@ function TaskModalEdit({
             {dueMode === "custom" && (
               <div className="flex flex-col gap-2 pt-1">
                 <CusCalendar
-                  placeholder="Sana"
+                  placeholder={t("tasks.modal.datePlaceholder")}
                   value={customDate}
                   onValueChange={(details) => setCustomDate(details.value)}
                   variant="modal"
-                  modalTitle="Sanani tanlang"
+                  modalTitle={t("tasks.modal.pickDateTitle")}
                 />
                 <CusTimepicker
-                  label="Vaqt"
-                  placeholder="ЧЧ:ММ"
+                  label={t("tasks.modal.time")}
+                  placeholder={t("ui.timepicker.placeholder")}
                   value={customTime}
                   onChange={setCustomTime}
                   variant="modal"
-                  modalTitle="Vaqtni tanlang"
+                  modalTitle={t("tasks.modal.pickTimeTitle")}
                   minTime={customMinTime}
                 />
               </div>
@@ -549,13 +551,13 @@ function TaskModalEdit({
 
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              Приоритет
+              {t("tasks.modal.priority")}
             </span>
             <div className="flex gap-2">
               {PRIORITY_OPTIONS.map((p) => (
                 <Pill
                   key={p.value}
-                  label={p.label}
+                  label={t(p.labelKey)}
                   icon={PRIORITY_ICON}
                   active={priority === p.value}
                   activeColor={p.activeColor}
@@ -570,11 +572,11 @@ function TaskModalEdit({
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              Дополнительные задачи - sub-task
+              {t("tasks.modal.subtasks")}
             </span>
             <div className="flex gap-2">
               <CusInput
-                placeholder="Новый Sub-Task"
+                placeholder={t("tasks.modal.subtaskPlaceholder")}
                 value={subtaskInput}
                 onChange={(e) => setSubtaskInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -602,7 +604,7 @@ function TaskModalEdit({
                     <span className="min-w-0 flex-1 truncate text-sm text-primary">{s.label}</span>
                     <button
                       type="button"
-                      aria-label="O'chirish"
+                      aria-label={t("common.actions.delete")}
                       onClick={() => removeSubtask(s.id)}
                       className="flex-none text-secondary"
                     >
@@ -616,7 +618,7 @@ function TaskModalEdit({
 
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              Файлы
+              {t("tasks.modal.files")}
             </span>
             {existingFiles.length > 0 && (
               <div className="flex flex-col gap-2">
@@ -631,7 +633,7 @@ function TaskModalEdit({
                     </div>
                     <button
                       type="button"
-                      aria-label="O'chirish"
+                      aria-label={t("common.actions.delete")}
                       onClick={() => removeExistingFile(f.id)}
                       className="flex-none text-secondary"
                     >
@@ -644,20 +646,20 @@ function TaskModalEdit({
             <CusFileUpload
               variant="button"
               maxFiles={5}
-              buttonText="Прикрепить файл"
+              buttonText={t("common.actions.attachFile")}
               onFileChange={setNewFiles}
             />
           </div>
 
           <div className="flex flex-col divide-y divide-[var(--border-default)] rounded-input border border-subtle bg-surface px-4">
             <div className="flex items-center justify-between py-3 text-sm">
-              <span className="text-secondary">Задача</span>
+              <span className="text-secondary">{t("tasks.modal.summaryTask")}</span>
               <span className="min-w-0 max-w-[60%] truncate font-medium text-primary">
                 {title || "-"}
               </span>
             </div>
             <div className="flex items-center justify-between py-3 text-sm">
-              <span className="text-secondary">Сроки выполнения</span>
+              <span className="text-secondary">{t("tasks.modal.summaryDue")}</span>
               <span className="font-medium text-primary">{dueDateLabel || "-"}</span>
             </div>
           </div>

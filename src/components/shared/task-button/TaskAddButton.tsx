@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuPlus } from "react-icons/lu";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 
@@ -11,6 +12,7 @@ export const TASK_ADD_BUTTON_OFFSET =
   "calc(80px + 12px + var(--tg-safe-area-inset-bottom, 0px) + var(--tg-content-safe-area-inset-bottom, 0px))";
 
 function TaskAddButton({ onClick }: TaskAddButtonProps) {
+  const { t } = useTranslation();
   return (
     <div
       className="z-sticky fixed inset-x-0 px-4"
@@ -27,7 +29,7 @@ function TaskAddButton({ onClick }: TaskAddButtonProps) {
           color: "var(--text-on-brand)",
         }}
       >
-        Добавить задачу
+        {t("tasks.card.addTask")}
       </CusButton>
     </div>
   );

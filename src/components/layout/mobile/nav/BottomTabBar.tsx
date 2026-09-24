@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { ComponentType } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -11,14 +12,16 @@ import {
 
 const HOME_PATHS = ["/doska", "/profile"];
 
-const HOME_TAB = { to: "/doska", label: "Doska", icon: GrHomeRounded };
-const PROFILE_TAB = { to: "/profile", label: "Profil", icon: LuUser };
+type NavLabelKey = `layout.nav.${"doska" | "profile" | "today" | "calendar" | "statistics" | "settings"}`;
+
+const HOME_TAB = { to: "/doska", labelKey: "layout.nav.doska" as NavLabelKey, icon: GrHomeRounded };
+const PROFILE_TAB = { to: "/profile", labelKey: "layout.nav.profile" as NavLabelKey, icon: LuUser };
 
 const WORKSPACE_TABS = [
-  { to: "/tasks", label: "BUGUN", icon: FiCheckCircle },
-  { to: "/calendar", label: "KALENDAR", icon: LuCalendar },
-  { to: "/statistics", label: "STATS", icon: LuChartColumn },
-  { to: "/settings", label: "SOZLAMA", icon: LuSettings },
+  { to: "/tasks", labelKey: "layout.nav.today" as NavLabelKey, icon: FiCheckCircle },
+  { to: "/calendar", labelKey: "layout.nav.calendar" as NavLabelKey, icon: LuCalendar },
+  { to: "/statistics", labelKey: "layout.nav.statistics" as NavLabelKey, icon: LuChartColumn },
+  { to: "/settings", labelKey: "layout.nav.settings" as NavLabelKey, icon: LuSettings },
 ];
 
 // Home rejimda Doska+Profil bitta boxda yonma-yon; workspace rejimda Doska
@@ -54,7 +57,7 @@ function TabBox({
 }: {
   tabs: {
     to: string;
-    label: string;
+    labelKey: NavLabelKey;
     icon: ComponentType<{ size?: number; className?: string }>;
   }[];
   mode: "home" | "workspace";
@@ -62,6 +65,7 @@ function TabBox({
   className: string;
   animateOnMount?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <nav
       className={`relative flex h-14 items-center overflow-hidden border-y border-subtle px-1.5 shadow-dropdown ${className}`}
@@ -91,7 +95,7 @@ function TabBox({
               {({ isActive }) => (
                 <TabIcon
                   isActive={isActive}
-                  label={tab.label}
+                  label={t(tab.labelKey)}
                   Icon={tab.icon}
                 />
               )}

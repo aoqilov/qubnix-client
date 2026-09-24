@@ -1,7 +1,7 @@
 import { LuChevronRight } from "react-icons/lu";
 import { avatarColorVar } from "@/utils/avatarColor";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
-import { ORGANIZATION_ROLE_LABELS } from "@/utils/roleLabels";
+import { organizationRoleLabel } from "@/utils/roleLabels";
 import { daysSince } from "@/utils/daysSince";
 import type { RawOrganizationMember } from "@/api/organizations/organizations.types";
 
@@ -47,7 +47,7 @@ export function MemberCard({ member, onOpenActions }: MemberCardProps) {
         </span>
       </span>
       <CusBadge variant="subtle" tone="neutral">
-        {ORGANIZATION_ROLE_LABELS[member.organization_role]}
+        {organizationRoleLabel(member.organization_role)}
       </CusBadge>
     </div>
   );

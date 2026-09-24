@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Pagination, IconButton, Text, Select, useListCollection } from "@chakra-ui/react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 
@@ -42,6 +43,7 @@ export function CusPagination({
   pageSizeOptions = [5, 10, 20, 50],
   size = "sm",
 }: CusPaginationProps) {
+  const { t } = useTranslation();
   const totalPages = Math.max(1, Math.ceil(count / pageSize));
 
   const sizeItems = pageSizeOptions.map((n) => ({
@@ -64,7 +66,7 @@ export function CusPagination({
       {showSizeSelect && (
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Text style={{ fontSize: 12, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
-            На странице:
+            {t("ui.pagination.perPage")}
           </Text>
           <Select.Root
             collection={collection}
@@ -107,7 +109,7 @@ export function CusPagination({
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginLeft: "auto" }}>
         {showPageText && (
           <Text style={{ fontSize: 12, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
-            {`Всего страниц: ${totalPages}`}
+            {t("ui.pagination.totalPages", { count: totalPages })}
           </Text>
         )}
 
@@ -123,7 +125,7 @@ export function CusPagination({
           {/* Prev */}
           <Pagination.PrevTrigger asChild>
             <IconButton
-              aria-label="Предыдущая страница"
+              aria-label={t("ui.pagination.prev")}
               size={size}
               style={btnStyle}
               variant="outline"
@@ -139,7 +141,7 @@ export function CusPagination({
               return (
                 <Pagination.Item key={pg.value} value={pg.value} type="page" asChild>
                   <IconButton
-                    aria-label={`Страница ${pg.value}`}
+                    aria-label={t("ui.pagination.page", { page: pg.value })}
                     size={size}
                     variant="outline"
                     style={
@@ -170,7 +172,7 @@ export function CusPagination({
           {/* Next */}
           <Pagination.NextTrigger asChild>
             <IconButton
-              aria-label="Следующая страница"
+              aria-label={t("ui.pagination.next")}
               size={size}
               style={btnStyle}
               variant="outline"

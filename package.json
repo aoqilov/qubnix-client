@@ -7,7 +7,8 @@
     "dev": "vite --open",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc -b --noEmit"
+    "typecheck": "tsc -b --noEmit",
+    "i18n:check": "node scripts/i18n-check.mjs"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.35.0",
@@ -15,8 +16,10 @@
     "@tanstack/react-query": "^5.59.0",
     "axios": "^1.7.7",
     "framer-motion": "^12.40.0",
+    "i18next": "^26.4.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-i18next": "^17.0.15",
     "react-icons": "^5.6.0",
     "react-router-dom": "^6.27.0",
     "recharts": "^3.10.1",

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { FileUpload, Field } from "@chakra-ui/react";
 import { LuUpload, LuFile, LuX, LuImagePlus, LuEye } from "react-icons/lu";
@@ -59,6 +60,7 @@ export function CusFileUpload({
   onFileAccept,
   onFileReject,
 }: CusFileUploadProps) {
+  const { t } = useTranslation();
   const isInvalid = !!errorText;
   const borderColor = isInvalid ? "var(--color-red)" : "var(--border-input)";
 
@@ -138,7 +140,7 @@ export function CusFileUpload({
                   color: "var(--text-2)",
                 }}
               >
-                {placeholder ?? "Перетащите файл сюда"}
+                {placeholder ?? t("ui.fileUpload.dropHere")}
               </p>
               <p
                 style={{
@@ -148,7 +150,7 @@ export function CusFileUpload({
                 }}
               >
                 {[
-                  maxFiles > 1 ? `Максимум ${maxFiles} файлов` : null,
+                  maxFiles > 1 ? t("ui.fileUpload.maxFiles", { count: maxFiles }) : null,
                   maxFileSize ? formatBytes(maxFileSize) : null,
                 ]
                   .filter(Boolean)
@@ -169,7 +171,7 @@ export function CusFileUpload({
                   textDecoration: "underline",
                 }}
               >
-                или выбрать
+                {t("ui.fileUpload.orChoose")}
               </button>
             </FileUpload.Trigger>
           </FileUpload.Dropzone>
@@ -197,7 +199,7 @@ export function CusFileUpload({
               <LuUpload size={13} />
               {buttonText ??
                 placeholder ??
-                (maxFiles > 1 ? "Выбрать файлы" : "Выбрать файл")}
+                (maxFiles > 1 ? t("ui.fileUpload.chooseFiles") : t("ui.fileUpload.chooseFile"))}
             </button>
           </FileUpload.Trigger>
         )}
@@ -332,7 +334,7 @@ export function CusFileUpload({
                         pointerEvents: "none",
                       }}
                     >
-                      Текущее
+                      {t("ui.fileUpload.current")}
                     </span>
                     <button
                       type="button"

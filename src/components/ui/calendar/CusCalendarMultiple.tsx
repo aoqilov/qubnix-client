@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import { useIntlLocale } from "@/i18n/useIntlLocale";
 import { useState } from "react";
 import { DatePicker, Field } from "@chakra-ui/react";
 import type { DateValue } from "@ark-ui/react/date-picker";
@@ -54,12 +56,15 @@ export function CusCalendarMultiple({
   min,
   max,
   isDateUnavailable,
-  locale = "ru-RU",
+  locale,
   timeZone,
   disabled,
   readOnly,
   onClear,
 }: CusCalendarMultipleProps) {
+  const { t } = useTranslation();
+  const intlLocale = useIntlLocale();
+  const resolvedLocale = locale ?? intlLocale;
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
 
@@ -105,7 +110,7 @@ export function CusCalendarMultiple({
         max={max}
         isDateUnavailable={isDateUnavailable}
         colorPalette={colorPalette}
-        locale={locale}
+        locale={resolvedLocale}
         timeZone={timeZone}
         disabled={disabled}
         readOnly={readOnly}
@@ -132,7 +137,7 @@ export function CusCalendarMultiple({
         >
           <DatePicker.Input
             index={0}
-            placeholder={placeholder ?? "С"}
+            placeholder={placeholder ?? t("ui.calendar.rangeFrom")}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             style={inputStyle(disabled)}
@@ -140,7 +145,7 @@ export function CusCalendarMultiple({
           <span style={{ color: "var(--text-dim)", fontSize: 12, flexShrink: 0 }}>—</span>
           <DatePicker.Input
             index={1}
-            placeholder="По"
+            placeholder={t("ui.calendar.rangeTo")}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             style={inputStyle(disabled)}

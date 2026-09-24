@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Table } from "@chakra-ui/react";
 import { useId, useState, type ReactNode } from "react";
 import { LuArrowUp, LuArrowDown, LuArrowUpDown } from "react-icons/lu";
@@ -104,7 +105,8 @@ export function CusTable<T extends { id: number }>({
   colorBody,
   colorBodyHover = "var(--bg-hover)",
 }: CusTableProps<T>) {
-  const resolvedEmptyText = emptyText ?? "Данные не найдены";
+  const { t } = useTranslation();
+  const resolvedEmptyText = emptyText ?? t("ui.table.empty");
   const uid = useId().replace(/:/g, "");
   const scope = `cus-table-${uid}`;
 
@@ -263,7 +265,7 @@ export function CusTable<T extends { id: number }>({
               <Table.Row>
                 <Table.Cell colSpan={colSpanTotal} textAlign="center"
                   style={{ padding: "40px 0", color: "var(--text-muted)", fontSize: 13 }}>
-                  Загрузка...
+                  {t("common.states.loading")}
                 </Table.Cell>
               </Table.Row>
             ) : isEmpty ? (

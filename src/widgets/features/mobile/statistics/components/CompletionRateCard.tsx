@@ -1,6 +1,6 @@
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import TaskStatGrid from "@/components/shared/task-stat-grid/TaskStatGrid";
-import { tasksLabel } from "@/utils/pluralRu";
+import { tasksLabel } from "@/utils/countLabels";
 import type { CompletionSummary } from "../types";
 
 interface CompletionRateCardProps {

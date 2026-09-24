@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { LuCircleCheck, LuCircleX, LuX, LuPrinter } from "react-icons/lu";
 
@@ -63,14 +64,15 @@ function ToastCard({
   toast: ToasterItem;
   onRemove: (id: number) => void;
 }) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<"loading" | "done">(
     toast.loadingDuration ? "loading" : "done",
   );
 
   useEffect(() => {
     if (!toast.loadingDuration) return;
-    const t = setTimeout(() => setPhase("done"), toast.loadingDuration);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setPhase("done"), toast.loadingDuration);
+    return () => clearTimeout(timer);
   }, [toast.loadingDuration]);
 
   const isLoading = phase === "loading";
@@ -145,7 +147,7 @@ function ToastCard({
                 className="text-sm font-semibold text-center"
                 style={{ color: "var(--text-muted)" }}
               >
-                Чек печатается...
+                {t("ui.toaster.printing")}
               </p>
 
               <ProgressBar
@@ -187,7 +189,7 @@ function ToastCard({
                     border: `1px solid ${accentBorder}`,
                   }}
                 >
-                  Закрыть
+                  {t("common.actions.close")}
                 </button>
               )}
             </>
