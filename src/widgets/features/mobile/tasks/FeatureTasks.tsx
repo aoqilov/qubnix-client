@@ -140,6 +140,8 @@ interface TasksNavigationState {
 
 export default function FeatureTasks() {
   const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
+  // Personal workspace — bitta foydalanuvchi: xodim filtri va xodim tanlash kerak emas.
+  const isPersonal = useWorkspaceStore((s) => s.selectedWorkspaceType) === "personal";
   const location = useLocation();
   const navigationState = location.state as TasksNavigationState | null;
   const navigationDate = navigationState?.date;
@@ -189,10 +191,10 @@ export default function FeatureTasks() {
   }));
 
   const [sort, setSort] = useState<keyof typeof SORT_TO_API>("deadline");
-  const [statusId, setStatusId] = useState(() => (isPast ? "failed" : "in_progress"));
-  // O'tgan kunda avval bajarilmaganlar qiziqtiradi; bugunga qaytilsa — "Jarayonda".
+  const [statusId, setStatusId] = useState(() => (isPast ? "failed" : "assigned"));
+  // O'tgan kunda avval bajarilmaganlar qiziqtiradi; bugunga qaytilsa — "Berildi".
   useEffect(() => {
-    setStatusId(isPast ? "failed" : "in_progress");
+    setStatusId(isPast ? "failed" : "assigned");
   }, [isPast]);
   const activeStatusMeta = STATUS_META.find((m) => m.id === statusId);
 
@@ -204,13 +206,20 @@ export default function FeatureTasks() {
   const isProjectManager = activeProject?.members.some(
     (m) => m.user_id === currentUserId && m.role === "project_manager",
   );
+  // Vazifa berish, tahrirlash va o'chirish — workspace owner/admin yoki loyiha project_manager'i.
+  // Personal'da foydalanuvchi o'z workspace'ining owner'i — shu shart orqali ruxsat oladi.
+  const canManageTasks =
+    hasRole(workspaceRole ? [workspaceRole] : [], [WORKSPACE_ROLES.OWNER, WORKSPACE_ROLES.ADMIN]) ||
+    !!isProjectManager;
+
   const canFilterByEmployee =
-    hasRole(workspaceRole ? [workspaceRole] : [], [
+    !isPersonal &&
+    (hasRole(workspaceRole ? [workspaceRole] : [], [
       WORKSPACE_ROLES.OWNER,
       WORKSPACE_ROLES.ADMIN,
       WORKSPACE_ROLES.VIEWER,
     ]) ||
-    !!isProjectManager;
+      !!isProjectManager);
 
   // Bo'sh massiv — "hamma xodimlar".
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
@@ -294,7 +303,12 @@ export default function FeatureTasks() {
         fileIds = uploads.flatMap((uploadedFiles) => uploadedFiles.map((f) => f.id));
       }
 
-      const members = values.assignees.map((a) => ({ user_id: Number(a.id) }));
+      // Personal workspace'da xodim tanlanmaydi — vazifa foydalanuvchining o'ziga biriktiriladi.
+      const members = isPersonal
+        ? currentUserId
+          ? [{ user_id: Number(currentUserId) }]
+          : []
+        : values.assignees.map((a) => ({ user_id: Number(a.id) }));
       const subtasks = values.subtasks.map((s) => ({ name: s.label, checked: s.checked }));
 
       await createTask.mutateAsync({
@@ -520,6 +534,7 @@ export default function FeatureTasks() {
                 priority={task.priority}
                 dateRangeLabel={formatDueLabel(task)}
                 readOnly={isPast}
+                canManage={canManageTasks}
                 isOverdue={
                   task.status !== "done" && !!task.due_at && new Date(task.due_at) < new Date()
                 }
@@ -660,7 +675,7 @@ export default function FeatureTasks() {
         onApply={setSelectedMemberIds}
       />
 
-      {!isPast && <TaskAddButton onClick={() => setIsAddOpen(true)} />}
+      {!isPast && canManageTasks && <TaskAddButton onClick={() => setIsAddOpen(true)} />}
 
       <TaskModalAdd
         open={isAddOpen}
@@ -668,6 +683,7 @@ export default function FeatureTasks() {
         onSubmit={addTask}
         members={projectMembersForTask ?? []}
         isLoadingMembers={isProjectMembersPending}
+        hideMembers={isPersonal}
       />
 
       <TaskModalEdit

@@ -56,7 +56,9 @@ export default function FeatureSettingsRepeatingTasks() {
   }, [errorToast]);
 
   const { data: allProjects = [] } = useOrgProjectsForRoutines(organizationId);
-  const { data: membersDirectory = [] } = useOrgMembersDirectory(organizationId);
+  // Personal workspace'da boshqa xodim yo'q — kartalardagi avatarlar uchun ro'yxat so'ralmaydi.
+  const isPersonal = useWorkspaceStore((s) => s.selectedWorkspaceType) === "personal";
+  const { data: membersDirectory = [] } = useOrgMembersDirectory(organizationId, !isPersonal);
   const { routines, isPending: isRoutinesPending } = useRoutinesForProjects(
     organizationId,
     allProjects,

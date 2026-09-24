@@ -1,3 +1,4 @@
+import type { TaskStatusTotals } from "@/api/tasks/tasks.types";
 import type { Pagination } from "@/types/common";
 
 export type OrganizationType = "personal" | "organization";
@@ -93,4 +94,34 @@ export interface ListOrganizationMembersResponse {
 /** PATCH .../members/{user_id} — faqat owner/admin. */
 export interface UpdateOrganizationMemberRoleRequest {
   role: OrganizationMemberRole;
+}
+
+/** GET /organizations/{id}/members/statistics — sonlar task `due_at` bo'yicha. */
+export interface MemberStatisticsParams {
+  /** Bitta kun — `from`/`to` o'rniga. YYYY-MM-DD. */
+  date?: string;
+  from?: string;
+  to?: string;
+  /** Vergul bilan ajratilgan user id'lar. */
+  member_ids?: string;
+  search?: string;
+  task_order?: "most_done" | "least_done";
+  page?: number;
+  /** 1–1000, default 20. */
+  limit?: number;
+}
+
+export interface RawMemberStatistics {
+  user_id: number;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  telegram_avatar_url: string | null;
+  organization_role: OrganizationRole;
+  totals: TaskStatusTotals;
+}
+
+export interface MemberStatisticsResponse {
+  members: RawMemberStatistics[];
+  pagination: Pagination;
 }

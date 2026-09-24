@@ -1,12 +1,4 @@
-export interface CalendarDayCell {
-  date: Date;
-  dayNumber: number;
-  weekdayLabel: string;
-  isSelected?: boolean;
-  isToday?: boolean;
-  isWeekend?: boolean;
-  isPast?: boolean;
-}
+export type { WeekDayCell as CalendarDayCell } from "@/utils/weekDays";
 
 export interface DayTaskStats {
   total: number;

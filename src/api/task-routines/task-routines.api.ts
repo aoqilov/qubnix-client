@@ -12,20 +12,6 @@ interface ApiEnvelope<T> {
   data: T;
 }
 
-/**
- * Backend `end_time` ni hali qabul qilmaydi — so'rov sxemasi
- * `additionalProperties: false`, noma'lum maydon 400 qaytaradi. Backend
- * qo'shganda shu flag'ni `true` qiling; forma va tiplar o'zgarmaydi.
- */
-const BACKEND_SUPPORTS_END_TIME = false;
-
-function toRoutineBody<T extends { end_time?: string }>(payload: T): T {
-  if (BACKEND_SUPPORTS_END_TIME) return payload;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { end_time, ...rest } = payload;
-  return rest as T;
-}
-
 export const taskRoutinesApi = {
   list: (organizationID: string, projectId: string, type?: RoutineFrequency) =>
     api
@@ -50,7 +36,7 @@ export const taskRoutinesApi = {
       .post<
         ApiEnvelope<{ routine: RawTaskRoutine }>
       >(`/api/v1/organizations/${organizationID}/projects/${projectId}/task-routines`, {
-        data: toRoutineBody(payload),
+        data: payload,
       })
       .then((r) => r.data.data.routine),
 
@@ -65,7 +51,7 @@ export const taskRoutinesApi = {
         ApiEnvelope<{ routine: RawTaskRoutine }>
       >(
         `/api/v1/organizations/${organizationID}/projects/${projectId}/task-routines/${routineId}`,
-        { data: toRoutineBody(payload) },
+        { data: payload },
       )
       .then((r) => r.data.data.routine),
 

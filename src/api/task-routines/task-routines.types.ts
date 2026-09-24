@@ -22,8 +22,8 @@ export interface RawTaskRoutine {
   weekdays: number[];
   month_days: number[];
   time_of_day: string;
-  /** "HH:mm". Backend hali qaytarmaydi — qo'shilguncha undefined. */
-  end_time?: string | null;
+  /** "HH:mm" — tugash soati. */
+  end_time: string | null;
   timezone: string;
   start_date: string;
   end_date: string | null;
@@ -59,11 +59,8 @@ export interface CreateTaskRoutineRequest {
   month_days?: number[];
   /** "HH:mm". */
   time: string;
-  /**
-   * "HH:mm" — tugash soati. Backend hali qabul qilmaydi; `task-routines.api.ts`
-   * dagi `BACKEND_SUPPORTS_END_TIME` yoqilguncha so'rovdan olib tashlanadi.
-   */
-  end_time?: string;
+  /** "HH:mm" — tugash soati, majburiy. */
+  end_time: string;
   /** Hozircha faqat "Asia/Tashkent". */
   timezone?: string;
   /** YYYY-MM-DD. */

@@ -67,6 +67,8 @@ interface TaskCardProps {
 
   /** O'tgan kun — faqat ko'rish: status, subtask, tahrirlash va o'chirish yopiq. */
   readOnly?: boolean;
+  /** "Изменить"/"Удалить" tugmalari — faqat vazifani boshqarish huquqi borlarga. Default true. */
+  canManage?: boolean;
   /** Muddati o'tgan va bajarilmagan — vaqt badge'i qizil bo'ladi. */
   isOverdue?: boolean;
 
@@ -109,6 +111,7 @@ function TaskCard({
   expanded,
   onToggleExpanded,
   readOnly,
+  canManage = true,
   isOverdue,
   description,
   descriptionAudio,
@@ -306,7 +309,7 @@ function TaskCard({
                 </div>
               )}
 
-              {!readOnly && (
+              {!readOnly && canManage && (
               <div className="flex gap-2">
                 <CusButton
                   variant="outline"

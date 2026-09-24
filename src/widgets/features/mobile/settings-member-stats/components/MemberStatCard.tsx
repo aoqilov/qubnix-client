@@ -46,7 +46,8 @@ export function MemberStatCard({ row }: MemberStatCardProps) {
 
       <TaskStatGrid
         done={row.done}
-        completed={row.completed}
+        completed={row.assigned}
+        completedLabel="Назначено"
         inProgress={row.inProgress}
         overdue={row.overdue}
       />

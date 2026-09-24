@@ -1,19 +1,39 @@
-import { useMemo, useState } from "react";
-import { LuSearchX } from "react-icons/lu";
+import { useEffect, useMemo, useState } from "react";
+import { LuCalendarDays, LuSearchX } from "react-icons/lu";
 import { CusSegment } from "@/components/ui/segment/CusSegment";
 import { SettingsBackHeader } from "@/widgets/features/mobile/settings/components/SettingsBackHeader";
 import { PeriodTabs } from "./components/PeriodTabs";
 import { StatsFilterRow, type StatsSortOrder } from "./components/StatsFilterRow";
 import { MemberPickerDrawer } from "@/components/shared/member-picker-drawer/MemberPickerDrawer";
 import { MemberStatCard } from "./components/MemberStatCard";
-import { DailyStatsList } from "./components/DailyStatsList";
-import {
-  MOCK_DAILY_STATS,
-  MOCK_MEMBER_STATS,
-  MOCK_PERIOD_RANGES,
-  MOCK_STATS_MEMBERS,
-} from "./lib/mockMemberStats";
+import { MemberStatsDayStrip } from "./components/MemberStatsDayStrip";
+import { DayPickerDialog } from "./modals/DayPickerDialog";
+import { useMemberStatistics, useMemberStatsDirectory } from "./hooks/useApiMemberStats";
 import type { StatsMainTab, StatsPeriod } from "./types";
+import { useWorkspaceStore } from "@/store/workspace.store";
+import { toApiDate } from "@/utils/apiDate";
+import { addDays, buildWeekDays, getWeekStart } from "@/utils/weekDays";
+import { formatWeekdayDate } from "@/utils/formatWeekdayDate";
+
+function formatDayMonth(date: Date): string {
+  return `${String(date.getDate()).padStart(2, "0")}.${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+/** 7/15/30 kun — bugun bilan tugaydigan davr. */
+function periodRange(period: StatsPeriod) {
+  const to = new Date();
+  const from = new Date();
+  from.setDate(to.getDate() - (Number(period) - 1));
+  return {
+    from: toApiDate(from),
+    to: toApiDate(to),
+    label: `${formatDayMonth(from)} – ${formatDayMonth(to)}.${to.getFullYear()}`,
+  };
+}
+
+function CardSkeleton() {
+  return <div className="h-[132px] animate-pulse rounded-card border border-subtle bg-surface" />;
+}
 
 function EmptyState() {
   return (
@@ -32,31 +52,63 @@ export default function FeatureSettingsMemberStats() {
   const [period, setPeriod] = useState<StatsPeriod>("7");
   const [search, setSearch] = useState("");
   const [sortOrder, setSortOrder] = useState<StatsSortOrder>("most");
-  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>(() =>
-    MOCK_STATS_MEMBERS.map((member) => member.id),
-  );
+  // Bo'sh massiv — "hamma xodimlar" (member_ids yuborilmaydi).
+  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const [isMembersFilterOpen, setMembersFilterOpen] = useState(false);
 
-  const memberStats = MOCK_MEMBER_STATS[period];
-  const dailyStats = MOCK_DAILY_STATS[period];
+  // Qidiruv serverda — har bir harfda so'rov ketmasligi uchun 300ms kechiktiriladi.
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 300);
+    return () => clearTimeout(t);
+  }, [search]);
 
-  const filteredRows = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return memberStats
-      .filter((row) => {
-        const matchesMember = selectedMemberIds.includes(row.memberId);
-        const matchesQuery = !query || row.name.toLowerCase().includes(query);
-        return matchesMember && matchesQuery;
-      })
-      .sort((a, b) => (sortOrder === "most" ? b.percent - a.percent : a.percent - b.percent));
-  }, [memberStats, selectedMemberIds, search, sortOrder]);
+  // "По дням" — bitta kun: lentadan yoki to'liq kalendardan tanlanadi.
+  const [selectedDay, setSelectedDay] = useState(() => new Date());
+  const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
+  const [direction, setDirection] = useState(0);
+  const [isDayPickerOpen, setDayPickerOpen] = useState(false);
+  const weekDays = useMemo(() => buildWeekDays(weekStart, selectedDay), [weekStart, selectedDay]);
+
+  function shiftWeek(offsetDays: number) {
+    setDirection(offsetDays > 0 ? 1 : -1);
+    setWeekStart((prev) => addDays(prev, offsetDays));
+  }
+
+  function pickDay(date: Date) {
+    const nextWeekStart = getWeekStart(date);
+    setDirection(Math.sign(nextWeekStart.getTime() - weekStart.getTime()));
+    setWeekStart(nextWeekStart);
+    setSelectedDay(date);
+    setDayPickerOpen(false);
+  }
+
+  const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
+  const range = periodRange(period);
+  // "Общее" — davr (from/to), "По дням" — faqat bitta `date`.
+  const scope =
+    tab === "general" ? { from: range.from, to: range.to } : { date: toApiDate(selectedDay) };
+  const directoryQuery = useMemberStatsDirectory(organizationId, scope);
+  const directory = directoryQuery.data ?? [];
+  // Hammasi tanlangan bo'lsa ham filtr yuborilmaydi — natija bir xil, URL qisqa.
+  const isAllSelected =
+    selectedMemberIds.length === 0 || selectedMemberIds.length === directory.length;
+
+  const statsQuery = useMemberStatistics(organizationId, {
+    ...scope,
+    search: debouncedSearch || undefined,
+    task_order: sortOrder === "most" ? "most_done" : "least_done",
+    member_ids: isAllSelected ? undefined : selectedMemberIds.join(","),
+    limit: 100,
+  });
+  const rows = statsQuery.data ?? [];
 
   return (
     <div className="flex flex-col gap-4 p-4">
       <SettingsBackHeader title="Статистика сотрудников" />
 
       <p className="-mt-2 text-sm font-semibold text-brand">
-        {MOCK_PERIOD_RANGES[period]}
+        {tab === "general" ? range.label : formatWeekdayDate(selectedDay)}
       </p>
 
       <CusSegment
@@ -68,39 +120,69 @@ export default function FeatureSettingsMemberStats() {
         ]}
       />
 
-      <PeriodTabs value={period} onChange={setPeriod} />
-
       {tab === "general" ? (
-        <>
-          <StatsFilterRow
-            value={search}
-            onValueChange={setSearch}
-            sortOrder={sortOrder}
-            onSortOrderChange={setSortOrder}
-            onOpenMembersFilter={() => setMembersFilterOpen(true)}
-          />
-
-          {filteredRows.length === 0 ? (
-            <EmptyState />
-          ) : (
-            <div className="flex flex-col gap-3">
-              {filteredRows.map((row) => (
-                <MemberStatCard key={row.memberId} row={row} />
-              ))}
-            </div>
-          )}
-
-          <MemberPickerDrawer
-            open={isMembersFilterOpen}
-            onClose={() => setMembersFilterOpen(false)}
-            members={MOCK_STATS_MEMBERS}
-            selectedIds={selectedMemberIds}
-            onApply={setSelectedMemberIds}
-          />
-        </>
+        <PeriodTabs value={period} onChange={setPeriod} />
       ) : (
-        <DailyStatsList rows={dailyStats} />
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setDayPickerOpen(true)}
+              aria-label="Выбрать дату"
+              className="flex size-10 items-center justify-center rounded-card border border-default bg-surface text-secondary"
+            >
+              <LuCalendarDays size={18} />
+            </button>
+          </div>
+          <MemberStatsDayStrip
+            days={weekDays}
+            direction={direction}
+            onSelectDay={setSelectedDay}
+            onPrevWeek={() => shiftWeek(-7)}
+            onNextWeek={() => shiftWeek(7)}
+          />
+        </div>
       )}
+
+      <StatsFilterRow
+        value={search}
+        onValueChange={setSearch}
+        sortOrder={sortOrder}
+        onSortOrderChange={setSortOrder}
+        onOpenMembersFilter={() => setMembersFilterOpen(true)}
+      />
+
+      {statsQuery.isError ? (
+        <p className="px-1 text-sm text-error-strong">Не удалось загрузить статистику.</p>
+      ) : statsQuery.isPending ? (
+        <div className="flex flex-col gap-3">
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+      ) : rows.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <div className="flex flex-col gap-3">
+          {rows.map((row) => (
+            <MemberStatCard key={row.memberId} row={row} />
+          ))}
+        </div>
+      )}
+
+      <MemberPickerDrawer
+        open={isMembersFilterOpen}
+        onClose={() => setMembersFilterOpen(false)}
+        members={directory}
+        selectedIds={selectedMemberIds}
+        onApply={setSelectedMemberIds}
+      />
+
+      <DayPickerDialog
+        open={isDayPickerOpen}
+        onClose={() => setDayPickerOpen(false)}
+        value={selectedDay}
+        onPick={pickDay}
+      />
     </div>
   );
 }

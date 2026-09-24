@@ -4,6 +4,8 @@ import type {
   ListOrganizationMembersParams,
   ListOrganizationMembersResponse,
   ListOrganizationsParams,
+  MemberStatisticsParams,
+  MemberStatisticsResponse,
   RawOrganization,
   RawOrganizationMember,
   RenameOrganizationRequest,
@@ -17,6 +19,17 @@ interface ApiEnvelope<T> {
 }
 
 export const organizationsApi = {
+  /**
+   * Owner/admin — barcha faol xodimlar; project manager — faqat o'zi boshqaradigan
+   * loyihalardagi xodimlar. Tartib bajarilgan vazifalar soni bo'yicha.
+   */
+  memberStatistics: (organizationID: string, params?: MemberStatisticsParams) =>
+    api
+      .get<
+        ApiEnvelope<MemberStatisticsResponse>
+      >(`/api/v1/organizations/${organizationID}/members/statistics`, { params })
+      .then((r) => r.data.data),
+
   list: (params?: ListOrganizationsParams) =>
     api
       .get<

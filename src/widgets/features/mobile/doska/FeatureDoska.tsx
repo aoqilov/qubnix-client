@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWorkspaceStore } from "@/store/workspace.store";
+import type { OrganizationType } from "@/api/organizations/organizations.types";
 import { DoskaSectionHeader } from "./components/DoskaSectionHeader";
 import { PersonalTasksCard } from "./components/PersonalTasksCard";
 import { WorkspaceCard } from "./components/WorkspaceCard";
@@ -25,9 +26,9 @@ export default function FeatureDoska() {
   const workspaces = workspacesQuery.data ?? [];
   const invitationsCount = invitationsQuery.data?.length ?? 0;
 
-  const openWorkspace = (id: string | undefined) => {
+  const openWorkspace = (id: string | undefined, type: OrganizationType) => {
     if (!id) return;
-    selectWorkspace(id);
+    selectWorkspace(id, type);
     navigate("/tasks");
   };
 
@@ -49,7 +50,7 @@ export default function FeatureDoska() {
         ) : (
           <PersonalTasksCard
             tasksCount={personalQuery.data?.tasksCount ?? 0}
-            onClick={() => openWorkspace(personalQuery.data?.id)}
+            onClick={() => openWorkspace(personalQuery.data?.id, "personal")}
           />
         )}
       </section>
@@ -57,7 +58,7 @@ export default function FeatureDoska() {
       <section>
         <DoskaSectionHeader
           index="02"
-          label="Workspace"
+          label="Организации"
           meta={workspacesQuery.isPending ? undefined : orgsLabel(workspaces.length)}
         />
 
@@ -85,7 +86,7 @@ export default function FeatureDoska() {
               <WorkspaceCard
                 key={workspace.id}
                 workspace={workspace}
-                onClick={() => openWorkspace(workspace.id)}
+                onClick={() => openWorkspace(workspace.id, "organization")}
               />
             ))
           )}

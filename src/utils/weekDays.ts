@@ -1,4 +1,13 @@
-import type { CalendarDayCell } from "../types";
+/** Haftalik lentadagi bitta kun katakchasi — kalendar va xodimlar statistikasi uchun umumiy. */
+export interface WeekDayCell {
+  date: Date;
+  dayNumber: number;
+  weekdayLabel: string;
+  isSelected?: boolean;
+  isToday?: boolean;
+  isWeekend?: boolean;
+  isPast?: boolean;
+}
 
 export function addDays(date: Date, amount: number): Date {
   const result = new Date(date);
@@ -29,7 +38,7 @@ export function formatMonthLabel(date: Date): string {
     .toUpperCase();
 }
 
-export function buildWeekDays(weekStart: Date, selectedDate: Date): CalendarDayCell[] {
+export function buildWeekDays(weekStart: Date, selectedDate: Date): WeekDayCell[] {
   const selectedKey = toDateKey(selectedDate);
   const todayKey = toDateKey(new Date());
 

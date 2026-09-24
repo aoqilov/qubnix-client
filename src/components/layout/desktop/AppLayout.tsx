@@ -1,8 +1,11 @@
+import { useSyncWorkspaceType } from "@/hooks/useSyncWorkspaceType";
 import { Outlet } from "react-router-dom";
 import { Sidebar } from "./sidebar/Sidebar";
 import { Header } from "./header/Header";
 
 export function AppLayout() {
+  useSyncWorkspaceType();
+
   return (
     <div className="flex h-screen">
       <Sidebar />

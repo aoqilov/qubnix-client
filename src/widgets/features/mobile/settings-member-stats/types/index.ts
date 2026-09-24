@@ -6,16 +6,10 @@ export interface MemberStatsRow {
   memberId: string;
   name: string;
   done: number;
-  completed: number;
+  /** Hali boshlanmagan (`todo`) — gridda "Назначено". */
+  assigned: number;
   inProgress: number;
   overdue: number;
   percent: number;
 }
 
-export interface DailyStatsRow {
-  date: string;
-  done: number;
-  completed: number;
-  inProgress: number;
-  overdue: number;
-}

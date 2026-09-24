@@ -10,18 +10,15 @@ import { tagColorVar } from "@/utils/tagColor";
 import { useProjectDetail } from "./hooks/useApiSettingsProjects";
 
 function CardSkeleton() {
-  return (
-    <div className="h-[220px] animate-pulse rounded-input border border-subtle bg-surface" />
-  );
+  return <div className="h-[220px] animate-pulse rounded-input border border-subtle bg-surface" />;
 }
 
 export default function FeatureProjectDetail() {
   const { projectId } = useParams<{ projectId: string }>();
   const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
-  const { data: project, isPending, isError } = useProjectDetail(
-    organizationId,
-    projectId ?? null,
-  );
+  // Personal workspace'da boshqa xodim yo'q — "Сотрудники" bo'limi ko'rsatilmaydi.
+  const isPersonal = useWorkspaceStore((s) => s.selectedWorkspaceType) === "personal";
+  const { data: project, isPending, isError } = useProjectDetail(organizationId, projectId ?? null);
   const tagColor = project ? tagColorVar(project.id) : undefined;
 
   return (
@@ -63,42 +60,44 @@ export default function FeatureProjectDetail() {
             />
           </CusCardbox>
 
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              Сотрудники
-            </span>
+          {!isPersonal && (
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                Сотрудники
+              </span>
 
-            {project.members.length === 0 ? (
-              <div className="flex flex-col items-center gap-2 py-8 text-center">
-                <span className="flex size-11 items-center justify-center rounded-avatar bg-surface-secondary text-secondary">
-                  <LuUsers size={20} />
-                </span>
-                <p className="text-sm text-secondary">Сотрудники не добавлены</p>
-              </div>
-            ) : (
-              <CusCardbox
-                style={{ padding: 0 }}
-                className="flex flex-col divide-y divide-[var(--border-default)] rounded-card"
-              >
-                {project.members.map((member) => (
-                  <div key={member.id} className="flex items-center gap-3 px-4 py-3">
-                    <span
-                      className="flex size-9 flex-none items-center justify-center rounded-avatar text-xs font-semibold text-on-brand"
-                      style={{ background: avatarColorVar(member.id) }}
-                    >
-                      {member.initials}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-primary">
-                      {member.name}
-                    </span>
-                    <CusBadge tone={member.role === "project_manager" ? "brand" : "neutral"}>
-                      {member.role === "project_manager" ? "Manager" : "Xodim"}
-                    </CusBadge>
-                  </div>
-                ))}
-              </CusCardbox>
-            )}
-          </div>
+              {project.members.length === 0 ? (
+                <div className="flex flex-col items-center gap-2 py-8 text-center">
+                  <span className="flex size-11 items-center justify-center rounded-avatar bg-surface-secondary text-secondary">
+                    <LuUsers size={20} />
+                  </span>
+                  <p className="text-sm text-secondary">Сотрудники не добавлены</p>
+                </div>
+              ) : (
+                <CusCardbox
+                  style={{ padding: 0 }}
+                  className="flex flex-col divide-y divide-[var(--border-default)] rounded-card"
+                >
+                  {project.members.map((member) => (
+                    <div key={member.id} className="flex items-center gap-3 px-4 py-3">
+                      <span
+                        className="flex size-9 flex-none items-center justify-center rounded-avatar text-xs font-semibold text-on-brand"
+                        style={{ background: avatarColorVar(member.id) }}
+                      >
+                        {member.initials}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-sm font-medium text-primary">
+                        {member.name}
+                      </span>
+                      <CusBadge tone={member.role === "project_manager" ? "brand" : "neutral"}>
+                        {member.role === "project_manager" ? "Manager" : "Xodim"}
+                      </CusBadge>
+                    </div>
+                  ))}
+                </CusCardbox>
+              )}
+            </div>
+          )}
         </>
       )}
     </div>

@@ -1,7 +1,7 @@
 import type React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
-import type { CalendarDayCell } from "../types";
+import type { WeekDayCell } from "@/utils/weekDays";
 import { toDateKey } from "@/utils/weekDays";
 
 const navButtonStyle: React.CSSProperties = {
@@ -12,21 +12,22 @@ const navButtonStyle: React.CSSProperties = {
   background: "var(--bg-surface)",
 };
 
-interface CalendarWeekStripProps {
-  days: CalendarDayCell[];
+interface MemberStatsDayStripProps {
+  days: WeekDayCell[];
   direction: number;
   onSelectDay: (date: Date) => void;
   onPrevWeek: () => void;
   onNextWeek: () => void;
 }
 
-export function CalendarWeekStrip({
+/** "По дням" tab'i uchun kun tanlash lentasi — kalendar sahifasidagidan mustaqil. */
+export function MemberStatsDayStrip({
   days,
   direction,
   onSelectDay,
   onPrevWeek,
   onNextWeek,
-}: CalendarWeekStripProps) {
+}: MemberStatsDayStripProps) {
   const weekKey = toDateKey(days[0].date);
 
   return (
@@ -83,7 +84,7 @@ export function CalendarWeekStrip({
                   >
                     {day.isSelected ? (
                       <motion.span
-                        layoutId="calendar-selected-day"
+                        layoutId="member-stats-selected-day"
                         transition={{
                           type: "spring",
                           stiffness: 500,

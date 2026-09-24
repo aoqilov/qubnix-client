@@ -1,12 +1,14 @@
-import { LuFlag } from "react-icons/lu";
+import { IoFlagSharp } from "react-icons/io5";
+import { PRIORITY_FLAG_COLOR } from "@/components/shared/task-card/TaskCard";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { scaleToPercent } from "../lib/statsScale";
 import type { PriorityLevel, PriorityStat } from "../types";
 
+// Ranglar vazifa kartasidagi bayroq bilan bir xil — ilova bo'ylab prioritet bir xil ko'rinadi.
 const PRIORITY_META: Record<PriorityLevel, { label: string; color: string }> = {
-  high: { label: "Высокий", color: "var(--status-error-text)" },
-  medium: { label: "Средний", color: "var(--status-warning-text)" },
-  low: { label: "Низкий", color: "var(--text-secondary)" },
+  high: { label: "Высокий", color: PRIORITY_FLAG_COLOR.high },
+  medium: { label: "Средний", color: PRIORITY_FLAG_COLOR.medium },
+  low: { label: "Низкий", color: PRIORITY_FLAG_COLOR.low },
 };
 
 function PriorityRow({ item, max }: { item: PriorityStat; max: number }) {
@@ -15,7 +17,7 @@ function PriorityRow({ item, max }: { item: PriorityStat; max: number }) {
 
   return (
     <div className="flex items-center gap-3">
-      <LuFlag size={16} style={{ color: meta.color }} className="flex-none" />
+      <IoFlagSharp size={16} style={{ color: meta.color }} className="flex-none" />
       <span className="w-16 flex-none text-sm font-medium text-primary">{meta.label}</span>
       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-secondary">
         <div className="h-full rounded-full" style={{ width: `${percent}%`, background: meta.color }} />

@@ -19,8 +19,16 @@ import type { SettingsMenuItem } from "./types";
 import { RoleGate, hasRole } from "@/components/shared/role-gate/RoleGate";
 import { MemberReminderSettings } from "./components/MemberReminderSettings";
 import { WORKSPACE_ROLES } from "@/const/roles";
+import { useWorkspaceStore } from "@/store/workspace.store";
 
 const MANAGER_ROLES = [WORKSPACE_ROLES.ADMIN, WORKSPACE_ROLES.OWNER];
+
+/** Personal workspace'da boshqa xodim yo'q — xodimlar bilan bog'liq bo'limlar ko'rsatilmaydi. */
+const PERSONAL_HIDDEN_ROUTES = new Set([
+  "/settings/members",
+  "/settings/roles",
+  "/settings/member-stats",
+]);
 
 export default function FeatureSettings() {
   const workspaceQuery = useSelectedOrganization();
@@ -28,7 +36,9 @@ export default function FeatureSettings() {
   // GET .../members faqat admin/owner uchun ruxsat etilgan — member'da 403 qaytadi,
   // shuning uchun rol aniqlanib, admin/owner ekani bilinmaguncha so'rov yuborilmaydi.
   const isManager = hasRole(workspace ? [workspace.role] : [], MANAGER_ROLES);
-  const membersCountQuery = useOrganizationMembersCount(isManager);
+  const isPersonal = useWorkspaceStore((s) => s.selectedWorkspaceType) === "personal";
+  // Personal'da xodimlar soni kerak emas — so'rov umuman yuborilmaydi.
+  const membersCountQuery = useOrganizationMembersCount(isManager && !isPersonal);
 
   if (workspaceQuery.isPending) {
     return (
@@ -51,7 +61,7 @@ export default function FeatureSettings() {
   }
 
   // Повторные задачи soni hali mock — /repeating-tasks resursi ulanmagan.
-  const menuItems: SettingsMenuItem[] = [
+  const allMenuItems: SettingsMenuItem[] = [
     {
       to: "/settings/members",
       icon: <LuUsers size={18} />,
@@ -97,6 +107,9 @@ export default function FeatureSettings() {
       subtitle: "Название, приглашения, тариф",
     },
   ];
+  const menuItems = isPersonal
+    ? allMenuItems.filter((item) => !PERSONAL_HIDDEN_ROUTES.has(item.to))
+    : allMenuItems;
 
   return (
     <div className="flex flex-col gap-5 p-4">
@@ -112,6 +125,7 @@ export default function FeatureSettings() {
       <SettingsWorkspaceCard
         workspace={workspace}
         membersCount={membersCountQuery.data}
+        isPersonal={isPersonal}
       />
       {/* admin owner */}
       <RoleGate roles={[workspace.role]} allow={MANAGER_ROLES}>

@@ -8,6 +8,7 @@ import { ProjectMemberSelectList } from "../components/ProjectMemberSelectList";
 import { RemoveMemberDialog } from "./RemoveMemberDialog";
 import { useAvailableProjectMembers, useUpdateProject } from "../hooks/useApiSettingsProjects";
 import type { ProjectMemberRole, ProjectStatsItem } from "../types";
+import { useWorkspaceStore } from "@/store/workspace.store";
 
 interface EditProjectDrawerProps {
   open: boolean;
@@ -30,6 +31,8 @@ export function EditProjectDrawer({
   const [additions, setAdditions] = useState<Record<string, ProjectMemberRole>>({});
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
 
+  // Personal workspace'da xodimlar bo'limi yo'q — faqat nom tahrirlanadi.
+  const isPersonal = useWorkspaceStore((s) => s.selectedWorkspaceType) === "personal";
   const updateProject = useUpdateProject(organizationId);
   const availableQuery = useAvailableProjectMembers(
     organizationId,
@@ -43,9 +46,7 @@ export function EditProjectDrawer({
   useEffect(() => {
     if (open && project) {
       setName(project.name);
-      setKeptRoles(
-        Object.fromEntries(project.members.map((member) => [member.id, member.role])),
-      );
+      setKeptRoles(Object.fromEntries(project.members.map((member) => [member.id, member.role])));
       setAddingOpen(false);
       setAdditions({});
       setRemovingMemberId(null);
@@ -95,16 +96,19 @@ export function EditProjectDrawer({
         projectId: project.id,
         payload: {
           name: name.trim(),
-          members: [
-            ...Object.entries(keptRoles).map(([userId, role]) => ({
-              user_id: Number(userId),
-              role,
-            })),
-            ...Object.entries(additions).map(([userId, role]) => ({
-              user_id: Number(userId),
-              role,
-            })),
-          ],
+          // Personal'da yuborilmaydi — `members` berilsa backend ro'yxatni to'liq almashtiradi.
+          members: isPersonal
+            ? undefined
+            : [
+                ...Object.entries(keptRoles).map(([userId, role]) => ({
+                  user_id: Number(userId),
+                  role,
+                })),
+                ...Object.entries(additions).map(([userId, role]) => ({
+                  user_id: Number(userId),
+                  role,
+                })),
+              ],
         },
       },
       { onSuccess: onClose },
@@ -141,11 +145,7 @@ export function EditProjectDrawer({
       }
     >
       <div className="flex flex-col gap-4">
-        <CusInput
-          label="Название проекта"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <CusInput label="Название проекта" value={name} onChange={(e) => setName(e.target.value)} />
 
         {updateProject.isError && (
           <p className="text-sm text-error-strong">
@@ -153,68 +153,72 @@ export function EditProjectDrawer({
           </p>
         )}
 
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-            Сотрудники
-          </span>
-
-          {members.length === 0 && (
-            <p className="py-4 text-center text-sm text-secondary">Сотрудники не добавлены</p>
-          )}
-
-          {members.map((member) => (
-            <div
-              key={member.id}
-              className="flex items-center gap-2 rounded-input border border-subtle p-2"
-            >
-              <span
-                className="flex size-8 flex-none items-center justify-center rounded-avatar text-xs font-semibold text-on-brand"
-                style={{ background: avatarColorVar(member.id) }}
-              >
-                {member.initials}
+        {!isPersonal && (
+          <>
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                Сотрудники
               </span>
-              <span className="min-w-0 flex-1 truncate text-sm font-medium text-primary">
-                {member.name}
-              </span>
-              <CusBadge tone={member.role === "project_manager" ? "brand" : "neutral"}>
-                {member.role === "project_manager" ? "Manager" : "Xodim"}
-              </CusBadge>
-              <CusButton
-                variant="outline"
-                colorPalette="red"
-                size="xs"
-                onClick={() => setRemovingMemberId(member.id)}
-              >
-                Убрать
-              </CusButton>
+
+              {members.length === 0 && (
+                <p className="py-4 text-center text-sm text-secondary">Сотрудники не добавлены</p>
+              )}
+
+              {members.map((member) => (
+                <div
+                  key={member.id}
+                  className="flex items-center gap-2 rounded-input border border-subtle p-2"
+                >
+                  <span
+                    className="flex size-8 flex-none items-center justify-center rounded-avatar text-xs font-semibold text-on-brand"
+                    style={{ background: avatarColorVar(member.id) }}
+                  >
+                    {member.initials}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-primary">
+                    {member.name}
+                  </span>
+                  <CusBadge tone={member.role === "project_manager" ? "brand" : "neutral"}>
+                    {member.role === "project_manager" ? "Manager" : "Xodim"}
+                  </CusBadge>
+                  <CusButton
+                    variant="outline"
+                    colorPalette="red"
+                    size="xs"
+                    onClick={() => setRemovingMemberId(member.id)}
+                  >
+                    Убрать
+                  </CusButton>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {isAddingOpen ? (
-          <div className="flex flex-col">
-            <span className="mb-2 text-xs font-medium uppercase tracking-wide text-secondary">
-              Добавить сотрудника
-            </span>
-            {availableQuery.isPending ? (
-              <p className="py-4 text-center text-sm text-secondary">Yuklanmoqda...</p>
-            ) : availableMembers.length === 0 ? (
-              <p className="py-4 text-center text-sm text-secondary">
-                Все сотрудники уже добавлены
-              </p>
+            {isAddingOpen ? (
+              <div className="flex flex-col">
+                <span className="mb-2 text-xs font-medium uppercase tracking-wide text-secondary">
+                  Добавить сотрудника
+                </span>
+                {availableQuery.isPending ? (
+                  <p className="py-4 text-center text-sm text-secondary">Yuklanmoqda...</p>
+                ) : availableMembers.length === 0 ? (
+                  <p className="py-4 text-center text-sm text-secondary">
+                    Все сотрудники уже добавлены
+                  </p>
+                ) : (
+                  <ProjectMemberSelectList
+                    members={availableMembers}
+                    selections={additions}
+                    onToggle={toggleAddition}
+                    onRoleChange={setAdditionRole}
+                  />
+                )}
+              </div>
             ) : (
-              <ProjectMemberSelectList
-                members={availableMembers}
-                selections={additions}
-                onToggle={toggleAddition}
-                onRoleChange={setAdditionRole}
-              />
+              <CusButton variant="outline" className="w-full" onClick={() => setAddingOpen(true)}>
+                Добавить сотрудника
+              </CusButton>
             )}
-          </div>
-        ) : (
-          <CusButton variant="outline" className="w-full" onClick={() => setAddingOpen(true)}>
-            Добавить сотрудника
-          </CusButton>
+          </>
         )}
       </div>
 

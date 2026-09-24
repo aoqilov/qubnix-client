@@ -1,3 +1,4 @@
+import { useSyncWorkspaceType } from "@/hooks/useSyncWorkspaceType";
 import { Outlet } from "react-router-dom";
 import { BottomTabBar } from "./nav/BottomTabBar";
 
@@ -14,6 +15,8 @@ const SAFE_AREA_STYLE = {
 };
 
 export function MobileLayout() {
+  useSyncWorkspaceType();
+
   return (
     <div
       className="flex h-dvh flex-col  bg-canvas text-primary"

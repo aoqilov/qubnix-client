@@ -129,11 +129,11 @@ export function useAvailableProjectMembers(
 }
 
 /** Yangi loyiha yaratishda tanlanadigan xodimlar — hali project_id yo'q, shu sabab tashkilot bo'yicha. */
-export function useOrgMembersForNewProject(organizationId: string | null) {
+export function useOrgMembersForNewProject(organizationId: string | null, enabled = true) {
   return useQuery({
     queryKey: PROJECTS_KEYS.orgMembers(organizationId ?? ""),
     queryFn: () => organizationsApi.listMembers(organizationId!, { limit: 100 }),
     select: (data) => data.members.map(toMemberPickerItem),
-    enabled: !!organizationId,
+    enabled: enabled && !!organizationId,
   });
 }

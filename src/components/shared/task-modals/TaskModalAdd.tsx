@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type React from "react";
 import { Drawer } from "@chakra-ui/react";
 import type { DateValue } from "@ark-ui/react/date-picker";
@@ -63,6 +63,8 @@ interface TaskModalAddProps {
   onSubmit: (values: TaskModalAddValues) => void | Promise<void>;
   members: TaskCardMember[];
   isLoadingMembers?: boolean;
+  /** Personal workspace — xodim tanlanmaydi, vazifa chaqiruvchi tomonidan o'ziga biriktiriladi. */
+  hideMembers?: boolean;
 }
 
 const QUICK_TIMES = ["09:00", "12:00", "15:00", "18:00", "21:00"];
@@ -187,8 +189,17 @@ function TaskModalAdd({
   onSubmit,
   members,
   isLoadingMembers,
+  hideMembers = false,
 }: TaskModalAddProps) {
   const [step, setStep] = useState<1 | 2>(1);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const subtaskInputRef = useRef<HTMLInputElement>(null);
+
+  // Ochilishdagi fokusni (nom maydoni) CusDrawer'ning initialFocusEl'i beradi;
+  // 2-qadamga o'tilganda esa subtask maydoni fokus oladi.
+  useEffect(() => {
+    if (open && step === 2) subtaskInputRef.current?.focus();
+  }, [open, step]);
 
   // ── Step 1 ──────────────────────────────────────────────────────────────────
   const [title, setTitle] = useState("");
@@ -287,6 +298,8 @@ function TaskModalAdd({
   }
 
   function addSubtask() {
+    // [+] bosilganda ham fokus inputda qoladi — keyingi bandni darhol yozish uchun.
+    subtaskInputRef.current?.focus();
     const label = subtaskInput.trim();
     if (!label) return;
     setSubtasks((prev) => [
@@ -358,6 +371,7 @@ function TaskModalAdd({
       size="full"
       closeOnBackdrop={false}
       closeOnEscape={false}
+      initialFocusEl={() => titleInputRef.current}
       title="Yangi vazifa"
       footer={
         step === 1 ? (
@@ -369,7 +383,7 @@ function TaskModalAdd({
             </Drawer.ActionTrigger>
             <CusButton
               className="flex-1"
-              isDisabled={!title.trim() || assigneeIds.length === 0}
+              isDisabled={!title.trim() || (!hideMembers && assigneeIds.length === 0)}
               onClick={() => setStep(2)}
               style={{
                 background: "var(--brand-default)",
@@ -410,6 +424,7 @@ function TaskModalAdd({
       {step === 1 ? (
         <div className="flex flex-col gap-4">
           <CusInput
+            ref={titleInputRef}
             label="Название задачи"
             isRequired
             placeholder="Напишите название"
@@ -549,18 +564,20 @@ function TaskModalAdd({
             )}
           </div>
 
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              Сотрудники{" "}
-              <span style={{ color: "var(--status-error-text)" }}>*</span>
-            </span>
-            <AssigneeChecklist
-              members={members}
-              selectedIds={assigneeIds}
-              onToggle={toggleAssignee}
-              isLoading={isLoadingMembers}
-            />
-          </div>
+          {!hideMembers && (
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                Сотрудники{" "}
+                <span style={{ color: "var(--status-error-text)" }}>*</span>
+              </span>
+              <AssigneeChecklist
+                members={members}
+                selectedIds={assigneeIds}
+                onToggle={toggleAssignee}
+                isLoading={isLoadingMembers}
+              />
+            </div>
+          )}
 
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-secondary">
@@ -589,6 +606,7 @@ function TaskModalAdd({
             </span>
             <div className="flex gap-2">
               <CusInput
+                ref={subtaskInputRef}
                 placeholder="Новый Sub-Task"
                 value={subtaskInput}
                 onChange={(e) => setSubtaskInput(e.target.value)}
@@ -648,12 +666,14 @@ function TaskModalAdd({
                 {title || "-"}
               </span>
             </div>
-            <div className="flex items-center justify-between py-3 text-sm">
-              <span className="text-secondary">Ответственный</span>
-              <span className="font-medium text-primary">
-                {assigneeSummary}
-              </span>
-            </div>
+            {!hideMembers && (
+              <div className="flex items-center justify-between py-3 text-sm">
+                <span className="text-secondary">Ответственный</span>
+                <span className="font-medium text-primary">
+                  {assigneeSummary}
+                </span>
+              </div>
+            )}
             <div className="flex items-center justify-between py-3 text-sm">
               <span className="text-secondary">Сроки выполнения</span>
               <span className="font-medium text-primary">

@@ -49,12 +49,12 @@ export function useRoutinesForProjects(
 }
 
 /** Routine kartalarida a'zo ism/ismi bosh harflarini ko'rsatish uchun — butun tashkilot xodimlari. */
-export function useOrgMembersDirectory(organizationId: string | null) {
+export function useOrgMembersDirectory(organizationId: string | null, enabled = true) {
   return useQuery({
     queryKey: ["organizations", organizationId ?? "", "members", "directory"] as const,
     queryFn: () => organizationsApi.listMembers(organizationId!, { limit: 500 }),
     select: (data) => data.members,
-    enabled: !!organizationId,
+    enabled: enabled && !!organizationId,
   });
 }
 

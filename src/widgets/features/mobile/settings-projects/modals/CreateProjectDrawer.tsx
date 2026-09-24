@@ -5,6 +5,7 @@ import { CusButton } from "@/components/ui/buttons/CusButton";
 import { ProjectMemberSelectList } from "../components/ProjectMemberSelectList";
 import { useCreateProject, useOrgMembersForNewProject } from "../hooks/useApiSettingsProjects";
 import type { ProjectMemberRole } from "../types";
+import { useWorkspaceStore } from "@/store/workspace.store";
 
 interface CreateProjectDrawerProps {
   open: boolean;
@@ -17,7 +18,9 @@ export function CreateProjectDrawer({ open, onClose, organizationId }: CreatePro
   // userId -> tanlangan rol. Kalit borligi shu odam belgilanganini bildiradi.
   const [selections, setSelections] = useState<Record<string, ProjectMemberRole>>({});
 
-  const membersQuery = useOrgMembersForNewProject(organizationId);
+  // Personal workspace'da boshqa xodim yo'q — ro'yxat ham, uning so'rovi ham kerak emas.
+  const isPersonal = useWorkspaceStore((s) => s.selectedWorkspaceType) === "personal";
+  const membersQuery = useOrgMembersForNewProject(organizationId, !isPersonal);
   const createProject = useCreateProject(organizationId);
   const availableMembers = membersQuery.data ?? [];
 
@@ -51,10 +54,12 @@ export function CreateProjectDrawer({ open, onClose, organizationId }: CreatePro
     createProject.mutate(
       {
         name: name.trim(),
-        members: Object.entries(selections).map(([userId, role]) => ({
-          user_id: Number(userId),
-          role,
-        })),
+        members: isPersonal
+          ? undefined
+          : Object.entries(selections).map(([userId, role]) => ({
+              user_id: Number(userId),
+              role,
+            })),
       },
       { onSuccess: onClose },
     );
@@ -103,22 +108,24 @@ export function CreateProjectDrawer({ open, onClose, organizationId }: CreatePro
           </p>
         )}
 
-        <div className="flex flex-col">
-          <span className="mb-2 text-xs font-medium uppercase tracking-wide text-secondary">
-            Сотрудники
-          </span>
+        {!isPersonal && (
+          <div className="flex flex-col">
+            <span className="mb-2 text-xs font-medium uppercase tracking-wide text-secondary">
+              Сотрудники
+            </span>
 
-          {membersQuery.isPending ? (
-            <p className="py-4 text-center text-sm text-secondary">Yuklanmoqda...</p>
-          ) : (
-            <ProjectMemberSelectList
-              members={availableMembers}
-              selections={selections}
-              onToggle={toggleMember}
-              onRoleChange={setMemberRole}
-            />
-          )}
-        </div>
+            {membersQuery.isPending ? (
+              <p className="py-4 text-center text-sm text-secondary">Yuklanmoqda...</p>
+            ) : (
+              <ProjectMemberSelectList
+                members={availableMembers}
+                selections={selections}
+                onToggle={toggleMember}
+                onRoleChange={setMemberRole}
+              />
+            )}
+          </div>
+        )}
       </div>
     </CusDrawer>
   );

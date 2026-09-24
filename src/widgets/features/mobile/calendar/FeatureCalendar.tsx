@@ -8,7 +8,7 @@ import { CusCalendar } from "@/components/ui/calendar/CusCalendar";
 import { CalendarDayInfoBox } from "./components/CalendarDayInfoBox";
 import { CalendarProjectsCard } from "./components/CalendarProjectsCard";
 import { CalendarWeekStrip } from "./components/CalendarWeekStrip";
-import { addDays, buildWeekDays, formatMonthLabel, getWeekStart, toDateKey } from "./lib/calendarWeek";
+import { addDays, buildWeekDays, formatMonthLabel, getWeekStart, toDateKey } from "@/utils/weekDays";
 import { useCalendarDay } from "./hooks/useApiCalendar";
 import type { CalendarProjectSummary, DayTaskStats } from "./types";
 import { getDayKind, toApiDate } from "@/utils/apiDate";

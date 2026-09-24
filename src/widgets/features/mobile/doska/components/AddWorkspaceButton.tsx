@@ -23,7 +23,7 @@ export function AddWorkspaceButton({ onClick }: AddWorkspaceButtonProps) {
       }}
       leftIcon={<LuPlus size={16} />}
     >
-      Новый workspace
+      Новая организация
     </CusButton>
   );
 }

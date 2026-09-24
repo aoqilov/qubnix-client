@@ -21,6 +21,8 @@ import type { TaskPriority } from "@/api/tasks/tasks.types";
 import type { RawTaskRoutine, RoutineFrequency } from "@/api/task-routines/task-routines.types";
 import type { RawProjectMember } from "@/api/projects/projects.types";
 import { todayApiDate } from "@/utils/apiDate";
+import { useWorkspaceStore } from "@/store/workspace.store";
+import { useSessionStore } from "@/store/session.store";
 import {
   useCreateRoutine,
   useProjectMembersForRoutine,
@@ -215,10 +217,13 @@ export function RoutineFormDrawer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initial]);
 
+  // Personal workspace — xodim tanlanmaydi, routine foydalanuvchining o'ziga biriktiriladi.
+  const isPersonal = useWorkspaceStore((s) => s.selectedWorkspaceType) === "personal";
+  const currentUserId = useSessionStore((s) => s.user?.id);
   const { data: projectMembers, isPending: isMembersPending } = useProjectMembersForRoutine(
     organizationId,
     projectId,
-    open,
+    open && !isPersonal,
   );
   const members = (projectMembers ?? []).map(toMemberCard);
 
@@ -291,7 +296,11 @@ export function RoutineFormDrawer({
         name: name.trim(),
         description: description.trim() || undefined,
         priority,
-        members: memberIds.map((id) => ({ user_id: Number(id) })),
+        members: isPersonal
+          ? currentUserId
+            ? [{ user_id: Number(currentUserId) }]
+            : []
+          : memberIds.map((id) => ({ user_id: Number(id) })),
         frequency,
         time,
         timezone: "Asia/Tashkent",
@@ -597,17 +606,19 @@ export function RoutineFormDrawer({
             )}
           </div>
 
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              Сотрудники
-            </span>
-            <AssigneeChecklist
-              members={members}
-              selectedIds={memberIds}
-              onToggle={toggleMember}
-              isLoading={isMembersPending}
-            />
-          </div>
+          {!isPersonal && (
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                Сотрудники
+              </span>
+              <AssigneeChecklist
+                members={members}
+                selectedIds={memberIds}
+                onToggle={toggleMember}
+                isLoading={isMembersPending}
+              />
+            </div>
+          )}
 
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-secondary">

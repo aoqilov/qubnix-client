@@ -40,7 +40,7 @@ export function ModalAddWorkspace({ open, onClose }: ModalAddWorkspaceProps) {
       // mumkin emas — yopish faqat chapdagi orqaga tugmasi yoki "Отмена" orqali.
       closeOnBackdrop={false}
       closeOnEscape={true}
-      title="Новый workspace"
+      title="Новая организация"
       footer={
         <div className="flex w-full gap-3">
           <CusButton
@@ -75,7 +75,7 @@ export function ModalAddWorkspace({ open, onClose }: ModalAddWorkspaceProps) {
         />
         {createWorkspace.isError && (
           <p className="text-sm text-error-strong">
-            Не удалось создать workspace. Попробуйте ещё раз.
+            Не удалось создать организацию. Попробуйте ещё раз.
           </p>
         )}
       </div>
