@@ -1,6 +1,29 @@
 import type ru from "../ru/tasks";
 
 const tasks: typeof ru = {
+  page: {
+    title: "Mening vazifalarim",
+    pastBanner: "O'tgan kun — faqat ko'rish uchun",
+    filter: "Filtr",
+    loadError: "Vazifalarni yuklab bo'lmadi.",
+    empty: "Sizda \"{{status}}\" vazifalar yo'q",
+    emptyHint: "Boshqa statusni tanlang",
+    unfinishedTitle: "Subtasklar bajarilmagan",
+    unfinishedText: "{{count}} ta subtask hali bajarilmagan. Baribir \"{{status}}\" deb belgilaysizmi?",
+    confirmDone: "Ha, bajarildi",
+  },
+  sort: {
+    deadline: "Muddat bo'yicha",
+    priority: "Muhimlik bo'yicha",
+    created: "Yaratilgan sana bo'yicha",
+  },
+  membersFilter: {
+    button: "Xodimlar",
+    buttonWithCount: "Xodimlar · {{count}}",
+    title: "Xodimlar bo'yicha filtr",
+    selected: "{{count}} ta xodim tanlandi",
+    noneSelected: "Tanlanmasa — barcha xodimlar",
+  },
   card: {
     subtasks: "Kichik vazifalar",
     photos: "Rasmlar",

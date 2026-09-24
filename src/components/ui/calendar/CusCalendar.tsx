@@ -225,7 +225,7 @@ export function CusCalendar({
           <CusDialog
             open={open}
             onClose={() => setOpen(false)}
-            title={modalTitle ?? "Sanani tanlang"}
+            title={modalTitle ?? t("ui.calendar.pickDate")}
             centered
             size="xs"
             footer={

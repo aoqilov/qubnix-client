@@ -1,0 +1,56 @@
+// /settings/members — xodimlar ro'yxati, taklifnomalar, xodim qo'shish.
+const members = {
+  title: "Сотрудники",
+  usersCount: "{{name}} - {{label}}",
+  tabs: {
+    general: "Общее",
+    invites: "Приглашения",
+  },
+  loadError: "Не удалось загрузить сотрудников.",
+  invitesLoadError: "Не удалось загрузить приглашения.",
+  addPerson: "Добавить сотрудника",
+  since: "уже {{count}} дн.",
+  sentAgo: "{{count}} дн. назад",
+  unknownUser: "Пользователь",
+  projectsCount: "Проекты ({{count}})",
+  cancelInvite: "Отменить",
+  toolbar: {
+    search: "Поиск сотрудников",
+    list: "Список",
+    cards: "Карточки",
+    allRoles: "Все",
+  },
+  cancelDialog: {
+    title: "Отменить приглашение",
+    cancelling: "Отмена...",
+    confirm: "Да, отменить",
+    question: "Отменить приглашение для {{name}}?",
+    warning: "Это действие нельзя отменить — чтобы пригласить снова, нужно отправить новое приглашение.",
+    error: "Не удалось отменить. Попробуйте ещё раз.",
+  },
+  invite: {
+    title: "Добавить сотрудника",
+    send: "Отправить приглашение",
+    searchLabel: "Телефон или Telegram username",
+    searchPlaceholder: "+998 90 123 45 67 или @username",
+    minChars: "Введите минимум 3 символа",
+    searching: "Поиск...",
+    searchError: "Ошибка поиска. Попробуйте ещё раз.",
+    notFound: "Пользователь не найден. Сначала он должен зарегистрироваться в боте.",
+    role: "Роль",
+    attachProjects: "Привязать к проектам (необязательно)",
+    chooseProject: "Выберите проект",
+    addProject: "Добавить проект",
+    sendError: "Приглашение не отправлено. Попробуйте ещё раз.",
+  },
+  actions: {
+    title: "Сотрудник",
+    role: "Роль",
+    roleError: "Не удалось изменить роль.",
+    removeQuestion: "Исключить {{name}} из организации?",
+    removeError: "Не удалось удалить. Попробуйте ещё раз.",
+    confirmRemove: "Да, удалить",
+  },
+};
+
+export default members;

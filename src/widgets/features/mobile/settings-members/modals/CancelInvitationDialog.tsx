@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuTriangleAlert } from "react-icons/lu";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -19,26 +20,27 @@ export function CancelInvitationDialog({
   isLoading = false,
   isError = false,
 }: CancelInvitationDialogProps) {
+  const { t } = useTranslation();
   return (
     <CusDialog
       open={open}
       onClose={onClose}
-      title="Taklifni bekor qilish"
+      title={t("members.cancelDialog.title")}
       size="sm"
       centered
       closeOnBackdrop={!isLoading}
       footer={
         <>
           <CusButton variant="outline" onClick={onClose} isDisabled={isLoading}>
-            Yo'q
+            {t("common.actions.no")}
           </CusButton>
           <CusButton
             onClick={onConfirm}
             isLoading={isLoading}
-            loadingText="Bekor qilinmoqda..."
+            loadingText={t("members.cancelDialog.cancelling")}
             style={{ background: "var(--status-error-solid)", color: "var(--text-on-brand)" }}
           >
-            Ha, bekor qilish
+            {t("members.cancelDialog.confirm")}
           </CusButton>
         </>
       }
@@ -60,15 +62,14 @@ export function CancelInvitationDialog({
         </div>
         <div>
           <p style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
-            {employeeName}ga yuborilgan taklifni bekor qilasizmi?
+            {t("members.cancelDialog.question", { name: employeeName })}
           </p>
           <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4, lineHeight: 1.5 }}>
-            Bu amalni ortga qaytarib bo'lmaydi — qayta taklif qilish uchun yangidan yuborishingiz
-            kerak bo'ladi.
+            {t("members.cancelDialog.warning")}
           </p>
           {isError && (
             <p style={{ fontSize: 12, color: "var(--status-error-text)", marginTop: 8 }}>
-              Bekor qilib bo'lmadi. Qayta urinib ko'ring.
+              {t("members.cancelDialog.error")}
             </p>
           )}
         </div>

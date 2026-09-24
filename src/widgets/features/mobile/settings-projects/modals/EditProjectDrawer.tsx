@@ -1,3 +1,5 @@
+import { projectRoleLabel } from "@/utils/roleLabels";
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusInput } from "@/components/ui/inputs/CusInput";
@@ -23,6 +25,7 @@ export function EditProjectDrawer({
   organizationId,
   project,
 }: EditProjectDrawerProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   // Loyihada qolayotgan mavjud xodimlar: userId -> rol.
   const [keptRoles, setKeptRoles] = useState<Record<string, ProjectMemberRole>>({});
@@ -121,7 +124,7 @@ export function EditProjectDrawer({
       onClose={onClose}
       placement="end"
       size="full"
-      title="Изменить проект"
+      title={t("projects.edit.title")}
       footer={
         <div className="flex w-full gap-2">
           <CusButton
@@ -130,26 +133,26 @@ export function EditProjectDrawer({
             onClick={onClose}
             isDisabled={updateProject.isPending}
           >
-            Отмена
+            {t("common.actions.cancel")}
           </CusButton>
           <CusButton
             className="flex-1"
             isDisabled={!name.trim()}
             isLoading={updateProject.isPending}
-            loadingText="Saqlanmoqda..."
+            loadingText={t("common.states.saving")}
             onClick={handleSave}
           >
-            Сохранить
+            {t("common.actions.save")}
           </CusButton>
         </div>
       }
     >
       <div className="flex flex-col gap-4">
-        <CusInput label="Название проекта" value={name} onChange={(e) => setName(e.target.value)} />
+        <CusInput label={t("projects.create.nameLabel")} value={name} onChange={(e) => setName(e.target.value)} />
 
         {updateProject.isError && (
           <p className="text-sm text-error-strong">
-            Не удалось сохранить изменения. Попробуйте ещё раз.
+            {t("projects.edit.error")}
           </p>
         )}
 
@@ -157,11 +160,11 @@ export function EditProjectDrawer({
           <>
             <div className="flex flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-                Сотрудники
+                {t("projects.members")}
               </span>
 
               {members.length === 0 && (
-                <p className="py-4 text-center text-sm text-secondary">Сотрудники не добавлены</p>
+                <p className="py-4 text-center text-sm text-secondary">{t("projects.noMembers")}</p>
               )}
 
               {members.map((member) => (
@@ -179,7 +182,7 @@ export function EditProjectDrawer({
                     {member.name}
                   </span>
                   <CusBadge tone={member.role === "project_manager" ? "brand" : "neutral"}>
-                    {member.role === "project_manager" ? "Manager" : "Xodim"}
+                    {projectRoleLabel(member.role)}
                   </CusBadge>
                   <CusButton
                     variant="outline"
@@ -187,7 +190,7 @@ export function EditProjectDrawer({
                     size="xs"
                     onClick={() => setRemovingMemberId(member.id)}
                   >
-                    Убрать
+                    {t("common.actions.remove")}
                   </CusButton>
                 </div>
               ))}
@@ -196,13 +199,13 @@ export function EditProjectDrawer({
             {isAddingOpen ? (
               <div className="flex flex-col">
                 <span className="mb-2 text-xs font-medium uppercase tracking-wide text-secondary">
-                  Добавить сотрудника
+                  {t("projects.addMember")}
                 </span>
                 {availableQuery.isPending ? (
-                  <p className="py-4 text-center text-sm text-secondary">Yuklanmoqda...</p>
+                  <p className="py-4 text-center text-sm text-secondary">{t("common.states.loading")}</p>
                 ) : availableMembers.length === 0 ? (
                   <p className="py-4 text-center text-sm text-secondary">
-                    Все сотрудники уже добавлены
+                    {t("projects.allMembersAdded")}
                   </p>
                 ) : (
                   <ProjectMemberSelectList
@@ -215,7 +218,7 @@ export function EditProjectDrawer({
               </div>
             ) : (
               <CusButton variant="outline" className="w-full" onClick={() => setAddingOpen(true)}>
-                Добавить сотрудника
+                {t("projects.addMember")}
               </CusButton>
             )}
           </>

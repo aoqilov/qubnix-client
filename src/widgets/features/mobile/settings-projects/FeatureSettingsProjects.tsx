@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LuPlus, LuSearch, LuSearchX } from "react-icons/lu";
@@ -12,15 +13,16 @@ import { DeleteProjectDialog } from "./modals/DeleteProjectDialog";
 import { useDeleteProject, useProjectsList } from "./hooks/useApiSettingsProjects";
 
 function EmptyState({ hasQuery }: { hasQuery: boolean }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center gap-2 py-12 text-center">
       <span className="flex size-11 items-center justify-center rounded-avatar bg-surface-secondary text-secondary">
         <LuSearchX size={20} />
       </span>
       <p className="text-sm font-medium text-primary">
-        {hasQuery ? "Hech narsa topilmadi" : "Loyihalar hali yo'q"}
+        {hasQuery ? t("common.states.nothingFound") : t("projects.empty")}
       </p>
-      {hasQuery && <p className="text-xs text-secondary">Qidiruvni o'zgartirib ko'ring</p>}
+      {hasQuery && <p className="text-xs text-secondary">{t("projects.emptySearchHint")}</p>}
     </div>
   );
 }
@@ -32,6 +34,7 @@ function CardSkeleton() {
 }
 
 export default function FeatureSettingsProjects() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
   const projectsQuery = useProjectsList(organizationId);
@@ -58,10 +61,10 @@ export default function FeatureSettingsProjects() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <SettingsBackHeader title="Проекты" />
+      <SettingsBackHeader title={t("projects.title")} />
 
       <CusInput
-        placeholder="Поиск проектов"
+        placeholder={t("projects.search")}
         clearable
         leftElementWidth="2.25rem"
         leftElement={<LuSearch size={18} />}
@@ -83,7 +86,7 @@ export default function FeatureSettingsProjects() {
         leftIcon={<LuPlus size={16} />}
         onClick={() => setCreateOpen(true)}
       >
-        Новый проект
+        {t("projects.newProject")}
       </CusButton>
 
       {projectsQuery.isPending ? (
@@ -92,7 +95,7 @@ export default function FeatureSettingsProjects() {
           <CardSkeleton />
         </div>
       ) : projectsQuery.isError ? (
-        <p className="px-1 text-sm text-error-strong">Не удалось загрузить проекты.</p>
+        <p className="px-1 text-sm text-error-strong">{t("projects.loadError")}</p>
       ) : filteredProjects.length === 0 ? (
         <EmptyState hasQuery={search.trim().length > 0} />
       ) : (

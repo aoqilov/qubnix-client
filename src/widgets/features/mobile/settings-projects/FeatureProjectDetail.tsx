@@ -1,3 +1,5 @@
+import { projectRoleLabel } from "@/utils/roleLabels";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { LuUsers } from "react-icons/lu";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
@@ -14,6 +16,7 @@ function CardSkeleton() {
 }
 
 export default function FeatureProjectDetail() {
+  const { t } = useTranslation();
   const { projectId } = useParams<{ projectId: string }>();
   const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
   // Personal workspace'da boshqa xodim yo'q — "Сотрудники" bo'limi ko'rsatilmaydi.
@@ -23,12 +26,12 @@ export default function FeatureProjectDetail() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <SettingsBackHeader title={project?.name ?? "Loyiha"} to="/settings/projects" />
+      <SettingsBackHeader title={project?.name ?? t("projects.fallbackTitle")} to="/settings/projects" />
 
       {isPending ? (
         <CardSkeleton />
       ) : isError || !project ? (
-        <p className="px-1 text-sm text-error-strong">Не удалось загрузить проект.</p>
+        <p className="px-1 text-sm text-error-strong">{t("projects.detailLoadError")}</p>
       ) : (
         <>
           <CusCardbox className="flex flex-col gap-4 rounded-input">
@@ -63,7 +66,7 @@ export default function FeatureProjectDetail() {
           {!isPersonal && (
             <div className="flex flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-                Сотрудники
+                {t("projects.members")}
               </span>
 
               {project.members.length === 0 ? (
@@ -71,7 +74,7 @@ export default function FeatureProjectDetail() {
                   <span className="flex size-11 items-center justify-center rounded-avatar bg-surface-secondary text-secondary">
                     <LuUsers size={20} />
                   </span>
-                  <p className="text-sm text-secondary">Сотрудники не добавлены</p>
+                  <p className="text-sm text-secondary">{t("projects.noMembers")}</p>
                 </div>
               ) : (
                 <CusCardbox
@@ -90,7 +93,7 @@ export default function FeatureProjectDetail() {
                         {member.name}
                       </span>
                       <CusBadge tone={member.role === "project_manager" ? "brand" : "neutral"}>
-                        {member.role === "project_manager" ? "Manager" : "Xodim"}
+                        {projectRoleLabel(member.role)}
                       </CusBadge>
                     </div>
                   ))}

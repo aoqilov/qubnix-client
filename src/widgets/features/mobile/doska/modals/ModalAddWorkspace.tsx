@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusInput } from "@/components/ui/inputs/CusInput";
@@ -10,6 +11,7 @@ interface ModalAddWorkspaceProps {
 }
 
 export function ModalAddWorkspace({ open, onClose }: ModalAddWorkspaceProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const createWorkspace = useCreateWorkspace();
 
@@ -40,7 +42,7 @@ export function ModalAddWorkspace({ open, onClose }: ModalAddWorkspaceProps) {
       // mumkin emas — yopish faqat chapdagi orqaga tugmasi yoki "Отмена" orqali.
       closeOnBackdrop={false}
       closeOnEscape={true}
-      title="Новая организация"
+      title={t("doska.createOrganization.title")}
       footer={
         <div className="flex w-full gap-3">
           <CusButton
@@ -50,32 +52,32 @@ export function ModalAddWorkspace({ open, onClose }: ModalAddWorkspaceProps) {
             isDisabled={createWorkspace.isPending}
             className="flex-1"
           >
-            Отмена
+            {t("common.actions.cancel")}
           </CusButton>
           <CusButton
             onClick={handleSubmit}
             isDisabled={!canSubmit}
             isLoading={createWorkspace.isPending}
-            loadingText="Создание..."
+            loadingText={t("common.states.creating")}
             className="flex-1"
             style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
           >
-            Создать
+            {t("common.actions.create")}
           </CusButton>
         </div>
       }
     >
       <div className="flex flex-col gap-4">
         <CusInput
-          label="Название"
+          label={t("doska.createOrganization.nameLabel")}
           isRequired
-          placeholder="Synapse"
+          placeholder={t("doska.createOrganization.namePlaceholder")}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         {createWorkspace.isError && (
           <p className="text-sm text-error-strong">
-            Не удалось создать организацию. Попробуйте ещё раз.
+            {t("doska.createOrganization.error")}
           </p>
         )}
       </div>

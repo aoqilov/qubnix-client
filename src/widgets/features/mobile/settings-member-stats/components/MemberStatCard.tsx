@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import TaskStatGrid from "@/components/shared/task-stat-grid/TaskStatGrid";
 import { avatarColorVar } from "@/utils/avatarColor";
@@ -18,6 +19,7 @@ interface MemberStatCardProps {
 }
 
 export function MemberStatCard({ row }: MemberStatCardProps) {
+  const { t } = useTranslation();
   const accent = avatarColorVar(row.memberId);
 
   return (
@@ -47,7 +49,7 @@ export function MemberStatCard({ row }: MemberStatCardProps) {
       <TaskStatGrid
         done={row.done}
         completed={row.assigned}
-        completedLabel="Назначено"
+        completedLabel={t("common.taskStatus.todo")}
         inProgress={row.inProgress}
         overdue={row.overdue}
       />

@@ -1,3 +1,5 @@
+import { daysLabel } from "@/utils/countLabels";
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { LuCheck } from "react-icons/lu";
@@ -18,6 +20,7 @@ import { WORKSPACE_ROLES } from "@/const/roles";
 // fon so'rovda emas (useEffect-based sinxronlash query obyekti yangi reference
 // bergan har safar inputni serverdagi qiymatga qaytarib yuborar edi).
 function WorkspaceNameField({ organization }: { organization: SettingsWorkspace }) {
+  const { t } = useTranslation();
   const renameOrganization = useRenameOrganization();
   const [workspaceName, setWorkspaceName] = useState(organization.name);
 
@@ -32,7 +35,7 @@ function WorkspaceNameField({ organization }: { organization: SettingsWorkspace 
   return (
     <div className="flex flex-col gap-2">
       <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-        Название организации
+        {t("settings.general.orgName")}
       </span>
       <div className="flex items-center gap-2 rounded-input border border-subtle bg-surface px-3 py-2">
         <CusInput value={workspaceName} onChange={(e) => setWorkspaceName(e.target.value)} />
@@ -50,6 +53,7 @@ function WorkspaceNameField({ organization }: { organization: SettingsWorkspace 
 }
 
 export default function FeatureSettingsGeneral() {
+  const { t } = useTranslation();
   const organizationQuery = useSelectedOrganization();
   const ownerRoles = organizationQuery.data ? [organizationQuery.data.role] : [];
   // Personal workspace'da obuna (PRO) bo'limi ko'rsatilmaydi.
@@ -57,7 +61,7 @@ export default function FeatureSettingsGeneral() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <SettingsBackHeader title="Общие настройки" />
+      <SettingsBackHeader title={t("settings.menu.general")} />
 
       <p className="-mt-2 text-sm font-semibold text-brand">
         {(organizationQuery.data?.name ?? "").toUpperCase()}
@@ -72,9 +76,9 @@ export default function FeatureSettingsGeneral() {
         ) : (
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              Название организации
+              {t("settings.general.orgName")}
             </span>
-            <CusInput value="" disabled placeholder="Yuklanmoqda..." />
+            <CusInput value="" disabled placeholder={t("common.states.loading")} />
           </div>
         )}
       </RoleGate>
@@ -82,12 +86,15 @@ export default function FeatureSettingsGeneral() {
       {!isPersonal && (
         <CusCardbox className="flex flex-col gap-3 rounded-input">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-base font-semibold text-primary">PRO режим</span>
-            <CusBadge tone="success">Активно</CusBadge>
+            <span className="text-base font-semibold text-primary">{t("settings.general.proMode")}</span>
+            <CusBadge tone="success">{t("settings.general.active")}</CusBadge>
           </div>
 
           <span className="text-sm text-secondary">
-            Осталось {MOCK_PRO_STATUS.daysLeft} дней - до {MOCK_PRO_STATUS.untilDate}
+            {t("settings.general.remaining", {
+              label: daysLabel(MOCK_PRO_STATUS.daysLeft),
+              date: MOCK_PRO_STATUS.untilDate,
+            })}
           </span>
 
           <div className="h-2 w-full overflow-hidden rounded-full bg-surface-secondary">
@@ -107,7 +114,7 @@ export default function FeatureSettingsGeneral() {
                 color: "var(--text-on-brand)",
               }}
             >
-              Продлить подписку
+              {t("settings.general.extend")}
             </CusButton>
           </RoleGate>
         </CusCardbox>

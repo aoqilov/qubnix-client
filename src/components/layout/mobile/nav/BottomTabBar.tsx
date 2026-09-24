@@ -12,13 +12,13 @@ import {
 
 const HOME_PATHS = ["/doska", "/profile"];
 
-type NavLabelKey = `layout.nav.${"doska" | "profile" | "today" | "calendar" | "statistics" | "settings"}`;
+type NavLabelKey = `layout.nav.${"doska" | "profile" | "tasks" | "calendar" | "statistics" | "settings"}`;
 
 const HOME_TAB = { to: "/doska", labelKey: "layout.nav.doska" as NavLabelKey, icon: GrHomeRounded };
 const PROFILE_TAB = { to: "/profile", labelKey: "layout.nav.profile" as NavLabelKey, icon: LuUser };
 
 const WORKSPACE_TABS = [
-  { to: "/tasks", labelKey: "layout.nav.today" as NavLabelKey, icon: FiCheckCircle },
+  { to: "/tasks", labelKey: "layout.nav.tasks" as NavLabelKey, icon: FiCheckCircle },
   { to: "/calendar", labelKey: "layout.nav.calendar" as NavLabelKey, icon: LuCalendar },
   { to: "/statistics", labelKey: "layout.nav.statistics" as NavLabelKey, icon: LuChartColumn },
   { to: "/settings", labelKey: "layout.nav.settings" as NavLabelKey, icon: LuSettings },

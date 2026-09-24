@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuBell } from "react-icons/lu";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
@@ -8,6 +9,7 @@ interface AcceptInvitationsButtonProps {
 }
 
 export function AcceptInvitationsButton({ count, onClick }: AcceptInvitationsButtonProps) {
+  const { t } = useTranslation();
   return (
     <CusButton
       variant="plain"
@@ -26,7 +28,7 @@ export function AcceptInvitationsButton({ count, onClick }: AcceptInvitationsBut
       }}
       leftIcon={<LuBell size={16} />}
     >
-      Приглашения
+      {t("doska.invitations.button")}
       {count > 0 && (
         <span className="absolute -right-2 -top-2">
           <CusBadge tone="error" variant="solid" size="xs">

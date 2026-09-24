@@ -1,4 +1,7 @@
-import { forwardRef, useState } from "react";
+import { LANGUAGES, isLanguageCode } from "@/i18n/languages";
+import { changeLanguage } from "@/i18n";
+import { useTranslation } from "react-i18next";
+import { forwardRef } from "react";
 import type React from "react";
 import { LuChevronDown, LuMoon, LuSun } from "react-icons/lu";
 import { useUiStore, type FontSizePreference } from "@/store/ui.store";
@@ -6,24 +9,8 @@ import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { CusMenuList } from "@/components/ui/menu-list/CusMenuList";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 
-const MODE_ITEMS = [
-  { value: "light", label: "Yorug'", icon: <LuSun size={14} /> },
-  { value: "dark", label: "Qorong'u", icon: <LuMoon size={14} /> },
-];
-
-const FONT_SIZE_ITEMS = [
-  { value: "sm", label: "Kichik" },
-  { value: "md", label: "O'rta" },
-  { value: "lg", label: "Katta" },
-];
-
-// i18n loyihada yo'q (qat'iy qaror) — bu tanlov hech narsani tarjima qilmaydi,
-// faqat interfeys sifatida mavjud.
-const LANGUAGE_ITEMS = [
-  { value: "uz", label: "O'zbek" },
-  { value: "ru", label: "Русский" },
-  { value: "en", label: "English" },
-];
+// Til nomlari har doim o'z tilida ko'rsatiladi (Русский / O'zbekcha / Ўзбекча).
+const LANGUAGE_ITEMS = LANGUAGES.map((l) => ({ value: l.code, label: l.label }));
 
 interface TriggerButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   label: string;
@@ -58,15 +45,25 @@ export function ProfileSettingsModal({ open, onClose }: ProfileSettingsModalProp
   const toggleDarkMode = useUiStore((s) => s.toggleDarkMode);
   const fontSize = useUiStore((s) => s.fontSize);
   const setFontSize = useUiStore((s) => s.setFontSize);
-  const [language, setLanguage] = useState("uz");
+  const { t, i18n } = useTranslation();
+  const language = i18n.language;
+
+  const MODE_ITEMS = [
+    { value: "light", label: t("profile.prefs.light"), icon: <LuSun size={14} /> },
+    { value: "dark", label: t("profile.prefs.dark"), icon: <LuMoon size={14} /> },
+  ];
+  const FONT_SIZE_ITEMS = [
+    { value: "sm", label: t("profile.prefs.fontSm") },
+    { value: "md", label: t("profile.prefs.fontMd") },
+    { value: "lg", label: t("profile.prefs.fontLg") },
+  ];
 
   const modeValue = isDarkMode ? "dark" : "light";
-  const modeLabel =
-    MODE_ITEMS.find((m) => m.value === modeValue)?.label ?? "Yorug'";
+  const modeLabel = MODE_ITEMS.find((m) => m.value === modeValue)?.label ?? MODE_ITEMS[0].label;
   const languageLabel =
-    LANGUAGE_ITEMS.find((l) => l.value === language)?.label ?? "O'zbek";
+    LANGUAGE_ITEMS.find((l) => l.value === language)?.label ?? LANGUAGE_ITEMS[0].label;
   const fontSizeLabel =
-    FONT_SIZE_ITEMS.find((f) => f.value === fontSize)?.label ?? "O'rta";
+    FONT_SIZE_ITEMS.find((f) => f.value === fontSize)?.label ?? FONT_SIZE_ITEMS[1].label;
 
   return (
     <CusDrawer
@@ -76,14 +73,14 @@ export function ProfileSettingsModal({ open, onClose }: ProfileSettingsModalProp
       size="full"
       closeOnBackdrop={false}
       closeOnEscape={false}
-      title="Sozlamalar"
+      title={t("profile.settings")}
     >
       <CusCardbox
         style={{ padding: 0 }}
         className="flex flex-col divide-y divide-[var(--border-default)] rounded-card"
       >
         <div className="flex items-center gap-3 px-4 py-3 text-sm">
-          <span>Rejim</span>
+          <span>{t("profile.prefs.mode")}</span>
           <span className="flex-1" />
           <CusMenuList
             value={modeValue}
@@ -97,11 +94,13 @@ export function ProfileSettingsModal({ open, onClose }: ProfileSettingsModalProp
           />
         </div>
         <div className="flex items-center gap-3 px-4 py-3 text-sm">
-          <span>Til</span>
+          <span>{t("profile.prefs.language")}</span>
           <span className="flex-1" />
           <CusMenuList
             value={language}
-            onValueChange={setLanguage}
+            onValueChange={(code) => {
+              if (isLanguageCode(code)) void changeLanguage(code);
+            }}
             items={LANGUAGE_ITEMS}
             trigger={(triggerOpen) => (
               <TriggerButton label={languageLabel} open={triggerOpen} />
@@ -109,7 +108,7 @@ export function ProfileSettingsModal({ open, onClose }: ProfileSettingsModalProp
           />
         </div>
         <div className="flex items-center gap-3 px-4 py-3 text-sm">
-          <span>Shrift kattaligi</span>
+          <span>{t("profile.prefs.fontSize")}</span>
           <span className="flex-1" />
           <CusMenuList
             value={fontSize}

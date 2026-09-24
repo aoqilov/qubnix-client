@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -125,6 +126,7 @@ function TaskCard({
   onDelete,
   onEdit,
 }: TaskCardProps) {
+  const { t } = useTranslation();
   const doneSubtasks = subtasks?.filter((s) => s.checked).length ?? 0;
 
   return (
@@ -263,7 +265,7 @@ function TaskCard({
               {subtasks && subtasks.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <SectionLabel>Подзадачи</SectionLabel>
+                    <SectionLabel>{t("tasks.card.subtasks")}</SectionLabel>
                     <span style={CAPTION_STYLE}>
                       {doneSubtasks}/{subtasks.length}
                     </span>
@@ -283,14 +285,14 @@ function TaskCard({
 
               {photos && photos.length > 0 && (
                 <div className="flex flex-col gap-2">
-                  <SectionLabel>Фото</SectionLabel>
+                  <SectionLabel>{t("tasks.card.photos")}</SectionLabel>
                   <TaskPhotoGrid photos={photos} />
                 </div>
               )}
 
               {files && files.length > 0 && (
                 <div className="flex flex-col gap-2">
-                  <SectionLabel>Файлы</SectionLabel>
+                  <SectionLabel>{t("tasks.card.files")}</SectionLabel>
                   <div className="flex flex-col gap-2">
                     {files.map((file) => (
                       <TaskFileItem key={file.id} file={file} onDownload={onDownloadFile} />
@@ -303,7 +305,7 @@ function TaskCard({
                     className="flex items-center gap-1.5 self-start text-sm font-medium text-brand"
                   >
                     <LuPaperclip size={14} />
-                    Прикрепить файл
+                    {t("common.actions.attachFile")}
                   </button>
                   )}
                 </div>
@@ -318,7 +320,7 @@ function TaskCard({
                   leftIcon={<LuTrash2 size={16} />}
                   onClick={onDelete}
                 >
-                  Удалить
+                  {t("common.actions.delete")}
                 </CusButton>
                 <CusButton
                   className="flex-1"
@@ -326,7 +328,7 @@ function TaskCard({
                   onClick={onEdit}
                   style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
                 >
-                  Изменить
+                  {t("common.actions.edit")}
                 </CusButton>
               </div>
               )}

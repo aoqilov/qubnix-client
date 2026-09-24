@@ -539,7 +539,7 @@ function TaskModalEdit({
 
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              Сотрудники <span style={{ color: "var(--status-error-text)" }}>*</span>
+              {t("tasks.modal.members")} <span style={{ color: "var(--status-error-text)" }}>*</span>
             </span>
             <AssigneeChecklist
               members={members}

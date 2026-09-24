@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { LuCheckCheck, LuX } from "react-icons/lu";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
@@ -23,6 +24,7 @@ export function MembersFilterDrawer({
   selectedIds,
   onApply,
 }: MembersFilterDrawerProps) {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState<string[]>(selectedIds);
 
   useEffect(() => {
@@ -39,11 +41,11 @@ export function MembersFilterDrawer({
       onClose={onClose}
       placement="end"
       size="full"
-      title="Xodimlar bo'yicha filtr"
+      title={t("tasks.membersFilter.title")}
       footer={
         <>
           <CusButton variant="outline" className="flex-1" onClick={onClose}>
-            Bekor qilish
+            {t("common.actions.cancel")}
           </CusButton>
           <CusButton
             className="flex-1"
@@ -53,7 +55,7 @@ export function MembersFilterDrawer({
             }}
             style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
           >
-            Qo'llash
+            {t("common.actions.apply")}
           </CusButton>
         </>
       }
@@ -70,7 +72,7 @@ export function MembersFilterDrawer({
             onClick={() => setDraft(members.map((m) => m.id))}
             style={{ borderColor: "var(--brand-default)", color: "var(--brand-default)" }}
           >
-            Hammasini belgilash
+            {t("common.actions.selectAll")}
           </CusButton>
           <CusButton
             variant="outline"
@@ -81,11 +83,13 @@ export function MembersFilterDrawer({
             isDisabled={draft.length === 0}
             onClick={() => setDraft([])}
           >
-            Hammasini olib tashlash
+            {t("common.actions.clearAll")}
           </CusButton>
         </div>
         <span className="text-xs font-medium text-secondary">
-          {draft.length > 0 ? `${draft.length} ta xodim tanlandi` : "Tanlanmasa — barcha xodimlar"}
+          {draft.length > 0
+            ? t("tasks.membersFilter.selected", { count: draft.length })
+            : t("tasks.membersFilter.noneSelected")}
         </span>
         <AssigneeChecklist members={members} selectedIds={draft} onToggle={toggle} />
       </div>

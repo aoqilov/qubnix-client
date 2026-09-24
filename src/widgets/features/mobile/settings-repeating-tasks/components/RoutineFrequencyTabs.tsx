@@ -1,12 +1,7 @@
+import { useTranslation } from "react-i18next";
 import type { RoutineFilter } from "../types";
 
-const ITEMS: { id: RoutineFilter; label: string }[] = [
-  { id: "all", label: "Все" },
-  { id: "daily", label: "Дни" },
-  { id: "weekly", label: "Неделя" },
-  { id: "monthly", label: "Месяц" },
-  { id: "yearly", label: "Год" },
-];
+const ITEMS: RoutineFilter[] = ["all", "daily", "weekly", "monthly", "yearly"];
 
 interface RoutineFrequencyTabsProps {
   value: RoutineFilter;
@@ -14,9 +9,11 @@ interface RoutineFrequencyTabsProps {
 }
 
 export function RoutineFrequencyTabs({ value, onChange }: RoutineFrequencyTabsProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-4 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      {ITEMS.map((item) => {
+      {ITEMS.map((id) => {
+        const item = { id, label: t(`routines.filter.${id}`) };
         const isActive = item.id === value;
         return (
           <button

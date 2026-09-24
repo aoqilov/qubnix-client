@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { forwardRef } from "react";
 import type React from "react";
 import { LuFilter, LuSearch, LuUsers } from "react-icons/lu";
@@ -6,10 +7,7 @@ import { CusMenuList } from "@/components/ui/menu-list/CusMenuList";
 
 export type StatsSortOrder = "most" | "least";
 
-const SORT_ITEMS = [
-  { value: "most", label: "Сначала больше выполненных" },
-  { value: "least", label: "Сначала меньше выполненных" },
-];
+const SORT_KEYS = ["most", "least"] as const;
 
 const iconButtonStyle: React.CSSProperties = {
   width: 40,
@@ -54,10 +52,11 @@ export function StatsFilterRow({
   onSortOrderChange,
   onOpenMembersFilter,
 }: StatsFilterRowProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-2">
       <CusInput
-        placeholder="Поиск сотрудников"
+        placeholder={t("memberStats.search")}
         clearable
         leftElementWidth="2.25rem"
         leftElement={<LuSearch size={18} />}
@@ -67,7 +66,7 @@ export function StatsFilterRow({
       <CusMenuList
         value={sortOrder}
         onValueChange={(v) => onSortOrderChange(v as StatsSortOrder)}
-        items={SORT_ITEMS}
+        items={SORT_KEYS.map((key) => ({ value: key, label: t(`memberStats.sort.${key}`) }))}
         width={220}
         trigger={<IconTriggerButton />}
       />

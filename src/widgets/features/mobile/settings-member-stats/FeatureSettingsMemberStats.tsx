@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { LuCalendarDays, LuSearchX } from "react-icons/lu";
 import { CusSegment } from "@/components/ui/segment/CusSegment";
@@ -36,18 +37,20 @@ function CardSkeleton() {
 }
 
 function EmptyState() {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center gap-2 py-12 text-center">
       <span className="flex size-11 items-center justify-center rounded-avatar bg-surface-secondary text-secondary">
         <LuSearchX size={20} />
       </span>
-      <p className="text-sm font-medium text-primary">Hech narsa topilmadi</p>
-      <p className="text-xs text-secondary">Qidiruv yoki filtrni o'zgartirib ko'ring</p>
+      <p className="text-sm font-medium text-primary">{t("common.states.nothingFound")}</p>
+      <p className="text-xs text-secondary">{t("common.states.nothingFoundHint")}</p>
     </div>
   );
 }
 
 export default function FeatureSettingsMemberStats() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<StatsMainTab>("general");
   const [period, setPeriod] = useState<StatsPeriod>("7");
   const [search, setSearch] = useState("");
@@ -105,7 +108,7 @@ export default function FeatureSettingsMemberStats() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <SettingsBackHeader title="Статистика сотрудников" />
+      <SettingsBackHeader title={t("memberStats.title")} />
 
       <p className="-mt-2 text-sm font-semibold text-brand">
         {tab === "general" ? range.label : formatWeekdayDate(selectedDay)}
@@ -115,8 +118,8 @@ export default function FeatureSettingsMemberStats() {
         value={tab}
         onValueChange={(v) => setTab(v as StatsMainTab)}
         items={[
-          { id: "general", label: "Общее" },
-          { id: "byDay", label: "По дням" },
+          { id: "general", label: t("memberStats.tabs.general") },
+          { id: "byDay", label: t("memberStats.tabs.byDay") },
         ]}
       />
 
@@ -128,7 +131,7 @@ export default function FeatureSettingsMemberStats() {
             <button
               type="button"
               onClick={() => setDayPickerOpen(true)}
-              aria-label="Выбрать дату"
+              aria-label={t("memberStats.pickDate")}
               className="flex size-10 items-center justify-center rounded-card border border-default bg-surface text-secondary"
             >
               <LuCalendarDays size={18} />
@@ -153,7 +156,7 @@ export default function FeatureSettingsMemberStats() {
       />
 
       {statsQuery.isError ? (
-        <p className="px-1 text-sm text-error-strong">Не удалось загрузить статистику.</p>
+        <p className="px-1 text-sm text-error-strong">{t("memberStats.loadError")}</p>
       ) : statsQuery.isPending ? (
         <div className="flex flex-col gap-3">
           <CardSkeleton />

@@ -1,10 +1,8 @@
+import { useTranslation } from "react-i18next";
+import { daysLabel } from "@/utils/countLabels";
 import type { StatsPeriod } from "../types";
 
-const ITEMS: { id: StatsPeriod; label: string }[] = [
-  { id: "7", label: "7 дней" },
-  { id: "15", label: "15 дней" },
-  { id: "30", label: "30 дней" },
-];
+const ITEMS: StatsPeriod[] = ["7", "15", "30"];
 
 interface PeriodTabsProps {
   value: StatsPeriod;
@@ -12,9 +10,11 @@ interface PeriodTabsProps {
 }
 
 export function PeriodTabs({ value, onChange }: PeriodTabsProps) {
+  useTranslation(); // til almashsa "7 дней" / "7 kun" qayta hisoblanadi
   return (
     <div className="flex items-center gap-4">
-      {ITEMS.map((item) => {
+      {ITEMS.map((id) => {
+        const item = { id, label: daysLabel(Number(id)) };
         const isActive = item.id === value;
         return (
           <button

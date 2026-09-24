@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";
 import { LuChartBarIncreasing, LuChevronRight, LuSlidersVertical } from "react-icons/lu";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
@@ -32,12 +33,13 @@ interface TariffsSectionProps {
 }
 
 export function TariffsSection({ onSelectCurrent, onSelectList }: TariffsSectionProps) {
+  const { t } = useTranslation();
   const myTariffsCount = useWorkspaceStore((s) => s.workspaces.length);
 
   return (
     <div className="flex flex-col gap-2">
       <div className="text-xs font-semibold tracking-wide text-secondary">
-        TARIFLAR
+        {t("profile.tariffs.section")}
       </div>
 
       <CusCardbox
@@ -46,13 +48,13 @@ export function TariffsSection({ onSelectCurrent, onSelectList }: TariffsSection
       >
         <TariffMenuRow
           icon={<LuSlidersVertical size={18} />}
-          title="Mening tariflarim"
+          title={t("profile.tariffs.mine")}
           count={myTariffsCount}
           onClick={onSelectCurrent}
         />
         <TariffMenuRow
           icon={<LuChartBarIncreasing size={18} />}
-          title="Tariflar va narxlar"
+          title={t("profile.tariffs.list")}
           onClick={onSelectList}
         />
       </CusCardbox>

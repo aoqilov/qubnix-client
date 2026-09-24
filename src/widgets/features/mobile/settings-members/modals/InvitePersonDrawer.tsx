@@ -1,3 +1,5 @@
+import { organizationRoleLabel, projectRoleLabel } from "@/utils/roleLabels";
+import { useTranslation } from "react-i18next";
 import { forwardRef, useEffect, useState } from "react";
 import type React from "react";
 import {
@@ -73,10 +75,6 @@ const RoleTriggerButton = forwardRef<
   );
 });
 
-const PROJECT_ROLE_LABELS: Record<ProjectMemberRole, string> = {
-  project_manager: "Менежер",
-  project_member: "A'zo",
-};
 
 function ToggleButtonGroup<T extends string>({
   value,
@@ -175,6 +173,7 @@ function ProjectAssignmentRow({
   onChangeRole: (role: ProjectMemberRole) => void;
   onRemove: () => void;
 }) {
+  const { t } = useTranslation();
   const project = projectOptions.find((p) => p.id === assignment.projectId);
   const projectItems = projectOptions.map((p) => ({
     value: String(p.id),
@@ -194,7 +193,7 @@ function ProjectAssignmentRow({
         items={projectItems}
         width={180}
         trigger={
-          <ProjectTriggerButton label={project?.name ?? "Loyiha tanlang"} />
+          <ProjectTriggerButton label={project?.name ?? t("members.invite.chooseProject")} />
         }
       />
       {roleRequired && (
@@ -202,11 +201,11 @@ function ProjectAssignmentRow({
           value={assignment.role}
           onValueChange={(v) => onChangeRole(v as ProjectMemberRole)}
           items={[
-            { value: "project_manager", label: PROJECT_ROLE_LABELS.project_manager },
-            { value: "project_member", label: PROJECT_ROLE_LABELS.project_member },
+            { value: "project_manager", label: projectRoleLabel("project_manager") },
+            { value: "project_member", label: projectRoleLabel("project_member") },
           ]}
           width={140}
-          trigger={<RoleTriggerButton label={PROJECT_ROLE_LABELS[assignment.role]} />}
+          trigger={<RoleTriggerButton label={projectRoleLabel(assignment.role)} />}
         />
       )}
       <button
@@ -221,6 +220,7 @@ function ProjectAssignmentRow({
 }
 
 export function InvitePersonDrawer({ open, onClose }: InvitePersonDrawerProps) {
+  const { t } = useTranslation();
   const [contact, setContact] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
@@ -318,7 +318,7 @@ export function InvitePersonDrawer({ open, onClose }: InvitePersonDrawerProps) {
       placement="end"
       size="full"
       closeOnBackdrop={false}
-      title="Odam qo'shish"
+      title={t("members.invite.title")}
       footer={
         <div className="flex w-full gap-3">
           <CusButton
@@ -328,20 +328,20 @@ export function InvitePersonDrawer({ open, onClose }: InvitePersonDrawerProps) {
             className="flex-1"
             isDisabled={createInvitation.isPending}
           >
-            Bekor qilish
+            {t("common.actions.cancel")}
           </CusButton>
           <CusButton
             onClick={handleSubmit}
             isDisabled={!canSubmit}
             isLoading={createInvitation.isPending}
-            loadingText="Yuborilmoqda..."
+            loadingText={t("common.states.sending")}
             className="flex-1"
             style={{
               background: "var(--brand-default)",
               color: "var(--text-on-brand)",
             }}
           >
-            Taklif yuborish
+            {t("members.invite.send")}
           </CusButton>
         </div>
       }
@@ -349,9 +349,9 @@ export function InvitePersonDrawer({ open, onClose }: InvitePersonDrawerProps) {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <CusInput
-            label="Telefon yoki Telegram username"
+            label={t("members.invite.searchLabel")}
             isRequired
-            placeholder="+998 90 123 45 67 yoki @username"
+            placeholder={t("members.invite.searchPlaceholder")}
             leftElement={<LuSearch size={16} />}
             leftElementWidth="2.25rem"
             value={contact}
@@ -359,17 +359,17 @@ export function InvitePersonDrawer({ open, onClose }: InvitePersonDrawerProps) {
           />
 
           {debouncedQuery.length > 0 && debouncedQuery.length < 3 && (
-            <p className="text-xs text-secondary">Kamida 3 ta belgi kiriting</p>
+            <p className="text-xs text-secondary">{t("members.invite.minChars")}</p>
           )}
 
           {debouncedQuery.length >= 3 && searchQuery.isFetching && (
-            <p className="text-xs text-secondary">Qidirilmoqda...</p>
+            <p className="text-xs text-secondary">{t("members.invite.searching")}</p>
           )}
 
           {debouncedQuery.length >= 3 && !searchQuery.isFetching && searchQuery.isError && (
             <div className="flex items-center gap-2 rounded-input border border-subtle bg-surface p-2.5 text-xs text-error-strong">
               <LuTriangleAlert size={14} className="flex-none" />
-              Qidiruvda xatolik yuz berdi. Qayta urinib ko'ring.
+              {t("members.invite.searchError")}
             </div>
           )}
 
@@ -379,8 +379,7 @@ export function InvitePersonDrawer({ open, onClose }: InvitePersonDrawerProps) {
             employees.length === 0 && (
               <div className="flex items-center gap-2 rounded-input border border-subtle bg-surface p-2.5 text-xs text-error-strong">
                 <LuTriangleAlert size={14} className="flex-none" />
-                Foydalanuvchi topilmadi. U avval botga ro'yxatdan o'tgan
-                bo'lishi kerak.
+                {t("members.invite.notFound")}
               </div>
             )}
 
@@ -401,19 +400,19 @@ export function InvitePersonDrawer({ open, onClose }: InvitePersonDrawerProps) {
         {selectedEmployee && role && (
           <>
             <div>
-              <p className="mb-1.5 text-sm font-medium text-secondary">Rol</p>
+              <p className="mb-1.5 text-sm font-medium text-secondary">{t("members.invite.role")}</p>
               <ToggleButtonGroup
                 size="md"
                 value={role}
                 onChange={setRole}
-                options={availableRoles.map((r) => ({ value: r.code, label: r.name }))}
+                options={availableRoles.map((r) => ({ value: r.code, label: organizationRoleLabel(r.code) }))}
               />
             </div>
 
             {canAttachProjects && (
               <div>
                 <p className="mb-1.5 text-sm font-medium text-secondary">
-                  Loyihalarga biriktirish (ixtiyoriy)
+                  {t("members.invite.attachProjects")}
                 </p>
                 <div className="flex flex-col gap-2">
                   {projects.map((assignment, index) => (
@@ -444,7 +443,7 @@ export function InvitePersonDrawer({ open, onClose }: InvitePersonDrawerProps) {
                     }}
                     leftIcon={<LuPlus size={16} />}
                   >
-                    Loyiha qo'shish
+                    {t("members.invite.addProject")}
                   </CusButton>
                 )}
               </div>
@@ -452,7 +451,7 @@ export function InvitePersonDrawer({ open, onClose }: InvitePersonDrawerProps) {
 
             {createInvitation.isError && (
               <p className="text-xs text-error-strong">
-                Taklif yuborilmadi. Qayta urinib ko'ring.
+                {t("members.invite.sendError")}
               </p>
             )}
           </>

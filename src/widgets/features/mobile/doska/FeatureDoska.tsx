@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWorkspaceStore } from "@/store/workspace.store";
@@ -14,6 +15,7 @@ import { formatWeekdayDate } from "@/utils/formatWeekdayDate";
 import { orgsLabel } from "@/utils/countLabels";
 
 export default function FeatureDoska() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const selectWorkspace = useWorkspaceStore((s) => s.selectWorkspace);
   const [isAddOpen, setAddOpen] = useState(false);
@@ -36,7 +38,7 @@ export default function FeatureDoska() {
     <div className="flex flex-col gap-6 p-4">
       <header>
         <h1 className="text-3xl font-bold leading-tight text-primary">
-          Где будем работать?
+          {t("doska.title")}
         </h1>
         <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-brand">
           {formatWeekdayDate()}
@@ -44,7 +46,7 @@ export default function FeatureDoska() {
       </header>
 
       <section>
-        <DoskaSectionHeader index="01" label="Личное" />
+        <DoskaSectionHeader index="01" label={t("doska.sections.personal")} />
         {personalQuery.isPending ? (
           <CardSkeleton />
         ) : (
@@ -58,7 +60,7 @@ export default function FeatureDoska() {
       <section>
         <DoskaSectionHeader
           index="02"
-          label="Организации"
+          label={t("doska.sections.organizations")}
           meta={workspacesQuery.isPending ? undefined : orgsLabel(workspaces.length)}
         />
 
@@ -79,7 +81,7 @@ export default function FeatureDoska() {
             </>
           ) : workspacesQuery.isError ? (
             <p className="px-1 text-sm text-error-strong">
-              Не удалось загрузить список. Обновите страницу.
+              {t("doska.listError")}
             </p>
           ) : (
             workspaces.map((workspace) => (

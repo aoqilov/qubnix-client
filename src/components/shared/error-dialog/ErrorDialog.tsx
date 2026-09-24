@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuCircleAlert } from "react-icons/lu";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -10,7 +11,7 @@ interface ErrorDialogProps {
   description: string;
   /** Alohida qatorda, badge ichida ko'rsatiladigan qiymat (masalan telefon raqami). */
   badgeValue?: string;
-  /** Yopish tugmasi matni — default "Tushundim". */
+  /** Yopish tugmasi matni — default common.errorDialog.confirm. */
   confirmLabel?: string;
 }
 
@@ -20,8 +21,9 @@ function ErrorDialog({
   title,
   description,
   badgeValue,
-  confirmLabel = "Tushundim",
+  confirmLabel,
 }: ErrorDialogProps) {
+  const { t } = useTranslation();
   return (
     <CusDialog
       open={open}
@@ -34,7 +36,7 @@ function ErrorDialog({
           onClick={onClose}
           style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
         >
-          {confirmLabel}
+          {confirmLabel ?? t("common.errorDialog.confirm")}
         </CusButton>
       }
     >

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";
 import {
   LuCalendarPlus,
@@ -8,7 +9,7 @@ import {
 } from "react-icons/lu";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { avatarColorVar } from "@/utils/avatarColor";
-import { projectsLabel } from "@/utils/countLabels";
+import { projectsLabel, tasksLabel } from "@/utils/countLabels";
 import type { DayKind } from "@/utils/apiDate";
 import type { CalendarProjectSummary } from "../types";
 
@@ -18,22 +19,11 @@ interface CalendarProjectRowProps {
   onClick: () => void;
 }
 
-const EMPTY_BY_DAY: Record<DayKind, { icon: ReactNode; title: string; hint: string }> = {
-  past: {
-    icon: <LuHistory size={22} />,
-    title: "В этот день задач не было",
-    hint: "Выберите другой день в календаре",
-  },
-  today: {
-    icon: <LuCoffee size={22} />,
-    title: "На сегодня задач нет",
-    hint: "Свободный день — можно заняться планированием",
-  },
-  future: {
-    icon: <LuCalendarPlus size={22} />,
-    title: "Задачи ещё не запланированы",
-    hint: "Когда появятся задачи с этим сроком, они будут здесь",
-  },
+// Matnlar: calendar.empty.<past|today|future>.title/hint
+const EMPTY_ICON: Record<DayKind, ReactNode> = {
+  past: <LuHistory size={22} />,
+  today: <LuCoffee size={22} />,
+  future: <LuCalendarPlus size={22} />,
 };
 
 /** Bo'sh/xato holati uchun umumiy blok — ikonka doirada, sarlavha va izoh. */
@@ -71,19 +61,20 @@ function ProjectRowSkeleton() {
 }
 
 function ProjectStatus({ project, dayKind }: { project: CalendarProjectSummary; dayKind: DayKind }) {
+  const { t } = useTranslation();
   if (dayKind === "future") {
-    return <span className="text-sm font-semibold text-primary">{project.total} задач</span>;
+    return <span className="text-sm font-semibold text-primary">{tasksLabel(project.total)}</span>;
   }
   if (dayKind === "past") {
     const notDone = project.total - project.done;
     return notDone > 0 ? (
-      <span className="text-sm font-semibold text-error-strong">Просрочено {notDone}</span>
+      <span className="text-sm font-semibold text-error-strong">{t("calendar.projects.overdueCount", { count: notDone })}</span>
     ) : (
-      <span className="text-sm font-semibold text-success-strong">Выполнено</span>
+      <span className="text-sm font-semibold text-success-strong">{t("calendar.projects.completed")}</span>
     );
   }
   return project.isOverdue ? (
-    <span className="text-sm font-semibold text-error-strong">Просрочено</span>
+    <span className="text-sm font-semibold text-error-strong">{t("calendar.projects.overdue")}</span>
   ) : (
     <span className="text-sm font-semibold text-primary">
       {project.done}/{project.total}
@@ -145,11 +136,12 @@ export function CalendarProjectsCard({
   isLoading,
   isError,
 }: CalendarProjectsCardProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between px-1">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary">
-          Проекты
+          {t("calendar.projects.title")}
         </span>
         <span className="text-[11px] font-medium text-secondary">
           {projectsLabel(projects.length)}
@@ -165,11 +157,15 @@ export function CalendarProjectsCard({
         <StateBlock
           tone="error"
           icon={<LuTriangleAlert size={22} />}
-          title="Не удалось загрузить данные"
-          hint="Проверьте соединение и попробуйте ещё раз"
+          title={t("common.states.loadError")}
+          hint={t("common.states.loadErrorHint")}
         />
       ) : projects.length === 0 ? (
-        <StateBlock {...EMPTY_BY_DAY[dayKind]} />
+        <StateBlock
+          icon={EMPTY_ICON[dayKind]}
+          title={t(`calendar.empty.${dayKind}.title`)}
+          hint={t(`calendar.empty.${dayKind}.hint`)}
+        />
       ) : (
         <div className="flex flex-col gap-3">
           {projects.map((project) => (

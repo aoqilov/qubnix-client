@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuChevronRight } from "react-icons/lu";
 import { avatarColorVar } from "@/utils/avatarColor";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
@@ -15,6 +16,7 @@ interface MemberRowProps {
 }
 
 export function MemberRow({ member, onOpenActions }: MemberRowProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-3 rounded-card border border-subtle bg-surface p-3">
       <span
@@ -28,8 +30,8 @@ export function MemberRow({ member, onOpenActions }: MemberRowProps) {
           {member.first_name} {member.last_name}
         </span>
         <span className="block truncate text-xs text-secondary">
-          @{member.telegram_username} · {daysSince(member.created_at)} kundan
-          beri
+          @{member.telegram_username} ·{" "}
+          {t("members.since", { count: daysSince(member.created_at) })}
         </span>
         <span className="block truncate text-sm font-semibold text-secondary">
           {member.phone}

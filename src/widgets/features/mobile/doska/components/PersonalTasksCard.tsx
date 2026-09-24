@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuChevronRight, LuUser } from "react-icons/lu";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { tasksLabel } from "@/utils/countLabels";
@@ -8,6 +9,7 @@ interface PersonalTasksCardProps {
 }
 
 export function PersonalTasksCard({ tasksCount, onClick }: PersonalTasksCardProps) {
+  const { t } = useTranslation();
   return (
     <CusCardbox
       onClick={onClick}
@@ -21,8 +23,8 @@ export function PersonalTasksCard({ tasksCount, onClick }: PersonalTasksCardProp
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="block truncate font-semibold text-primary">Личные задачи</span>
-        <span className="block text-xs text-secondary">Сегодня {tasksLabel(tasksCount)}</span>
+        <span className="block truncate font-semibold text-primary">{t("doska.personal.title")}</span>
+        <span className="block text-xs text-secondary">{t("doska.personal.today", { label: tasksLabel(tasksCount) })}</span>
       </span>
 
       <span className="flex flex-none items-center gap-1">

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Drawer, CloseButton } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 import { LuArrowLeft } from "react-icons/lu";
@@ -46,6 +47,7 @@ export function CusDrawer({
   backButton = false,
   initialFocusEl,
 }: CusDrawerProps) {
+  const { t } = useTranslation();
   const isBottom = placement === "bottom";
   const isTop = placement === "top";
   const isHorizontal = isBottom || isTop;
@@ -159,7 +161,7 @@ export function CusDrawer({
           >
             <CloseButton
               size="sm"
-              aria-label={backButton ? "Orqaga" : "Yopish"}
+              aria-label={backButton ? t("ui.drawer.back") : t("ui.drawer.close")}
               color="var(--text-muted)"
               _hover={{ bg: "var(--bg-hover)", color: "var(--text-default)" }}
             >

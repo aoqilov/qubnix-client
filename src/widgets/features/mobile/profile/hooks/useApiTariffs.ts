@@ -11,9 +11,10 @@ export interface Tariff {
 // mock-data bilan yoziladi. Backend tayyor bo'lganda queryFn/mutationFn'ni
 // haqiqiy so'rovlarga almashtirish kifoya.
 const MOCK_TARIFFS: Tariff[] = [
-  { id: "basic", name: "Basic", price: 0, currency: "UZS" },
-  { id: "pro", name: "Pro", price: 149000, currency: "UZS" },
-  { id: "business", name: "Business", price: 349000, currency: "UZS" },
+  // Tarif nomlari — brend, tarjima qilinmaydi.
+  { id: "basic", name: "Basic", price: 0, currency: "UZS" }, // i18n-ignore
+  { id: "pro", name: "Pro", price: 149000, currency: "UZS" }, // i18n-ignore
+  { id: "business", name: "Business", price: 349000, currency: "UZS" }, // i18n-ignore
 ];
 
 export const TARIFFS_KEYS = {

@@ -8,6 +8,7 @@ const ui: typeof ru = {
     range: "Oraliq kunlarni belgilash",
     rangeFrom: "Dan",
     rangeTo: "Gacha",
+    pickDate: "Sanani tanlang",
   },
   timepicker: {
     placeholder: "SS:DD",
@@ -18,6 +19,7 @@ const ui: typeof ru = {
     minutes: "Daqiqa",
     seconds: "Soniya",
     ok: "OK",
+    pickTime: "Vaqtni tanlang",
   },
   fileUpload: {
     dropHere: "Faylni shu yerga tashlang",
@@ -36,6 +38,13 @@ const ui: typeof ru = {
   },
   table: {
     empty: "Ma'lumot topilmadi",
+  },
+  select: {
+    placeholder: "Tanlang",
+  },
+  drawer: {
+    back: "Orqaga",
+    close: "Yopish",
   },
   toaster: {
     printing: "Chek chop etilmoqda...",

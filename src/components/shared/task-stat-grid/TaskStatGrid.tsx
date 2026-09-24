@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 interface StatCellProps {
   value: number;
   label: string;
@@ -22,7 +24,7 @@ interface TaskStatGridProps {
   completed: number;
   inProgress: number;
   overdue: number;
-  /** 2-katak yorlig'i — default "Сделано". /statistics'da u yerda `todo` ("Назначено") turadi. */
+  /** 2-katak yorlig'i — default tasks.stats.completed. /statistics'da u yerda `todo` turadi. */
   completedLabel?: string;
 }
 
@@ -31,14 +33,15 @@ function TaskStatGrid({
   completed,
   inProgress,
   overdue,
-  completedLabel = "Сделано",
+  completedLabel,
 }: TaskStatGridProps) {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-4 divide-x divide-subtle">
-      <StatCell value={done} label="Сдано" color="var(--brand-default)" />
-      <StatCell value={completed} label={completedLabel} color="var(--status-success-text)" />
-      <StatCell value={inProgress} label="В процессе" color="var(--status-progress-text)" />
-      <StatCell value={overdue} label="Просрочено" color="var(--status-error-text)" />
+      <StatCell value={done} label={t("tasks.stats.done")} color="var(--brand-default)" />
+      <StatCell value={completed} label={completedLabel ?? t("tasks.stats.completed")} color="var(--status-success-text)" />
+      <StatCell value={inProgress} label={t("tasks.stats.inProgress")} color="var(--status-progress-text)" />
+      <StatCell value={overdue} label={t("tasks.stats.overdue")} color="var(--status-error-text)" />
     </div>
   );
 }

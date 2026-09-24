@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import type React from "react";
 import { useNavigate } from "react-router-dom";
@@ -36,6 +37,7 @@ function initialsOf(name: string): string {
 }
 
 export default function FeatureCalendar() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
   const [selectedDate, setSelectedDate] = useState(() => new Date());
@@ -85,7 +87,7 @@ export default function FeatureCalendar() {
       {/* title */}
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h1 className="font-condensed text-3xl font-semibold leading-none text-primary">Календарь</h1>
+          <h1 className="font-condensed text-3xl font-semibold leading-none text-primary">{t("calendar.title")}</h1>
           <p className="mt-1.5 text-xs font-semibold tracking-widest text-brand">{formatMonthLabel(weekStart)}</p>
         </div>
         <button
@@ -119,7 +121,7 @@ export default function FeatureCalendar() {
         isError={dayQuery.isError}
       />
 
-      <CusDialog open={isCalendarOpen} onClose={() => setCalendarOpen(false)} title="Выберите дату" centered size="sm">
+      <CusDialog open={isCalendarOpen} onClose={() => setCalendarOpen(false)} title={t("calendar.pickDate")} centered size="sm">
         <CusCalendar
           inline
           value={[parseDate(toDateKey(selectedDate))]}

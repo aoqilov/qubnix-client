@@ -1,7 +1,8 @@
+import { getApiErrorMessage } from "@/utils/apiErrorMessage";
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import type React from "react";
 import { Drawer } from "@chakra-ui/react";
-import axios from "axios";
 import type { DateValue } from "@ark-ui/react/date-picker";
 import { IoFlagSharp } from "react-icons/io5";
 import { LuCalendar, LuPlus, LuX } from "react-icons/lu";
@@ -29,7 +30,7 @@ import {
   useUpdateRoutine,
   useUploadRoutineFile,
 } from "../hooks/useApiRepeatingTasks";
-import { MONTH_DAYS, WEEKDAY_OPTIONS } from "../lib/routineSchedule";
+import { MONTH_DAYS, WEEKDAY_VALUES, weekdayShortLabel } from "../lib/routineSchedule";
 
 function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -55,25 +56,12 @@ function toApiDate(v: DateValue): string {
   return `${v.year}-${String(v.month).padStart(2, "0")}-${String(v.day).padStart(2, "0")}`;
 }
 
-function getErrorMessage(err: unknown): string {
-  if (axios.isAxiosError(err)) {
-    const message = err.response?.data?.message;
-    if (typeof message === "string" && message) return message;
-  }
-  return "Amalni bajarib bo'lmadi. Qaytadan urinib ko'ring.";
-}
+const FREQUENCY_VALUES: RoutineFrequency[] = ["daily", "weekly", "monthly", "yearly"];
 
-const FREQUENCY_OPTIONS: { value: RoutineFrequency; label: string }[] = [
-  { value: "daily", label: "Kunlik" },
-  { value: "weekly", label: "Haftalik" },
-  { value: "monthly", label: "Oylik" },
-  { value: "yearly", label: "Yillik" },
-];
-
-const PRIORITY_OPTIONS: { value: TaskPriority; label: string; activeColor: string }[] = [
-  { value: "high", label: "Высокий", activeColor: "var(--status-error-solid)" },
-  { value: "medium", label: "Средний", activeColor: "var(--accent-orange)" },
-  { value: "low", label: "Низкий", activeColor: "var(--text-secondary)" },
+const PRIORITY_OPTIONS: { value: TaskPriority; activeColor: string }[] = [
+  { value: "high", activeColor: "var(--status-error-solid)" },
+  { value: "medium", activeColor: "var(--accent-orange)" },
+  { value: "low", activeColor: "var(--text-secondary)" },
 ];
 
 function Pill({
@@ -141,6 +129,7 @@ export function RoutineFormDrawer({
   initial,
   onError,
 }: RoutineFormDrawerProps) {
+  const { t } = useTranslation();
   const isEditing = !!initial;
 
   const [step, setStep] = useState<1 | 2>(1);
@@ -336,7 +325,7 @@ export function RoutineFormDrawer({
       }
       onClose();
     } catch (err) {
-      onError(getErrorMessage(err));
+      onError(getApiErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -354,13 +343,13 @@ export function RoutineFormDrawer({
       closeOnBackdrop={false}
       closeOnEscape={false}
       initialFocusEl={() => nameInputRef.current}
-      title={isEditing ? "Vazifani tahrirlash" : "Yangi doimiy vazifa"}
+      title={isEditing ? t("routines.form.titleEdit") : t("routines.form.titleAdd")}
       footer={
         step === 1 ? (
           <>
             <Drawer.ActionTrigger asChild>
               <CusButton variant="outline" className="flex-1" isDisabled={isSubmitting}>
-                Bekor qilish
+                {t("common.actions.cancel")}
               </CusButton>
             </Drawer.ActionTrigger>
             <CusButton
@@ -369,7 +358,7 @@ export function RoutineFormDrawer({
               onClick={() => setStep(2)}
               style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
             >
-              Далее
+              {t("common.actions.next")}
             </CusButton>
           </>
         ) : (
@@ -380,17 +369,17 @@ export function RoutineFormDrawer({
               isDisabled={isSubmitting}
               onClick={() => setStep(1)}
             >
-              Orqaga
+              {t("common.actions.back")}
             </CusButton>
             <CusButton
               className="flex-1"
               isDisabled={!canSubmit}
               isLoading={isSubmitting}
-              loadingText="Yuborilmoqda..."
+              loadingText={t("common.states.sending")}
               onClick={handleSubmit}
               style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
             >
-              Saqlash
+              {t("common.actions.save")}
             </CusButton>
           </>
         )
@@ -401,10 +390,10 @@ export function RoutineFormDrawer({
       {step === 1 ? (
         <div className="flex flex-col gap-4">
           <CusSelect
-            label="Loyiha"
+            label={t("routines.form.project")}
             required
             disabled={isEditing}
-            placeholder="Loyihani tanlang"
+            placeholder={t("routines.form.projectPlaceholder")}
             options={projects.map((p) => ({ label: p.name, value: p.id }))}
             value={projectId}
             onChange={setProjectId}
@@ -412,16 +401,16 @@ export function RoutineFormDrawer({
 
           <CusInput
             ref={nameInputRef}
-            label="Vazifa nomi"
+            label={t("routines.form.name")}
             isRequired
-            placeholder="Masalan: Oylik hisobot"
+            placeholder={t("routines.form.namePlaceholder")}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
 
           <CusTextArea
-            label="Tavsif"
-            placeholder="Ixtiyoriy"
+            label={t("routines.form.description")}
+            placeholder={t("routines.form.descriptionPlaceholder")}
             autoresize
             maxH="8lh"
             value={description}
@@ -430,15 +419,15 @@ export function RoutineFormDrawer({
 
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              Takrorlanish
+              {t("routines.form.frequency")}
             </span>
             <div className="flex flex-wrap gap-2">
-              {FREQUENCY_OPTIONS.map((opt) => (
+              {FREQUENCY_VALUES.map((value) => (
                 <Pill
-                  key={opt.value}
-                  label={opt.label}
-                  active={frequency === opt.value}
-                  onClick={() => setFrequency(opt.value)}
+                  key={value}
+                  label={t(`routines.form.${value}`)}
+                  active={frequency === value}
+                  onClick={() => setFrequency(value)}
                 />
               ))}
             </div>
@@ -447,16 +436,16 @@ export function RoutineFormDrawer({
           {frequency === "weekly" && (
             <div className="flex flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-                Hafta kunlari *
+                {t("routines.form.weekdays")} *{" "}
               </span>
               <div className="grid grid-cols-4 gap-2">
-                {WEEKDAY_OPTIONS.map((opt) => (
+                {WEEKDAY_VALUES.map((day) => (
                   <Pill
-                    key={opt.value}
-                    label={opt.label}
+                    key={day}
+                    label={weekdayShortLabel(day)}
                     className="w-full"
-                    active={weekdays.includes(opt.value)}
-                    onClick={() => toggleWeekday(opt.value)}
+                    active={weekdays.includes(day)}
+                    onClick={() => toggleWeekday(day)}
                   />
                 ))}
               </div>
@@ -466,7 +455,7 @@ export function RoutineFormDrawer({
           {frequency === "monthly" && (
             <div className="flex flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-                Oyning kuni *
+                {t("routines.form.monthDay")} *{" "}
               </span>
               <div
                 onClick={() => setIsMonthDayPickerOpen(true)}
@@ -478,10 +467,10 @@ export function RoutineFormDrawer({
                   style={{ color: monthDays.length ? "var(--text-primary)" : "var(--text-dim)" }}
                 >
                   {monthDays.length === 0
-                    ? "Kunlarni tanlang"
+                    ? t("routines.form.pickDays")
                     : monthDays.length <= 3
-                      ? monthDays.map((d) => `${d}-sana`).join(", ")
-                      : `${monthDays.length} ta kun tanlandi`}
+                      ? monthDays.map((d) => t("routines.form.monthDayLabel", { day: d })).join(", ")
+                      : t("routines.form.daysSelected", { count: monthDays.length })}
                 </span>
                 <LuCalendar size={15} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
               </div>
@@ -489,7 +478,7 @@ export function RoutineFormDrawer({
               <CusDialog
                 open={isMonthDayPickerOpen}
                 onClose={() => setIsMonthDayPickerOpen(false)}
-                title="Oyning kunlarini tanlang"
+                title={t("routines.form.pickMonthDaysTitle")}
                 centered
                 size="xs"
                 footer={
@@ -499,7 +488,7 @@ export function RoutineFormDrawer({
                     onClick={() => setIsMonthDayPickerOpen(false)}
                     style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
                   >
-                    Tasdiqlash
+                    {t("common.actions.confirm")}
                   </CusButton>
                 }
               >
@@ -533,7 +522,8 @@ export function RoutineFormDrawer({
           {frequency === "yearly" && (
             <div className="flex flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-                Yil kuni{isEditing ? "" : " (bir nechtasini tanlash mumkin)"} *
+                {t("routines.form.yearDay")}
+                {isEditing ? "" : ` ${t("routines.form.yearDayMultiHint")}`} *
               </span>
               <div
                 onClick={() => setIsYearlyPickerOpen(true)}
@@ -545,10 +535,10 @@ export function RoutineFormDrawer({
                   style={{ color: yearlyDates.length ? "var(--text-primary)" : "var(--text-dim)" }}
                 >
                   {yearlyDates.length === 0
-                    ? "Sanalarni tanlang"
+                    ? t("routines.form.pickDates")
                     : yearlyDates.length <= 2
                       ? yearlyDates.map(formatDay).join(", ")
-                      : `${yearlyDates.length} ta sana tanlandi`}
+                      : t("routines.form.datesSelected", { count: yearlyDates.length })}
                 </span>
                 <LuCalendar size={15} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
               </div>
@@ -556,7 +546,7 @@ export function RoutineFormDrawer({
               <CusDialog
                 open={isYearlyPickerOpen}
                 onClose={() => setIsYearlyPickerOpen(false)}
-                title={isEditing ? "Sanani tanlang" : "Yil kunlarini tanlang"}
+                title={isEditing ? t("routines.form.pickDateTitle") : t("routines.form.pickYearDaysTitle")}
                 centered
                 size="xs"
                 footer={
@@ -566,7 +556,7 @@ export function RoutineFormDrawer({
                     onClick={() => setIsYearlyPickerOpen(false)}
                     style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
                   >
-                    Tasdiqlash
+                    {t("common.actions.confirm")}
                   </CusButton>
                 }
               >
@@ -581,27 +571,27 @@ export function RoutineFormDrawer({
           )}
 
           <CusTimepicker
-            label="Boshlanish soati"
-            placeholder="ЧЧ:ММ"
+            label={t("routines.form.startTime")}
+            placeholder={t("ui.timepicker.placeholder")}
             value={time}
             onChange={setTime}
             variant="modal"
-            modalTitle="Vaqtni tanlang"
+            modalTitle={t("routines.form.pickTimeTitle")}
           />
 
           <div className="flex flex-col gap-1">
             <CusTimepicker
-              label="Tugash soati *"
-              placeholder="ЧЧ:ММ"
+              label={`${t("routines.form.endTime")} *`}
+              placeholder={t("ui.timepicker.placeholder")}
               value={endTime}
               onChange={setEndTime}
               minTime={time}
               variant="modal"
-              modalTitle="Tugash vaqtini tanlang"
+              modalTitle={t("routines.form.pickEndTimeTitle")}
             />
             {!isEndTimeValid && (
               <span className="text-xs text-error-strong">
-                Tugash soati boshlanish soatidan keyin bo'lishi kerak
+                {t("routines.form.endTimeError")}
               </span>
             )}
           </div>
@@ -609,7 +599,7 @@ export function RoutineFormDrawer({
           {!isPersonal && (
             <div className="flex flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-                Сотрудники
+                {t("tasks.modal.members")}
               </span>
               <AssigneeChecklist
                 members={members}
@@ -622,13 +612,13 @@ export function RoutineFormDrawer({
 
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              Приоритет
+              {t("tasks.modal.priority")}
             </span>
             <div className="flex gap-2">
               {PRIORITY_OPTIONS.map((p) => (
                 <Pill
                   key={p.value}
-                  label={p.label}
+                  label={t(`common.priority.${p.value}`)}
                   icon={<IoFlagSharp size={14} />}
                   active={priority === p.value}
                   activeColor={p.activeColor}
@@ -643,12 +633,12 @@ export function RoutineFormDrawer({
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              Дополнительные задачи - sub-task
+              {t("tasks.modal.subtasks")}
             </span>
             <div className="flex gap-2">
               <CusInput
                 ref={subtaskInputRef}
-                placeholder="Новый Sub-Task"
+                placeholder={t("tasks.modal.subtaskPlaceholder")}
                 value={subtaskInput}
                 onChange={(e) => setSubtaskInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -676,7 +666,7 @@ export function RoutineFormDrawer({
                     <span className="min-w-0 flex-1 truncate text-sm text-primary">{s.label}</span>
                     <button
                       type="button"
-                      aria-label="O'chirish"
+                      aria-label={t("common.actions.delete")}
                       onClick={() => removeSubtask(s.id)}
                       className="flex-none text-secondary"
                     >
@@ -692,11 +682,11 @@ export function RoutineFormDrawer({
             <CusFileUpload
               variant="button"
               maxFiles={5}
-              buttonText="Прикрепить файл"
+              buttonText={t("common.actions.attachFile")}
               onFileChange={setFiles}
             />
             {files.length > 0 && (
-              <span className="text-xs text-secondary">{files.length} ta fayl biriktirildi</span>
+              <span className="text-xs text-secondary">{t("routines.form.filesAttached", { count: files.length })}</span>
             )}
           </div>
         </div>

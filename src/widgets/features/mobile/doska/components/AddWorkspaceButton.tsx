@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuPlus } from "react-icons/lu";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 
@@ -6,6 +7,7 @@ interface AddWorkspaceButtonProps {
 }
 
 export function AddWorkspaceButton({ onClick }: AddWorkspaceButtonProps) {
+  const { t } = useTranslation();
   return (
     <CusButton
       variant="plain"
@@ -23,7 +25,7 @@ export function AddWorkspaceButton({ onClick }: AddWorkspaceButtonProps) {
       }}
       leftIcon={<LuPlus size={16} />}
     >
-      Новая организация
+      {t("doska.addOrganization")}
     </CusButton>
   );
 }

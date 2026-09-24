@@ -1,3 +1,5 @@
+import { membersLabel } from "@/utils/countLabels";
+import { useTranslation } from "react-i18next";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import type { SettingsWorkspace } from "../hooks/useApiSettings";
 
@@ -13,6 +15,7 @@ export function SettingsWorkspaceCard({
   membersCount,
   isPersonal,
 }: SettingsWorkspaceCardProps) {
+  const { t } = useTranslation();
   return (
     <CusCardbox
       className="flex items-center gap-3 rounded-card"
@@ -24,7 +27,7 @@ export function SettingsWorkspaceCard({
       <span className="min-w-0 flex-1">
         <span className="block text-base font-semibold text-primary">{workspace.name}</span>
         <span className="block text-sm text-secondary">
-          {isPersonal ? "Личное пространство" : `${membersCount ?? 0} сотрудников`}
+          {isPersonal ? t("settings.personalSpace") : membersLabel(membersCount ?? 0)}
         </span>
       </span>
     </CusCardbox>

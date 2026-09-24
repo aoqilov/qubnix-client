@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import type React from "react";
 import { LuArrowLeft, LuExternalLink, LuPhone, LuSend } from "react-icons/lu";
@@ -27,6 +28,7 @@ const OTP_LENGTH = 6;
 type Step = "phone" | "code";
 
 export function LoginPhoneForm() {
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>("phone");
   const [phoneDigits, setPhoneDigits] = useState("");
   const [code, setCode] = useState("");
@@ -43,7 +45,7 @@ export function LoginPhoneForm() {
 
   const requestCode = () => {
     if (!isValidUzPhone(phoneDigits)) {
-      setPhoneError("Telefon raqamini to'liq kiriting");
+      setPhoneError(t("auth.phone.incomplete"));
       return;
     }
     setPhoneError(null);
@@ -61,7 +63,7 @@ export function LoginPhoneForm() {
             setUserNotFoundOpen(true);
             return;
           }
-          setPhoneError(authErrorMessage(error, "Kod yuborilmadi, qayta urining"));
+          setPhoneError(authErrorMessage(error, t("auth.phone.sendFailed")));
         },
       },
     );
@@ -69,7 +71,7 @@ export function LoginPhoneForm() {
 
   const submitCode = (value: string = code) => {
     if (value.length !== OTP_LENGTH) {
-      setCodeError("Kod 6 xonali bo'lishi kerak");
+      setCodeError(t("auth.code.mustBeSix"));
       return;
     }
     setCodeError(null);
@@ -81,7 +83,7 @@ export function LoginPhoneForm() {
           redirectAfterLogin();
         },
         onError: (error) => {
-          setCodeError(authErrorMessage(error, "Tasdiqlash kodi noto'g'ri"));
+          setCodeError(authErrorMessage(error, t("auth.code.invalid")));
           setCode("");
         },
       },
@@ -105,9 +107,9 @@ export function LoginPhoneForm() {
     <ErrorDialog
       open={userNotFoundOpen}
       onClose={() => setUserNotFoundOpen(false)}
-      title="Foydalanuvchi topilmadi"
+      title={t("auth.userNotFound.title")}
       badgeValue={`${UZ_DIAL_CODE} ${formatUzPhone(phoneDigits)}`}
-      description="Bu raqam bilan hech kim ro'yxatdan o'tmagan. Avval Telegram bot orqali ro'yxatdan o'ting."
+      description={t("auth.userNotFound.text")}
     />
   );
 
@@ -117,7 +119,7 @@ export function LoginPhoneForm() {
       <>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <CusInput
-            label="Telefon raqami"
+            label={t("auth.phone.label")}
             isRequired
             inputMode="tel"
             autoFocus
@@ -131,7 +133,7 @@ export function LoginPhoneForm() {
               setPhoneError(null);
             }}
             errorText={phoneError ?? undefined}
-            helperText="Tasdiqlash kodi shu raqamga bog'langan Telegram akkauntingizga yuboriladi"
+            helperText={t("auth.phone.helper")}
             leftElementWidth="5rem"
             leftElement={
               <span className="flex items-center gap-1.5 whitespace-nowrap text-base text-secondary">
@@ -144,13 +146,13 @@ export function LoginPhoneForm() {
           <CusButton
             size="xl"
             isLoading={sendCode.isPending}
-            loadingText="Yuborilmoqda..."
+            loadingText={t("common.states.sending")}
             isDisabled={!isValidUzPhone(phoneDigits)}
             rightIcon={<LuSend size={18} />}
             onClick={requestCode}
             style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
           >
-            Jo'natish
+            {t("auth.phone.send")}
           </CusButton>
         </form>
         {errorDialog}
@@ -164,7 +166,7 @@ export function LoginPhoneForm() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <div className="flex flex-col gap-3 rounded-card bg-brand-subtle p-4">
           <p className="text-base leading-relaxed text-primary">
-            Tasdiqlash kodini Telegram ilovangizdagi{" "}
+            {t("auth.code.sentBefore")}{" "}
             <a
               href={BOT_URL}
               target="_blank"
@@ -173,7 +175,7 @@ export function LoginPhoneForm() {
             >
               @{BOT_USERNAME}
             </a>{" "}
-            ga jo'natdik — kodni o'sha yerdan olishingiz mumkin.
+            {t("auth.code.sentAfter")}
           </p>
 
           <CusButton
@@ -184,14 +186,14 @@ export function LoginPhoneForm() {
             rightIcon={<LuExternalLink size={14} />}
             onClick={() => openBot()}
           >
-            Botni ochish
+            {t("auth.code.openBot")}
           </CusButton>
         </div>
 
         <div className="flex flex-col gap-3">
           <div className="flex items-baseline justify-between">
             <span className="text-base font-medium text-secondary">
-              Tasdiqlash kodi
+              {t("auth.code.label")}
             </span>
             <span className="text-base text-secondary">
               {UZ_DIAL_CODE} {formatUzPhone(phoneDigits)}
@@ -216,8 +218,8 @@ export function LoginPhoneForm() {
           ) : (
             <span className="text-sm text-secondary">
               {timer.isRunning
-                ? `Kod amal qilish muddati: ${timer.formatted}`
-                : "Kod muddati tugadi — yangisini so'rang"}
+                ? t("auth.code.validFor", { time: timer.formatted })
+                : t("auth.code.expired")}
             </span>
           )}
         </div>
@@ -226,13 +228,13 @@ export function LoginPhoneForm() {
           <CusButton
             size="xl"
             isLoading={verifyCode.isPending}
-            loadingText="Tekshirilmoqda..."
+            loadingText={t("auth.code.checking")}
             isDisabled={code.length !== OTP_LENGTH}
             rightIcon={<LuSend size={18} />}
             onClick={() => submitCode()}
             style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
           >
-            Jo'natish
+            {t("auth.phone.send")}
           </CusButton>
         ) : (
           <CusButton
@@ -240,10 +242,10 @@ export function LoginPhoneForm() {
             size="xl"
             variant="outline"
             isLoading={sendCode.isPending}
-            loadingText="Yuborilmoqda..."
+            loadingText={t("common.states.sending")}
             onClick={requestCode}
           >
-            Kodni qayta jo'natish
+            {t("auth.code.resend")}
           </CusButton>
         )}
 
@@ -253,7 +255,7 @@ export function LoginPhoneForm() {
           className="mx-auto flex items-center gap-1.5 text-base text-secondary transition hover:text-brand"
         >
           <LuArrowLeft size={16} />
-          Raqamni o'zgartirish
+          {t("auth.code.changePhone")}
         </button>
       </form>
       {errorDialog}

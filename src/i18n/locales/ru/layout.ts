@@ -3,7 +3,7 @@ const layout = {
   nav: {
     doska: "Доска",
     profile: "Профиль",
-    today: "СЕГОДНЯ",
+    tasks: "ЗАДАЧИ",
     calendar: "КАЛЕНДАРЬ",
     statistics: "СТАТИСТИКА",
     settings: "НАСТРОЙКИ",

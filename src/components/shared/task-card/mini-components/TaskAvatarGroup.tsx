@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { LuCheck, LuCheckCheck } from "react-icons/lu";
 import { avatarColorVar } from "@/utils/avatarColor";
@@ -49,6 +50,7 @@ function MemberAvatar({ member, size }: { member: TaskCardMember; size: number }
 }
 
 function TaskAvatarGroup({ members, overflowCount, max = 3 }: TaskAvatarGroupProps) {
+  const { t } = useTranslation();
   const visible = members.slice(0, max);
 
   return (
@@ -79,7 +81,7 @@ function TaskAvatarGroup({ members, overflowCount, max = 3 }: TaskAvatarGroupPro
               className="whitespace-nowrap font-medium text-secondary"
               style={{ fontSize: "var(--text-caption, 12px)" }}
             >
-              еще {overflowCount}
+              {t("tasks.avatars.more", { count: overflowCount })}
             </span>
           )}
         </button>
@@ -95,7 +97,7 @@ function TaskAvatarGroup({ members, overflowCount, max = 3 }: TaskAvatarGroupPro
             fontWeight: 600,
           }}
         >
-          Biriktirilgan xodimlar
+          {t("tasks.avatars.assigned")}
         </span>
 
         <div className="flex flex-col gap-2.5">
@@ -137,13 +139,13 @@ function TaskAvatarGroup({ members, overflowCount, max = 3 }: TaskAvatarGroupPro
             className="flex items-center gap-1.5"
             style={{ fontSize: "var(--text-caption, 12px)", color: "var(--text-secondary)" }}
           >
-            <LuCheck size={12} /> — vazifa yaratildi
+            <LuCheck size={12} /> {t("tasks.avatars.legendSent")}
           </span>
           <span
             className="flex items-center gap-1.5"
             style={{ fontSize: "var(--text-caption, 12px)", color: "var(--text-secondary)" }}
           >
-            <LuCheckCheck size={12} color="var(--status-success-solid)" /> — xodim ko'rdi
+            <LuCheckCheck size={12} color="var(--status-success-solid)" /> {t("tasks.avatars.legendSeen")}
           </span>
         </div>
       </div>

@@ -1,9 +1,7 @@
+import { useTranslation } from "react-i18next";
 import type { StatsPeriod } from "../types";
 
-const ITEMS: { id: StatsPeriod; label: string }[] = [
-  { id: "week", label: "Неделя" },
-  { id: "month", label: "Месяц" },
-];
+const ITEMS: StatsPeriod[] = ["week", "month"];
 
 interface StatsPeriodTabsProps {
   value: StatsPeriod;
@@ -11,9 +9,11 @@ interface StatsPeriodTabsProps {
 }
 
 export function StatsPeriodTabs({ value, onChange }: StatsPeriodTabsProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-4">
-      {ITEMS.map((item) => {
+      {ITEMS.map((id) => {
+        const item = { id, label: t(`statistics.period.${id}`) };
         const isActive = item.id === value;
         return (
           <button

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import type { ProjectStat } from "../types";
 
@@ -24,12 +25,13 @@ interface ProjectsBreakdownCardProps {
 }
 
 export function ProjectsBreakdownCard({ projects }: ProjectsBreakdownCardProps) {
+  const { t } = useTranslation();
   return (
     <CusCardbox
       style={{ borderColor: "var(--border-subtle)" }}
       className="flex flex-col gap-4 rounded-card bg-surface"
     >
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary">По проектам</span>
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-secondary">{t("statistics.projects.title")}</span>
       <div className="flex flex-col gap-4">
         {projects.map((project) => (
           <ProjectRow key={project.id} project={project} />

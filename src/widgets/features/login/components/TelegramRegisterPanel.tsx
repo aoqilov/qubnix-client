@@ -1,32 +1,30 @@
+import { useTranslation } from "react-i18next";
 import { LuExternalLink, LuSend } from "react-icons/lu";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { BOT_URL, BOT_USERNAME, openBot } from "../lib/bot";
 
-const STEPS = [
-  "Quyidagi tugma orqali botni oching",
-  "Botda «Start» bosing va telefon raqamingizni ulashing",
-  "Ro'yxatdan o'tgach, shu yerga qaytib «Login» orqali kiring",
-];
+const STEP_KEYS = ["auth.register.step1", "auth.register.step2", "auth.register.step3"] as const;
 
 export function TelegramRegisterPanel() {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-6">
       <p className="text-base leading-relaxed text-secondary">
-        Tugmani bossangiz{" "}
+        {t("auth.register.introBefore")}{" "}
         <span className="font-semibold text-brand">@{BOT_USERNAME}</span>{" "}
-        yangi oynada ochiladi.
+        {t("auth.register.introAfter")}
       </p>
 
       <ol className="flex flex-col gap-3">
-        {STEPS.map((text, index) => (
+        {STEP_KEYS.map((key, index) => (
           <li
-            key={text}
+            key={key}
             className="flex items-start gap-3 text-base leading-relaxed text-secondary"
           >
             <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-semibold text-on-brand">
               {index + 1}
             </span>
-            {text}
+            {t(key)}
           </li>
         ))}
       </ol>
@@ -38,7 +36,7 @@ export function TelegramRegisterPanel() {
         onClick={() => openBot("register")}
         style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
       >
-        Telegram bot orqali ro'yxatdan o'tish
+        {t("auth.register.button")}
       </CusButton>
 
       <a

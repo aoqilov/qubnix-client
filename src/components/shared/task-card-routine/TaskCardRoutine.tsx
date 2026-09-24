@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   LuChevronDown,
@@ -90,6 +91,7 @@ function TaskCardRoutine({
   onEdit,
   onDelete,
 }: TaskCardRoutineProps) {
+  const { t } = useTranslation();
   const subtaskCount = subtasks?.length ?? 0;
   const attachmentCount = (photos?.length ?? 0) + (files?.length ?? 0);
 
@@ -203,7 +205,7 @@ function TaskCardRoutine({
               {subtasks && subtasks.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <SectionLabel>Подзадачи</SectionLabel>
+                    <SectionLabel>{t("tasks.card.subtasks")}</SectionLabel>
                     <span style={CAPTION_STYLE}>{subtasks.length}</span>
                   </div>
                   <div className="flex flex-col gap-2">
@@ -216,14 +218,14 @@ function TaskCardRoutine({
 
               {photos && photos.length > 0 && (
                 <div className="flex flex-col gap-2">
-                  <SectionLabel>Фото</SectionLabel>
+                  <SectionLabel>{t("tasks.card.photos")}</SectionLabel>
                   <TaskPhotoGrid photos={photos} />
                 </div>
               )}
 
               {files && files.length > 0 && (
                 <div className="flex flex-col gap-2">
-                  <SectionLabel>Файлы</SectionLabel>
+                  <SectionLabel>{t("tasks.card.files")}</SectionLabel>
                   <div className="flex flex-col gap-2">
                     {files.map((file) => (
                       <TaskFileItem key={file.id} file={file} onDownload={onDownloadFile} />
@@ -247,7 +249,7 @@ function TaskCardRoutine({
           leftIcon={<LuTrash2 size={14} />}
           onClick={onDelete}
         >
-          Удалить
+          {t("common.actions.delete")}
         </CusButton>
         <CusButton
           size="sm"
@@ -257,7 +259,7 @@ function TaskCardRoutine({
           onClick={onEdit}
           style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
         >
-          Изменить
+          {t("common.actions.edit")}
         </CusButton>
       </div>
     </CusCardbox>

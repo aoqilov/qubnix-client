@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuPencil } from "react-icons/lu";
 import { useSessionStore } from "@/store/session.store";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
@@ -16,6 +17,7 @@ interface ProfileUserCardProps {
 }
 
 export function ProfileUserCard({ onEdit }: ProfileUserCardProps) {
+  const { t } = useTranslation();
   const user = useSessionStore((s) => s.user);
 
   if (!user) return null;
@@ -44,7 +46,7 @@ export function ProfileUserCard({ onEdit }: ProfileUserCardProps) {
       </div>
       <button
         onClick={onEdit}
-        aria-label="Profilni tahrirlash"
+        aria-label={t("profile.editProfile")}
         className="flex-none rounded-lg p-2 transition hover:bg-surface-secondary"
       >
         <LuPencil size={16} className="text-secondary" />

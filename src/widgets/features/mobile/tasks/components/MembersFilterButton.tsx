@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuUsers } from "react-icons/lu";
 
 interface MembersFilterButtonProps {
@@ -7,6 +8,7 @@ interface MembersFilterButtonProps {
 
 /** FilterSectionTask trigger'i bilan bir xil ko'rinishda — xodimlar drawer'ini ochadi. */
 function MembersFilterButton({ selectedCount, onClick }: MembersFilterButtonProps) {
+  const { t } = useTranslation();
   const isActive = selectedCount > 0;
   return (
     <button
@@ -21,7 +23,9 @@ function MembersFilterButton({ selectedCount, onClick }: MembersFilterButtonProp
       }}
     >
       <LuUsers size={16} />
-      {isActive ? `Xodimlar · ${selectedCount}` : "Xodimlar"}
+      {isActive
+        ? t("tasks.membersFilter.buttonWithCount", { count: selectedCount })
+        : t("tasks.membersFilter.button")}
     </button>
   );
 }

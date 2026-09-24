@@ -1,4 +1,5 @@
 // components/CusSelect.tsx
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo } from "react";
 import {
   Select,
@@ -64,9 +65,10 @@ const fromStr = <T extends string | number>(
 // ─── Component ───────────────────────────────────────────────────────────────
 
 const CusSelect = <T extends string | number>(props: CusSelectProps<T>) => {
+  const { t } = useTranslation();
   const {
     options,
-    placeholder = "Select option",
+    placeholder = t("ui.select.placeholder"),
     label,
     size = "md",
     variant = "outline",

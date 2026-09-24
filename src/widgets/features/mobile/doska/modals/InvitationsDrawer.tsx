@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuCheck, LuX } from "react-icons/lu";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -5,17 +6,10 @@ import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { CusAccordion } from "@/components/ui/accordion/CusAccordion";
 import { avatarColorVar } from "@/utils/avatarColor";
 import { daysSince } from "@/utils/daysSince";
-import { organizationRoleLabel } from "@/utils/roleLabels";
+import { organizationRoleLabel, projectRoleLabel } from "@/utils/roleLabels";
 import { useReceivedInvitations, useRespondInvitation } from "../hooks/useApiDoska";
-import type {
-  ProjectMemberRole,
-  RawOrganizationInvitation,
-} from "@/api/organization-invitations/organization-invitations.types";
+import type { RawOrganizationInvitation } from "@/api/organization-invitations/organization-invitations.types";
 
-const PROJECT_ROLE_LABELS: Record<ProjectMemberRole, string> = {
-  project_manager: "Менеджер",
-  project_member: "Участник",
-};
 
 interface InvitationsDrawerProps {
   open: boolean;
@@ -23,6 +17,7 @@ interface InvitationsDrawerProps {
 }
 
 export function InvitationsDrawer({ open, onClose }: InvitationsDrawerProps) {
+  const { t } = useTranslation();
   const invitationsQuery = useReceivedInvitations();
   const respondMutation = useRespondInvitation();
 
@@ -33,17 +28,17 @@ export function InvitationsDrawer({ open, onClose }: InvitationsDrawerProps) {
   };
 
   return (
-    <CusDrawer open={open} onClose={onClose} placement="end" size="full" title="Приглашения">
+    <CusDrawer open={open} onClose={onClose} placement="end" size="full" title={t("doska.invitations.title")}>
       {invitationsQuery.isPending ? (
         <div className="flex flex-col gap-3">
           <InvitationSkeleton />
           <InvitationSkeleton />
         </div>
       ) : invitationsQuery.isError ? (
-        <p className="text-sm text-error-strong">Не удалось загрузить приглашения.</p>
+        <p className="text-sm text-error-strong">{t("doska.invitations.loadError")}</p>
       ) : invitations.length === 0 ? (
         <p className="px-1 py-6 text-center text-sm text-secondary">
-          Пока нет новых приглашений
+          {t("doska.invitations.empty")}
         </p>
       ) : (
         <div className="flex flex-col gap-3">
@@ -78,6 +73,7 @@ function InvitationCard({
   onAccept: () => void;
   onReject: () => void;
 }) {
+  const { t } = useTranslation();
   const { organization, invited_by, projects } = invitation;
 
   return (
@@ -92,8 +88,11 @@ function InvitationCard({
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-primary">{organization.name}</p>
           <p className="text-xs text-secondary">
-            От {invited_by.first_name} {invited_by.last_name} ·{" "}
-            {daysSince(invitation.created_at)} дн. назад
+            {t("doska.invitations.from", {
+              name: `${invited_by.first_name} ${invited_by.last_name}`,
+            })}{" "}
+            ·{" "}
+            {t("doska.invitations.daysAgo", { count: daysSince(invitation.created_at) })}
           </p>
         </div>
         <CusBadge tone="brand">{organizationRoleLabel(invitation.role)}</CusBadge>
@@ -105,7 +104,7 @@ function InvitationCard({
             items={[
               {
                 value: "projects",
-                title: `Проекты (${projects.length})`,
+                title: t("doska.invitations.projects", { count: projects.length }),
                 content: (
                   <div className="flex flex-col gap-2">
                     {projects.map((project) => (
@@ -113,7 +112,7 @@ function InvitationCard({
                         <span className="min-w-0 flex-1 truncate text-sm text-primary">
                           {project.name}
                         </span>
-                        <CusBadge tone="neutral">{PROJECT_ROLE_LABELS[project.role]}</CusBadge>
+                        <CusBadge tone="neutral">{projectRoleLabel(project.role)}</CusBadge>
                       </div>
                     ))}
                   </div>
@@ -133,7 +132,7 @@ function InvitationCard({
           className="flex-1"
           leftIcon={<LuX size={16} />}
         >
-          Отклонить
+          {t("doska.invitations.reject")}
         </CusButton>
         <CusButton
           onClick={onAccept}
@@ -143,7 +142,7 @@ function InvitationCard({
           leftIcon={<LuCheck size={16} />}
           style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
         >
-          Принять
+          {t("doska.invitations.accept")}
         </CusButton>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import type { StatBarChartItem } from "../types";
 
@@ -28,6 +29,7 @@ function SegmentLabel(props: any) {
 }
 
 function StatBarTooltip({ active, payload }: any) {
+  const { t } = useTranslation();
   if (!active || !payload?.length) return null;
   const row: StatBarChartItem = payload[0].payload;
 
@@ -41,9 +43,9 @@ function StatBarTooltip({ active, payload }: any) {
       }}
     >
       <p className="font-semibold text-secondary">{row.label}</p>
-      <p style={{ color: "var(--brand-default)" }}>{row.done} сдано</p>
-      <p style={{ color: "var(--status-error-solid)" }}>{row.notDone} не выполнено</p>
-      <p className="text-primary">{row.total} всего</p>
+      <p style={{ color: "var(--brand-default)" }}>{t("statistics.chart.tooltipDone", { count: row.done })}</p>
+      <p style={{ color: "var(--status-error-solid)" }}>{t("statistics.chart.tooltipNotDone", { count: row.notDone })}</p>
+      <p className="text-primary">{t("statistics.chart.tooltipTotal", { count: row.total })}</p>
     </div>
   );
 }
@@ -70,15 +72,16 @@ function TotalTick({ x, y, payload, data }: any) {
 }
 
 function StatBarLegend() {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-4">
       <span className="flex items-center gap-1.5 text-xs font-medium text-secondary">
         <span className="size-2 rounded-full bg-brand" />
-        Сдано
+        {t("statistics.chart.done")}
       </span>
       <span className="flex items-center gap-1.5 text-xs font-medium text-secondary">
         <span className="size-2 rounded-full" style={{ background: "var(--status-error-solid)" }} />
-        Не выполнено
+        {t("statistics.chart.notDone")}
       </span>
     </div>
   );

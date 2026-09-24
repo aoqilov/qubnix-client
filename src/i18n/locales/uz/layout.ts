@@ -4,7 +4,7 @@ const layout: typeof ru = {
   nav: {
     doska: "Doska",
     profile: "Profil",
-    today: "BUGUN",
+    tasks: "VAZIFALAR",
     calendar: "KALENDAR",
     statistics: "STATISTIKA",
     settings: "SOZLAMALAR",

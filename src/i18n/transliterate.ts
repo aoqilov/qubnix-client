@@ -8,7 +8,14 @@
  * atamalar (PRO, Telegram, ...) o'zgarmaydi.
  */
 
-const KEEP_LATIN = ["Telegram", "Workspace", "workspace", "PRO", "Sub-Task", "Basic", "Business", "Push", "email", "OTP", "ID"];
+const KEEP_LATIN = [
+  "Telegram", "Start", "Workspace", "workspace", "PRO", "Sub-Task", "sub-task", "Basic", "Business",
+  "Push", "email", "OTP", "ID", "username", "Synapse",
+];
+
+// "Harf" — lotin ham, allaqachon o'girilgan kirill ham (so'z boshini to'g'ri aniqlash uchun:
+// "Cheklanmagan" → ch→ч dan keyingi "e" so'z boshi emas, "Чекланмаган" bo'lishi kerak).
+const LETTER = "A-Za-zА-Яа-яЁёЎўҚқҒғҲҳ";
 
 // Apostrof variantlari: ' ‘ ’ ʻ ʼ `
 const APOS = "['‘’ʻʼ`]";
@@ -40,11 +47,12 @@ const RULES: Rule[] = [
   [/Ye/g, "Е"],
   [/ye/g, "е"],
   // So'z boshidagi va unlidan keyingi "e" — "э".
-  [/(^|[^A-Za-zʻʼ'‘’`])E/g, "$1Э"],
-  [/(^|[^A-Za-zʻʼ'‘’`])e/g, "$1э"],
+  [new RegExp(`(^|[^${LETTER}ʻʼ'‘’\`])E`, "g"), "$1Э"],
+  [new RegExp(`(^|[^${LETTER}ʻʼ'‘’\`])e`, "g"), "$1э"],
   [/([aeiouAEIOU])e/g, "$1э"],
-  // Tutuq belgisi (ma'lumot → маълумот).
-  [new RegExp(APOS, "g"), "ъ"],
+  // Tutuq belgisi (ma'lumot → маълумот). Himoyalangan lotin atamadan keyingi apostrof
+  // qo'shimchani ajratadi ("Workspace'dan") — u o'zgarmaydi.
+  [new RegExp(`(?<!\u0000)${APOS}`, "g"), "ъ"],
 ];
 
 const SINGLE: Record<string, string> = {

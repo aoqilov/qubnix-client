@@ -1,5 +1,28 @@
 // Vazifa kartasi, vazifa modallari (qo'shish/tahrirlash/o'chirish) va /tasks sahifasi.
 const tasks = {
+  page: {
+    title: "Мои задачи",
+    pastBanner: "Прошедший день — только просмотр",
+    filter: "Фильтр",
+    loadError: "Не удалось загрузить задачи.",
+    empty: "У вас нет задач «{{status}}»",
+    emptyHint: "Выберите другой статус",
+    unfinishedTitle: "Подзадачи не выполнены",
+    unfinishedText: "Невыполненных подзадач: {{count}}. Всё равно отметить как «{{status}}»?",
+    confirmDone: "Да, выполнено",
+  },
+  sort: {
+    deadline: "По сроку",
+    priority: "По приоритету",
+    created: "По дате создания",
+  },
+  membersFilter: {
+    button: "Сотрудники",
+    buttonWithCount: "Сотрудники · {{count}}",
+    title: "Фильтр по сотрудникам",
+    selected: "Выбрано сотрудников: {{count}}",
+    noneSelected: "Не выбрано — все сотрудники",
+  },
   card: {
     subtasks: "Подзадачи",
     photos: "Фото",

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { LuCheck } from "react-icons/lu";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
@@ -28,6 +29,7 @@ const POP_STYLE = `
 `;
 
 function SubtaskItem({ subtask, onChange, readOnly }: SubtaskItemProps) {
+  const { t } = useTranslation();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleClick = () => {
@@ -90,13 +92,13 @@ function SubtaskItem({ subtask, onChange, readOnly }: SubtaskItemProps) {
       <CusDialog
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
-        title="Bandni qaytarish"
+        title={t("tasks.subtask.revertTitle")}
         size="sm"
         centered
         footer={
           <>
             <CusButton variant="outline" onClick={() => setConfirmOpen(false)}>
-              Yo'q
+              {t("common.actions.no")}
             </CusButton>
             <CusButton
               onClick={() => {
@@ -105,14 +107,13 @@ function SubtaskItem({ subtask, onChange, readOnly }: SubtaskItemProps) {
               }}
               style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
             >
-              Ha
+              {t("common.actions.yes")}
             </CusButton>
           </>
         }
       >
         <p>
-          Siz bu bandni bajarib bo'lgansiz. Uni qayta bajarilmagan holatga qaytarishni
-          istaysizmi?
+          {t("tasks.subtask.revertText")}
         </p>
       </CusDialog>
     </>

@@ -595,7 +595,7 @@ export function CusTimepicker({
         <CusDialog
           open={open}
           onClose={() => setOpen(false)}
-          title={modalTitle ?? "Vaqtni tanlang"}
+          title={modalTitle ?? t("ui.timepicker.pickTime")}
           centered
           size="xs"
           footer={

@@ -1,11 +1,13 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { CusSwitch } from "@/components/ui/inputs/CusSwitch";
 
 interface MemberReminderItem {
   id: string;
-  title: string;
-  description: string;
+  /** settings.memberReminders.* kalitlari — matn render paytida olinadi. */
+  titleKey: "settings.memberReminders.deadline" | "settings.memberReminders.newTask";
+  descriptionKey: "settings.memberReminders.deadlineHint" | "settings.memberReminders.newTaskHint";
   enabled: boolean;
 }
 
@@ -13,20 +15,21 @@ interface MemberReminderItem {
 const MOCK_MEMBER_REMINDERS: MemberReminderItem[] = [
   {
     id: "task-deadline-10min",
-    title: "Дедлайн задачи",
-    description: "За 10 минут до дедлайна",
+    titleKey: "settings.memberReminders.deadline",
+    descriptionKey: "settings.memberReminders.deadlineHint",
     enabled: true,
   },
   {
     id: "new-task",
-    title: "Новая задача",
-    description: "Когда дается новая задача",
+    titleKey: "settings.memberReminders.newTask",
+    descriptionKey: "settings.memberReminders.newTaskHint",
     enabled: true,
   },
 ];
 
 /** Oddiy a'zo (member) uchun shaxsiy bildirishnoma sozlamalari. */
 export function MemberReminderSettings() {
+  const { t } = useTranslation();
   const [reminders, setReminders] = useState(MOCK_MEMBER_REMINDERS);
 
   const toggleReminder = (id: string, enabled: boolean) => {
@@ -38,7 +41,7 @@ export function MemberReminderSettings() {
   return (
     <div className="flex flex-col gap-2">
       <div className="text-xs font-semibold tracking-wide text-secondary">
-        НАПОМИНАНИЯ
+        {t("settings.memberReminders.title")}
       </div>
 
       <CusCardbox className="flex flex-col rounded-card" style={{ padding: 0 }}>
@@ -49,10 +52,10 @@ export function MemberReminderSettings() {
           >
             <div className="flex min-w-0 flex-1 flex-col">
               <span className="truncate text-sm font-semibold text-primary">
-                {reminder.title}
+                {t(reminder.titleKey)}
               </span>
               <span className="truncate text-xs font-medium text-secondary">
-                {reminder.description}
+                {t(reminder.descriptionKey)}
               </span>
             </div>
             <div className="flex-none">

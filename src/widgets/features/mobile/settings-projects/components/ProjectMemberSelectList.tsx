@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import { projectRoleLabel } from "@/utils/roleLabels";
 import { forwardRef } from "react";
 import type React from "react";
 import { LuChevronDown } from "react-icons/lu";
@@ -6,10 +8,6 @@ import { CusMenuList } from "@/components/ui/menu-list/CusMenuList";
 import type { MemberPickerItem } from "@/components/shared/member-picker-drawer/MemberPickerDrawer";
 import type { ProjectMemberRole } from "../types";
 
-const ROLE_LABELS: Record<ProjectMemberRole, string> = {
-  project_member: "Xodim",
-  project_manager: "Manager",
-};
 
 // CusMenuList'ning Menu.Trigger asChild'i trigger DOM node'iga pozitsiya
 // hisoblash uchun o'z proplarini beradi — CusButton esa faqat o'zi bilgan
@@ -40,16 +38,17 @@ export function RoleDropdown({
   value: ProjectMemberRole;
   onChange: (role: ProjectMemberRole) => void;
 }) {
+  useTranslation(); // til almashsa rol nomlari qayta hisoblanadi
   return (
     <CusMenuList
       value={value}
       onValueChange={(v) => onChange(v as ProjectMemberRole)}
       items={[
-        { value: "project_member", label: ROLE_LABELS.project_member },
-        { value: "project_manager", label: ROLE_LABELS.project_manager },
+        { value: "project_member", label: projectRoleLabel("project_member") },
+        { value: "project_manager", label: projectRoleLabel("project_manager") },
       ]}
       width={140}
-      trigger={<RoleTriggerButton label={ROLE_LABELS[value]} />}
+      trigger={<RoleTriggerButton label={projectRoleLabel(value)} />}
     />
   );
 }

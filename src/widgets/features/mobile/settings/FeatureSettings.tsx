@@ -1,3 +1,5 @@
+import { organizationRoleLabel } from "@/utils/roleLabels";
+import { useTranslation } from "react-i18next";
 import {
   LuUsers,
   LuShield,
@@ -31,6 +33,7 @@ const PERSONAL_HIDDEN_ROUTES = new Set([
 ]);
 
 export default function FeatureSettings() {
+  const { t } = useTranslation();
   const workspaceQuery = useSelectedOrganization();
   const workspace = workspaceQuery.data;
   // GET .../members faqat admin/owner uchun ruxsat etilgan — member'da 403 qaytadi,
@@ -54,7 +57,7 @@ export default function FeatureSettings() {
     return (
       <div className="p-4">
         <p className="text-sm text-error-strong">
-          Workspace ma'lumotlarini yuklab bo'lmadi. Sahifani yangilang.
+          {t("settings.loadError")}
         </p>
       </div>
     );
@@ -65,46 +68,46 @@ export default function FeatureSettings() {
     {
       to: "/settings/members",
       icon: <LuUsers size={18} />,
-      title: "Сотрудники",
-      subtitle: "Роли, приглашения",
+      title: t("settings.menu.members"),
+      subtitle: t("settings.menu.membersHint"),
       badgeCount: membersCountQuery.data,
     },
     {
       to: "/settings/roles",
       icon: <LuShield size={18} />,
-      title: "Роли",
-      subtitle: "Кто что может делать",
+      title: t("settings.menu.roles"),
+      subtitle: t("settings.menu.rolesHint"),
     },
     {
       to: "/settings/projects",
       icon: <LuFolder size={18} />,
-      title: "Проекты",
-      subtitle: "Статистика, создание, архив",
+      title: t("settings.menu.projects"),
+      subtitle: t("settings.menu.projectsHint"),
     },
     {
       to: "/settings/member-stats",
       icon: <LuChartColumn size={18} />,
-      title: "Статистика сотрудников",
-      subtitle: "Кто сколько сделал и опоздал",
+      title: t("settings.menu.memberStats"),
+      subtitle: t("settings.menu.memberStatsHint"),
     },
     {
       to: "/settings/repeating-tasks",
       icon: <LuRepeat size={18} />,
-      title: "Повторные задачи",
-      subtitle: "Ежедневные, еженедельные, ежемесячные",
+      title: t("settings.menu.routines"),
+      subtitle: t("settings.menu.routinesHint"),
       badgeCount: 4,
     },
     {
       to: "/settings/reminders",
       icon: <LuBell size={18} />,
-      title: "Напоминания",
-      subtitle: "Push и email",
+      title: t("settings.menu.reminders"),
+      subtitle: t("settings.menu.remindersHint"),
     },
     {
       to: "/settings/general",
       icon: <LuSlidersHorizontal size={18} />,
-      title: "Общие настройки",
-      subtitle: "Название, приглашения, тариф",
+      title: t("settings.menu.general"),
+      subtitle: t("settings.menu.generalHint"),
     },
   ];
   const menuItems = isPersonal
@@ -115,10 +118,10 @@ export default function FeatureSettings() {
     <div className="flex flex-col gap-5 p-4">
       <div>
         <h1 className="font-condensed text-2xl tracking-wide text-primary">
-          Настройка Workspace
+          {t("settings.title")}
         </h1>
         <p className="mt-0.5 text-sm font-semibold text-brand">
-          {workspace.name.toUpperCase()} - {workspace.roleLabel}
+          {workspace.name.toUpperCase()} - {organizationRoleLabel(workspace.role)}
         </p>
       </div>
 
@@ -131,7 +134,7 @@ export default function FeatureSettings() {
       <RoleGate roles={[workspace.role]} allow={MANAGER_ROLES}>
         <div className="flex flex-col gap-2">
           <div className="text-xs font-semibold tracking-wide text-secondary">
-            УПРАВЛЕНИЕ
+            {t("settings.manage")}
           </div>
 
           <CusCardbox
@@ -151,7 +154,7 @@ export default function FeatureSettings() {
 
       <button className="flex w-full items-center justify-center gap-2 rounded-button border border-error py-3 text-sm font-semibold text-error-strong">
         <LuLogOut size={16} />
-        Выйти из Workspace
+        {t("settings.leave")}
       </button>
     </div>
   );

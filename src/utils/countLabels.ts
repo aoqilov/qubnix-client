@@ -10,6 +10,11 @@ export function tasksLabel(count: number): string {
   return i18n.t("common.count.tasks", { count });
 }
 
+/** Faqat so'z, raqamsiz — raqam alohida katta shriftda turganda: "задачи" / "vazifa". */
+export function tasksWordLabel(count: number): string {
+  return i18n.t("common.count.tasksWord", { count });
+}
+
 export function orgsLabel(count: number): string {
   return i18n.t("common.count.orgs", { count });
 }
@@ -24,4 +29,9 @@ export function membersLabel(count: number): string {
 
 export function daysLabel(count: number): string {
   return i18n.t("common.count.days", { count });
+}
+
+/** Faqat so'z, raqamsiz: "дней" / "kun". */
+export function daysWordLabel(count: number): string {
+  return i18n.t("common.count.daysWord", { count });
 }

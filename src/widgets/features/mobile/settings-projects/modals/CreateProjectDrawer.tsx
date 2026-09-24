@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusInput } from "@/components/ui/inputs/CusInput";
@@ -14,6 +15,7 @@ interface CreateProjectDrawerProps {
 }
 
 export function CreateProjectDrawer({ open, onClose, organizationId }: CreateProjectDrawerProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   // userId -> tanlangan rol. Kalit borligi shu odam belgilanganini bildiradi.
   const [selections, setSelections] = useState<Record<string, ProjectMemberRole>>({});
@@ -71,7 +73,7 @@ export function CreateProjectDrawer({ open, onClose, organizationId }: CreatePro
       onClose={onClose}
       placement="end"
       size="full"
-      title="Новый проект"
+      title={t("projects.newProject")}
       footer={
         <div className="flex w-full gap-2">
           <CusButton
@@ -80,42 +82,42 @@ export function CreateProjectDrawer({ open, onClose, organizationId }: CreatePro
             onClick={onClose}
             isDisabled={createProject.isPending}
           >
-            Отмена
+            {t("common.actions.cancel")}
           </CusButton>
           <CusButton
             className="flex-1"
             isDisabled={!name.trim()}
             isLoading={createProject.isPending}
-            loadingText="Yaratilmoqda..."
+            loadingText={t("common.states.creating")}
             onClick={handleCreate}
           >
-            Создать
+            {t("common.actions.create")}
           </CusButton>
         </div>
       }
     >
       <div className="flex flex-col gap-4">
         <CusInput
-          label="Название проекта"
-          placeholder="Например, Редизайн"
+          label={t("projects.create.nameLabel")}
+          placeholder={t("projects.create.namePlaceholder")}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         {createProject.isError && (
           <p className="text-sm text-error-strong">
-            Не удалось создать проект. Попробуйте ещё раз.
+            {t("projects.create.error")}
           </p>
         )}
 
         {!isPersonal && (
           <div className="flex flex-col">
             <span className="mb-2 text-xs font-medium uppercase tracking-wide text-secondary">
-              Сотрудники
+              {t("projects.members")}
             </span>
 
             {membersQuery.isPending ? (
-              <p className="py-4 text-center text-sm text-secondary">Yuklanmoqda...</p>
+              <p className="py-4 text-center text-sm text-secondary">{t("common.states.loading")}</p>
             ) : (
               <ProjectMemberSelectList
                 members={availableMembers}

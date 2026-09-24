@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuTrash2 } from "react-icons/lu";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -18,26 +19,27 @@ export function DeleteProjectDialog({
   project,
   isLoading = false,
 }: DeleteProjectDialogProps) {
+  const { t } = useTranslation();
   return (
     <CusDialog
       open={open}
       onClose={onClose}
-      title="Удалить проект"
+      title={t("projects.delete.title")}
       size="sm"
       centered
       closeOnBackdrop={!isLoading}
       footer={
         <>
           <CusButton variant="outline" onClick={onClose} isDisabled={isLoading}>
-            Bekor qilish
+            {t("common.actions.cancel")}
           </CusButton>
           <CusButton
             onClick={onConfirm}
             isLoading={isLoading}
-            loadingText="O'chirilmoqda..."
+            loadingText={t("projects.delete.deleting")}
             style={{ background: "var(--status-error-solid)", color: "var(--text-on-brand)" }}
           >
-            O'chirish
+            {t("common.actions.delete")}
           </CusButton>
         </>
       }
@@ -62,8 +64,7 @@ export function DeleteProjectDialog({
             {project?.name}
           </p>
           <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4, lineHeight: 1.5 }}>
-            Loyiha, vazifalari va a'zo bog'lanishlari bilan birga butunlay o'chiriladi. Bu amalni
-            ortga qaytarib bo'lmaydi.
+            {t("projects.delete.text")}
           </p>
         </div>
       </div>

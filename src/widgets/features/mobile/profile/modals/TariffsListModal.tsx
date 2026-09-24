@@ -1,3 +1,5 @@
+import { useIntlLocale } from "@/i18n/useIntlLocale";
+import { useTranslation } from "react-i18next";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
@@ -9,6 +11,8 @@ interface TariffsListModalProps {
 }
 
 export function TariffsListModal({ open, onClose }: TariffsListModalProps) {
+  const { t } = useTranslation();
+  const intlLocale = useIntlLocale();
   const { data: tariffs, isPending, isError } = useTariffs();
   const buyTariff = useBuyTariff();
 
@@ -20,16 +24,16 @@ export function TariffsListModal({ open, onClose }: TariffsListModalProps) {
       size="full"
       closeOnBackdrop={false}
       closeOnEscape={false}
-      title="Tariflar va narxlar"
+      title={t("profile.tariffs.list")}
     >
       <CusCardbox className="rounded-card">
         {isPending && (
-          <p className="text-sm text-secondary">Yuklanmoqda...</p>
+          <p className="text-sm text-secondary">{t("common.states.loading")}</p>
         )}
 
         {isError && (
           <p className="text-sm text-secondary">
-            Tariflarni olishda xatolik yuz berdi
+            {t("profile.tariffs.loadError")}
           </p>
         )}
 
@@ -40,7 +44,7 @@ export function TariffsListModal({ open, onClose }: TariffsListModalProps) {
                 <div className="min-w-0 flex-1">
                   <div className="font-medium">{tariff.name}</div>
                   <div className="text-sm text-secondary">
-                    {tariff.price} {tariff.currency}
+                    {new Intl.NumberFormat(intlLocale).format(tariff.price)} {tariff.currency}
                   </div>
                 </div>
                 <CusButton
@@ -49,7 +53,7 @@ export function TariffsListModal({ open, onClose }: TariffsListModalProps) {
                   isLoading={buyTariff.isPending && buyTariff.variables === tariff.id}
                   onClick={() => buyTariff.mutate(tariff.id)}
                 >
-                  Tanlash
+                  {t("profile.tariffs.choose")}
                 </CusButton>
               </div>
             ))}

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useRef, useState, type ChangeEvent } from "react";
 import { LuCamera, LuCheck } from "react-icons/lu";
 import { useSessionStore } from "@/store/session.store";
@@ -21,6 +22,7 @@ interface ProfileEditModalProps {
 }
 
 export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
+  const { t } = useTranslation();
   const user = useSessionStore((s) => s.user);
   const updateUser = useSessionStore((s) => s.updateUser);
   const [fullName, setFullName] = useState(user?.fullName ?? "");
@@ -65,7 +67,7 @@ export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
       size="full"
       closeOnBackdrop={false}
       closeOnEscape={false}
-      title="Profilni tahrirlash"
+      title={t("profile.editProfile")}
     >
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
@@ -87,7 +89,7 @@ export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              aria-label="Rasmni almashtirish"
+              aria-label={t("profile.edit.changePhoto")}
               className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[var(--bg-surface)] bg-brand text-on-brand"
             >
               <LuCamera size={12} />
@@ -101,16 +103,16 @@ export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
             />
           </div>
           <div className="text-sm text-secondary">
-            Rasmni almashtirish uchun kamera belgisini bosing
+            {t("profile.edit.changePhotoHint")}
           </div>
         </div>
 
         <CusInput
-          label="Ism familiya"
+          label={t("profile.edit.fullName")}
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
         />
-        <CusInput label="Telefon raqam" value={user.phone ?? ""} disabled />
+        <CusInput label={t("profile.edit.phone")} value={user.phone ?? ""} disabled />
         <div className="flex justify-end">
           <CusButton
             isDisabled={!isDirty}
@@ -118,7 +120,7 @@ export function ProfileEditModal({ open, onClose }: ProfileEditModalProps) {
             leftIcon={<LuCheck size={16} />}
             onClick={handleSave}
           >
-            Saqlash
+            {t("common.actions.save")}
           </CusButton>
         </div>
       </div>

@@ -7,6 +7,7 @@ const ui = {
     range: "Диапазон дней",
     rangeFrom: "С",
     rangeTo: "По",
+    pickDate: "Выберите дату",
   },
   timepicker: {
     placeholder: "ЧЧ:ММ",
@@ -17,6 +18,7 @@ const ui = {
     minutes: "Минуты",
     seconds: "Секунды",
     ok: "OK",
+    pickTime: "Выберите время",
   },
   fileUpload: {
     dropHere: "Перетащите файл сюда",
@@ -35,6 +37,13 @@ const ui = {
   },
   table: {
     empty: "Данные не найдены",
+  },
+  select: {
+    placeholder: "Выберите",
+  },
+  drawer: {
+    back: "Назад",
+    close: "Закрыть",
   },
   toaster: {
     printing: "Чек печатается...",

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuChevronRight } from "react-icons/lu";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -14,6 +15,7 @@ interface ProjectStatCardProps {
 }
 
 export function ProjectStatCard({ project, onOpen, onEdit, onDelete }: ProjectStatCardProps) {
+  const { t } = useTranslation();
   const tagColor = tagColorVar(project.id);
 
   return (
@@ -63,7 +65,7 @@ export function ProjectStatCard({ project, onOpen, onEdit, onDelete }: ProjectSt
           style={{ borderColor: "var(--brand-default)", color: "var(--brand-default)" }}
           onClick={onEdit}
         >
-          Изменить
+          {t("common.actions.edit")}
         </CusButton>
         <CusButton
           variant="outline"
@@ -73,7 +75,7 @@ export function ProjectStatCard({ project, onOpen, onEdit, onDelete }: ProjectSt
           className="flex-1"
           onClick={onDelete}
         >
-          Удалить
+          {t("common.actions.delete")}
         </CusButton>
       </div>
     </CusCardbox>

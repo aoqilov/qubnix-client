@@ -39,7 +39,15 @@ const NOT_TEXT = /^(var\(|#[0-9a-f]{3,8}$|[a-z0-9_\-./:#%()]+$)/;
 // Bosh harfli so'z/ibora ("Bugunlik", "Kelajak kunlari") — apostrofsiz o'zbekcha yoki
 // inglizcha matn ham tutilsin. className'lar kichik harfli, shuning uchun tushmaydi.
 const CAPITALIZED_PHRASE = /^[A-Z][a-z'‘’ʻ]+(?:[ -][A-Za-z'‘’ʻ]+)*[.!?…:]*$/;
+// Bosh harf bilan boshlanib, bo'sh joy bilan davom etadigan gap (tinish belgilari bilan ham).
+const SENTENCE = /^[A-Z][\p{L}'‘’ʻ]*[ ,][^{}<>;=]*\p{L}/u;
 // Texnik bosh harfli qiymatlar (HTTP sarlavhalar, timezone, event nomlari).
+// Template ichidagi CSS kalit so'zlari (1px solid ..., translateX(...), 12 KB).
+const CSS_WORDS = new Set([
+  "px", "rem", "em", "vh", "vw", "solid", "dashed", "dotted", "none", "auto", "calc", "var",
+  "translateX", "translateY", "rotate", "scale", "important", "background", "color", "border",
+  "KB", "MB", "GB", "start", "http", "https",
+]);
 const TECHNICAL = new Set(["Asia", "Content-Type", "Authorization", "Bearer", "Escape", "Enter", "Tab", "Backspace", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"]);
 
 const roots = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_ROOTS;
@@ -76,7 +84,15 @@ function isNonTextContext(node) {
     return !TEXT_PROPS.has(attr.name.getText());
   }
   if (ts.isCaseClause(parent) || ts.isElementAccessExpression(parent)) return true;
-  if (ts.isBinaryExpression(parent)) return true;
+  if (ts.isBinaryExpression(parent)) {
+    const op = parent.operatorToken.kind;
+    return (
+      op === ts.SyntaxKind.EqualsEqualsEqualsToken ||
+      op === ts.SyntaxKind.ExclamationEqualsEqualsToken ||
+      op === ts.SyntaxKind.EqualsEqualsToken ||
+      op === ts.SyntaxKind.ExclamationEqualsToken
+    );
+  }
   if (ts.isPropertyAssignment(parent) && parent.name === node) return true;
   return false;
 }
@@ -138,12 +154,27 @@ for (const root of roots) {
           report(node, text, `prop:${parent.name.getText(source)}`);
         } else if (CYRILLIC.test(text) || UZBEK.test(text)) {
           report(node, text, "string");
-        } else if (CAPITALIZED_PHRASE.test(text) && !TECHNICAL.has(text) && !isNonTextContext(node)) {
+        } else if ((CAPITALIZED_PHRASE.test(text) || SENTENCE.test(text)) && !TECHNICAL.has(text) && !isNonTextContext(node)) {
           report(node, text, "maybe-text");
         }
       } else if (ts.isTemplateExpression(node)) {
         const raw = node.getText(source);
-        if (CYRILLIC.test(raw) || UZBEK.test(raw)) report(node, raw, "template");
+        const head = node.head.text;
+        const parts = [head, ...node.templateSpans.map((span) => span.literal.text)];
+        const isCssBlock = parts.some((part) => /[;{}]/.test(part));
+        const looksLikeText = !isCssBlock && parts.some((part) => {
+          // CSS bloklari/qiymatlari va className bo'laklari — matn emas.
+          if (/[;{}]|var\(|--|gradient\(|color-mix\(/.test(part)) return false;
+          if (/^[a-z0-9.\-_]*$/.test(part.trim())) return false;
+          const words = part
+            .split(/[\s()·,.:!?—-]+/)
+            .filter((w) => w && !/\d/.test(w) && /^\p{L}+$/u.test(w) && !CSS_WORDS.has(w));
+          if (words.length >= 2) return true;
+          return words.length === 1 && /^\p{Lu}\p{Ll}{2,}$/u.test(words[0]);
+        });
+        if (CYRILLIC.test(raw) || UZBEK.test(raw) || SENTENCE.test(head) || looksLikeText) {
+          if (!isNonTextContext(node) && !isTranslationKey(node)) report(node, raw, "template");
+        }
       }
       ts.forEachChild(node, visit);
     };

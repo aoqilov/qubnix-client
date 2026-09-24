@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { parseDate } from "@internationalized/date";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusCalendar } from "@/components/ui/calendar/CusCalendar";
@@ -11,8 +12,9 @@ interface DayPickerDialogProps {
 }
 
 export function DayPickerDialog({ open, onClose, value, onPick }: DayPickerDialogProps) {
+  const { t } = useTranslation();
   return (
-    <CusDialog open={open} onClose={onClose} title="Выберите дату" centered size="sm">
+    <CusDialog open={open} onClose={onClose} title={t("memberStats.pickDateTitle")} centered size="sm">
       <CusCalendar
         inline
         value={[parseDate(toDateKey(value))]}

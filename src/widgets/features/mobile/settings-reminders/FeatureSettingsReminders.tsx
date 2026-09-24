@@ -1,10 +1,15 @@
+import { useSelectedOrganization } from "@/widgets/features/mobile/settings/hooks/useApiSettings";
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { CusSwitch } from "@/components/ui/inputs/CusSwitch";
 import { SettingsBackHeader } from "@/widgets/features/mobile/settings/components/SettingsBackHeader";
-import { MOCK_REMINDERS, MOCK_WORKSPACE_NAME } from "./lib/mockReminders";
+import { MOCK_REMINDERS } from "./lib/mockReminders";
 
 export default function FeatureSettingsReminders() {
+  const { t } = useTranslation();
+  // Sarlavhadagi nom — mock "Synapse" emas, haqiqiy tanlangan tashkilot.
+  const organizationQuery = useSelectedOrganization();
   const [reminders, setReminders] = useState(MOCK_REMINDERS);
 
   const toggleReminder = (id: string, enabled: boolean) => {
@@ -15,10 +20,10 @@ export default function FeatureSettingsReminders() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <SettingsBackHeader title="Напоминания" />
+      <SettingsBackHeader title={t("settings.menu.reminders")} />
 
       <p className="-mt-2 text-sm font-semibold text-brand">
-        {MOCK_WORKSPACE_NAME.toUpperCase()}
+        {(organizationQuery.data?.name ?? "").toUpperCase()}
       </p>
 
       <CusCardbox className="rounded-input p-0">
@@ -29,10 +34,10 @@ export default function FeatureSettingsReminders() {
           >
             <div className="flex min-w-0 flex-1 flex-col">
               <span className="truncate text-sm font-semibold text-primary">
-                {reminder.title}
+                {t(reminder.titleKey)}
               </span>
               <span className="truncate text-xs font-medium text-secondary">
-                {reminder.description}
+                {t(reminder.descriptionKey)}
               </span>
             </div>
             <div className="flex-none">

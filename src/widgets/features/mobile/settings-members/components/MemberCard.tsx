@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuChevronRight } from "react-icons/lu";
 import { avatarColorVar } from "@/utils/avatarColor";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
@@ -15,6 +16,7 @@ interface MemberCardProps {
 }
 
 export function MemberCard({ member, onOpenActions }: MemberCardProps) {
+  const { t } = useTranslation();
   return (
     <div className="relative flex flex-col items-center gap-2 rounded-card border border-subtle bg-surface p-3 text-center">
       <button
@@ -43,7 +45,7 @@ export function MemberCard({ member, onOpenActions }: MemberCardProps) {
           </span>
         )}
         <span className="block truncate text-[10px] text-disabled">
-          {daysSince(member.created_at)} kundan beri
+          {t("members.since", { count: daysSince(member.created_at) })}
         </span>
       </span>
       <CusBadge variant="subtle" tone="neutral">

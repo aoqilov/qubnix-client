@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { LuTrash2 } from "react-icons/lu";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
@@ -22,6 +23,7 @@ interface MemberActionsDrawerProps {
 }
 
 export function MemberActionsDrawer({ open, onClose, member }: MemberActionsDrawerProps) {
+  const { t } = useTranslation();
   const [isConfirmingDelete, setConfirmingDelete] = useState(false);
 
   const updateRole = useUpdateMemberRole();
@@ -49,7 +51,7 @@ export function MemberActionsDrawer({ open, onClose, member }: MemberActionsDraw
   };
 
   return (
-    <CusDrawer open={open} onClose={onClose} placement="end" size="full" title="Сотрудник">
+    <CusDrawer open={open} onClose={onClose} placement="end" size="full" title={t("members.actions.title")}>
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
           <span
@@ -70,7 +72,7 @@ export function MemberActionsDrawer({ open, onClose, member }: MemberActionsDraw
 
         {/* 1-qator: rol */}
         <div className="flex flex-col gap-2 rounded-card border border-subtle bg-surface p-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-secondary">Rol</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-secondary">{t("members.actions.role")}</p>
           <CusSegment
             value={member.organization_role}
             onValueChange={(v) => handleRoleChange(v as OrganizationMemberRole)}
@@ -81,7 +83,7 @@ export function MemberActionsDrawer({ open, onClose, member }: MemberActionsDraw
             ]}
           />
           {updateRole.isError && (
-            <p className="text-xs text-error-strong">Rolni o'zgartirib bo'lmadi.</p>
+            <p className="text-xs text-error-strong">{t("members.actions.roleError")}</p>
           )}
         </div>
 
@@ -89,10 +91,10 @@ export function MemberActionsDrawer({ open, onClose, member }: MemberActionsDraw
         {isConfirmingDelete ? (
           <div className="flex flex-col gap-2 rounded-card border border-subtle bg-surface p-3">
             <p className="text-sm font-medium text-primary">
-              {member.first_name}ni tashkilotdan chiqarishni tasdiqlaysizmi?
+              {t("members.actions.removeQuestion", { name: member.first_name })}
             </p>
             {removeMember.isError && (
-              <p className="text-xs text-error-strong">O'chirib bo'lmadi. Qayta urinib ko'ring.</p>
+              <p className="text-xs text-error-strong">{t("members.actions.removeError")}</p>
             )}
             <div className="flex gap-2">
               <CusButton
@@ -101,7 +103,7 @@ export function MemberActionsDrawer({ open, onClose, member }: MemberActionsDraw
                 onClick={() => setConfirmingDelete(false)}
                 isDisabled={removeMember.isPending}
               >
-                Bekor qilish
+                {t("common.actions.cancel")}
               </CusButton>
               <CusButton
                 className="flex-1"
@@ -109,7 +111,7 @@ export function MemberActionsDrawer({ open, onClose, member }: MemberActionsDraw
                 isLoading={removeMember.isPending}
                 onClick={handleRemove}
               >
-                Ha, o'chirish
+                {t("members.actions.confirmRemove")}
               </CusButton>
             </div>
           </div>
@@ -120,7 +122,7 @@ export function MemberActionsDrawer({ open, onClose, member }: MemberActionsDraw
             className="flex items-center gap-2 rounded-card border border-subtle bg-surface p-3 text-left text-sm font-medium text-error-strong hover:bg-surface-secondary"
           >
             <LuTrash2 size={16} />
-            Удалить
+            {t("common.actions.delete")}
           </button>
         )}
       </div>

@@ -1,8 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { avatarColorVar } from "@/utils/avatarColor";
 import type { WorkspaceSummary } from "@/store/workspace.store";
-import { tasksLabel } from "@/utils/countLabels";
+import { tasksWordLabel } from "@/utils/countLabels";
 import { organizationRoleLabel } from "@/utils/roleLabels";
 
 interface WorkspaceCardProps {
@@ -11,6 +12,7 @@ interface WorkspaceCardProps {
 }
 
 export function WorkspaceCard({ workspace, onClick }: WorkspaceCardProps) {
+  useTranslation(); // til almashsa rol/son matnlari qayta hisoblanadi
   return (
     <CusCardbox
       onClick={onClick}
@@ -38,7 +40,7 @@ export function WorkspaceCard({ workspace, onClick }: WorkspaceCardProps) {
       <span className="flex flex-none flex-col items-center rounded-chip bg-brand-subtle px-3 py-1.5 text-brand">
         <span className="text-lg font-bold leading-none">{workspace.tasksCount}</span>
         <span className="text-[10px] font-semibold leading-tight">
-          {tasksLabel(workspace.tasksCount)}
+          {tasksWordLabel(workspace.tasksCount)}
         </span>
       </span>
     </CusCardbox>

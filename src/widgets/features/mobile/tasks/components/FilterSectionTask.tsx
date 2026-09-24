@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuFilter } from "react-icons/lu";
 import { CusMenuList, type CusMenuListItem } from "@/components/ui/menu-list/CusMenuList";
 
@@ -13,11 +14,12 @@ interface FilterSectionTaskProps {
 
 function FilterSectionTask({
   label,
-  filterLabel = "Фильтр",
+  filterLabel,
   menulist,
   value,
   onValueChange,
 }: FilterSectionTaskProps) {
+  const { t } = useTranslation();
   return (
     <div className={label ? "flex items-center justify-between" : "flex items-center"}>
       {label && (
@@ -48,7 +50,7 @@ function FilterSectionTask({
             }}
           >
             <LuFilter size={16} />
-            {filterLabel}
+            {filterLabel ?? t("tasks.page.filter")}
           </button>
         }
       />

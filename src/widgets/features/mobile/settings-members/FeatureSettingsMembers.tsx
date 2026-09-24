@@ -1,3 +1,5 @@
+import { membersLabel } from "@/utils/countLabels";
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { LuSearchX, LuPlus } from "react-icons/lu";
 import { CusSegment } from "@/components/ui/segment/CusSegment";
@@ -18,13 +20,14 @@ import type { MemberRoleFilter } from "./lib/mockMembers";
 type MembersTab = "general" | "invites";
 
 function EmptyState() {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center gap-2 py-12 text-center">
       <span className="flex size-11 items-center justify-center rounded-avatar bg-surface-secondary text-secondary">
         <LuSearchX size={20} />
       </span>
-      <p className="text-sm font-medium text-primary">Hech narsa topilmadi</p>
-      <p className="text-xs text-secondary">Qidiruv yoki filtrni o'zgartirib ko'ring</p>
+      <p className="text-sm font-medium text-primary">{t("common.states.nothingFound")}</p>
+      <p className="text-xs text-secondary">{t("common.states.nothingFoundHint")}</p>
     </div>
   );
 }
@@ -49,6 +52,7 @@ function CountPill({ count }: { count: number }) {
 }
 
 export default function FeatureSettingsMembers() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<MembersTab>("general");
   const [search, setSearch] = useState("");
   const [viewStyle, setViewStyle] = useMemberViewStyle();
@@ -84,11 +88,13 @@ export default function FeatureSettingsMembers() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <SettingsBackHeader title="Сотрудники" />
+      <SettingsBackHeader title={t("members.title")} />
 
       <p className="-mt-2 text-sm font-semibold text-brand">
-        {(organizationQuery.data?.name ?? "").toUpperCase()} - {totalMembersCount}{" "}
-        пользователей
+        {t("members.usersCount", {
+          name: (organizationQuery.data?.name ?? "").toUpperCase(),
+          label: membersLabel(totalMembersCount),
+        })}
       </p>
 
       <CusSegment
@@ -98,12 +104,12 @@ export default function FeatureSettingsMembers() {
         items={[
           {
             id: "general",
-            label: "Общее",
+            label: t("members.tabs.general"),
             icon: <CountPill count={totalMembersCount} />,
           },
           {
             id: "invites",
-            label: "Приглашения",
+            label: t("members.tabs.invites"),
             icon: <CountPill count={invitesCount} />,
           },
         ]}
@@ -129,7 +135,7 @@ export default function FeatureSettingsMembers() {
             </div>
           ) : membersQuery.isError ? (
             <p className="px-1 text-sm text-error-strong">
-              Не удалось загрузить сотрудников.
+              {t("members.loadError")}
             </p>
           ) : filteredMembers.length === 0 ? (
             <EmptyState />
@@ -171,7 +177,7 @@ export default function FeatureSettingsMembers() {
             }}
             leftIcon={<LuPlus size={16} />}
           >
-            Odam qo'shish
+            {t("members.addPerson")}
           </CusButton>
           {invitationsQuery.isPending ? (
             <div className="flex flex-col gap-2">
@@ -180,7 +186,7 @@ export default function FeatureSettingsMembers() {
             </div>
           ) : invitationsQuery.isError ? (
             <p className="px-1 text-sm text-error-strong">
-              Не удалось загрузить приглашения.
+              {t("members.invitesLoadError")}
             </p>
           ) : invites.length === 0 ? (
             <EmptyState />

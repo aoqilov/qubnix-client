@@ -1,7 +1,9 @@
+import { getApiErrorMessage } from "@/utils/apiErrorMessage";
+import i18n from "@/i18n";
+import { useTranslation } from "react-i18next";
 import { useEffect, useState, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { useSessionStore } from "@/store/session.store";
 import { WORKSPACE_ROLES } from "@/const/roles";
@@ -48,11 +50,7 @@ import {
   useUploadTaskFile,
 } from "./hooks/useApiTasks";
 
-const SORT_OPTIONS = [
-  { value: "deadline", label: "Muddat bo'yicha" },
-  { value: "priority", label: "Muhimlik bo'yicha" },
-  { value: "created", label: "Yaratilgan sana bo'yicha" },
-];
+const SORT_KEYS = ["deadline", "priority", "created"] as const;
 
 const SORT_TO_API = {
   deadline: "deadline",
@@ -63,10 +61,10 @@ const SORT_TO_API = {
 // Statik metama'lumot (id/label/rang) — sonlar esa aktiv loyihaning
 // `task_counts`'idan dinamik olinadi (pastga qarang, komponent ichida).
 const STATUS_META = [
-  { id: "assigned", label: "Berildi", color: "gray" as const, countKey: "todo" as const },
-  { id: "in_progress", label: "Jarayonda", color: "brand" as const, countKey: "in_progress" as const },
-  { id: "done", label: "Bajarildi", color: "success" as const, countKey: "done" as const },
-  { id: "failed", label: "Bajarilmadi", color: "error" as const, countKey: "not_done" as const },
+  { id: "assigned", labelKey: "common.taskStatus.todo" as const, color: "gray" as const, countKey: "todo" as const },
+  { id: "in_progress", labelKey: "common.taskStatus.in_progress" as const, color: "brand" as const, countKey: "in_progress" as const },
+  { id: "done", labelKey: "common.taskStatus.done" as const, color: "success" as const, countKey: "done" as const },
+  { id: "failed", labelKey: "common.taskStatus.not_done" as const, color: "error" as const, countKey: "not_done" as const },
 ];
 
 // Checkbox ustidagi CusMenuList uchun: har bir status uchun ikonka va rang.
@@ -85,44 +83,37 @@ const STATUS_ICON_COLOR: Record<TaskStatusColor, string> = {
   error: "var(--status-error-solid)",
 };
 
-const STATUS_MENU_OPTIONS = STATUS_META.map((meta) => ({
+// Matn render paytida olinadi (til almashsa yangilanadi) — shu sabab funksiya.
+const buildStatusMenuOptions = () => STATUS_META.map((meta) => ({
   id: meta.id,
-  label: meta.label,
+  label: i18n.t(meta.labelKey),
   icon: STATUS_ICON[meta.id],
   iconColor: STATUS_ICON_COLOR[meta.color],
 }));
-
-/** Backend xato javobi `{statusCode, message, code, details}` shaklida keladi. */
-function getErrorMessage(err: unknown): string {
-  if (axios.isAxiosError(err)) {
-    const message = err.response?.data?.message;
-    if (typeof message === "string" && message) return message;
-  }
-  return "Amalni bajarib bo'lmadi. Qaytadan urinib ko'ring.";
-}
 
 function TaskCardSkeleton() {
   return <div className="h-[132px] animate-pulse rounded-input border border-subtle bg-surface" />;
 }
 
 function TasksEmptyState({ statusLabel }: { statusLabel: string }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center gap-2 py-12 text-center">
       <span className="flex size-11 items-center justify-center rounded-avatar bg-surface-secondary text-secondary">
         <LuListChecks size={20} />
       </span>
       <p className="text-sm font-medium text-primary">
-        Sizda "{statusLabel}" vazifalar yo'q
+        {t("tasks.page.empty", { status: statusLabel })}
       </p>
       <p className="text-xs text-secondary">
-        Boshqa statusni tanlang
+        {t("tasks.page.emptyHint")}
       </p>
     </div>
   );
 }
 
 function formatDueLabel(task: RawTask): string {
-  if (!task.due_at) return "Muddatsiz";
+  if (!task.due_at) return i18n.t("tasks.card.noDeadline");
   const d = new Date(task.due_at);
   const day = String(d.getDate()).padStart(2, "0");
   const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -139,6 +130,7 @@ interface TasksNavigationState {
 }
 
 export default function FeatureTasks() {
+  const { t } = useTranslation();
   const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
   // Personal workspace — bitta foydalanuvchi: xodim filtri va xodim tanlash kerak emas.
   const isPersonal = useWorkspaceStore((s) => s.selectedWorkspaceType) === "personal";
@@ -185,7 +177,7 @@ export default function FeatureTasks() {
   )?.task_counts;
   const statusTabs = STATUS_META.map((meta) => ({
     id: meta.id,
-    label: meta.label,
+    label: t(meta.labelKey),
     color: meta.color,
     count: activeProjectCounts?.[meta.countKey] ?? 0,
   }));
@@ -321,7 +313,7 @@ export default function FeatureTasks() {
         subtasks,
       });
     } catch (err) {
-      setErrorToast(getErrorMessage(err));
+      setErrorToast(getApiErrorMessage(err));
       // Qayta tashlanadi — TaskModalAdd shuni ko'rib, drawer'ni yopmay ochiq qoldiradi.
       throw err;
     }
@@ -380,7 +372,7 @@ export default function FeatureTasks() {
         },
       });
     } catch (err) {
-      setErrorToast(getErrorMessage(err));
+      setErrorToast(getApiErrorMessage(err));
       throw err;
     }
   };
@@ -393,7 +385,7 @@ export default function FeatureTasks() {
     if (!meta) return;
     updateTask.mutate(
       { taskId, payload: { status: meta.countKey } },
-      { onError: (err) => setErrorToast(getErrorMessage(err)) },
+      { onError: (err) => setErrorToast(getApiErrorMessage(err)) },
     );
   };
 
@@ -440,11 +432,11 @@ export default function FeatureTasks() {
         }}
       >
         <PageTitleDynamic
-          title="Mening vazifalarim"
+          title={t("tasks.page.title")}
           date={dateLabel}
           doneCount={activeProjectCounts?.done ?? 0}
           totalCount={activeProjectCounts?.total ?? 0}
-          statusLabel="Выполнено"
+          statusLabel={t("common.taskStatus.done")}
         />
         {isPast && (
           <div
@@ -455,7 +447,7 @@ export default function FeatureTasks() {
             }}
           >
             <span className="text-sm font-medium">
-              O'tgan kun — faqat ko'rish uchun
+              {t("tasks.page.pastBanner")}
             </span>
             <CusButton
               variant="outline"
@@ -467,7 +459,7 @@ export default function FeatureTasks() {
                 color: "var(--status-warning-text)",
               }}
             >
-              Bugun
+              {t("common.actions.today")}
             </CusButton>
           </div>
         )}
@@ -478,12 +470,12 @@ export default function FeatureTasks() {
         />
         <div className="flex items-center gap-2">
           <span className="mr-auto text-xs font-medium uppercase tracking-wide text-secondary">
-            Filtr
+            {t("tasks.page.filter")}
           </span>
           <FilterSectionTask
             value={sort}
             onValueChange={(v) => setSort(v as keyof typeof SORT_TO_API)}
-            menulist={SORT_OPTIONS}
+            menulist={SORT_KEYS.map((key) => ({ value: key, label: t(`tasks.sort.${key}`) }))}
           />
           {canFilterByEmployee && (
             <MembersFilterButton
@@ -506,10 +498,10 @@ export default function FeatureTasks() {
           </>
         ) : tasksQuery.isError ? (
           <p className="px-1 text-sm text-error-strong">
-            Vazifalarni yuklab bo'lmadi.
+            {t("tasks.page.loadError")}
           </p>
         ) : tasks.length === 0 ? (
-          <TasksEmptyState statusLabel={activeStatusMeta?.label ?? ""} />
+          <TasksEmptyState statusLabel={activeStatusMeta ? t(activeStatusMeta.labelKey) : ""} />
         ) : (
           tasks.map((task) => {
             const expanded = expandedIds.has(task.id);
@@ -528,7 +520,7 @@ export default function FeatureTasks() {
               <TaskCard
                 key={task.id}
                 title={task.title}
-                statusOptions={STATUS_MENU_OPTIONS}
+                statusOptions={buildStatusMenuOptions()}
                 statusId={meta?.id ?? "assigned"}
                 onStatusChange={(nextStatusId) => requestStatusChange(task, nextStatusId)}
                 priority={task.priority}
@@ -541,7 +533,7 @@ export default function FeatureTasks() {
                 subtaskCountLabel={`${task.subtasks.filter((s) => s.checked).length}/${task.subtasks.length}`}
                 fileCount={attachments.length}
                 members={task.members.map(toTaskMemberCard)}
-                statusLabel={meta?.label ?? ""}
+                statusLabel={meta ? t(meta.labelKey) : ""}
                 statusColor={meta?.color ?? "gray"}
                 expanded={expanded}
                 onToggleExpanded={() => toggleExpanded(task.id)}
@@ -568,7 +560,7 @@ export default function FeatureTasks() {
                         })),
                       },
                     },
-                    { onError: (err) => setErrorToast(getErrorMessage(err)) },
+                    { onError: (err) => setErrorToast(getApiErrorMessage(err)) },
                   )
                 }
                 photos={imageAttachments.map((f) => ({
@@ -596,7 +588,7 @@ export default function FeatureTasks() {
       <CusDialog
         open={pendingStatusChange !== null}
         onClose={() => setPendingStatusChange(null)}
-        title="Subtasklar bajarilmagan"
+        title={t("tasks.page.unfinishedTitle")}
         size="sm"
         centered
         footer={
@@ -605,7 +597,7 @@ export default function FeatureTasks() {
               variant="outline"
               onClick={() => setPendingStatusChange(null)}
             >
-              Bekor qilish
+              {t("common.actions.cancel")}
             </CusButton>
             <CusButton
               onClick={() => {
@@ -622,7 +614,7 @@ export default function FeatureTasks() {
                 color: "var(--text-on-brand)",
               }}
             >
-              Ha, bajarildi
+              {t("tasks.page.confirmDone")}
             </CusButton>
           </>
         }
@@ -660,8 +652,10 @@ export default function FeatureTasks() {
                 lineHeight: 1.5,
               }}
             >
-              {pendingTask?.subtasks.filter((s) => !s.checked).length} ta
-              subtask hali bajarilmagan. Baribir "Bajarildi" deb belgilaysizmi?
+              {t("tasks.page.unfinishedText", {
+                count: pendingTask?.subtasks.filter((s) => !s.checked).length ?? 0,
+                status: t("common.taskStatus.done"),
+              })}
             </p>
           </div>
         </div>
@@ -702,7 +696,7 @@ export default function FeatureTasks() {
         onConfirm={() => {
           if (deletingTaskId) {
             deleteTask.mutate(deletingTaskId, {
-              onError: (err) => setErrorToast(getErrorMessage(err)),
+              onError: (err) => setErrorToast(getApiErrorMessage(err)),
             });
           }
         }}
@@ -721,7 +715,7 @@ export default function FeatureTasks() {
           <span className="flex-1 text-sm font-medium">{errorToast}</span>
           <button
             type="button"
-            aria-label="Yopish"
+            aria-label={t("common.actions.close")}
             onClick={() => setErrorToast(null)}
             className="flex-none"
           >

@@ -1,3 +1,4 @@
+import i18n from "@/i18n";
 import { useMutation } from "@tanstack/react-query";
 import { authApi } from "@/api/auth/auth.api";
 import { usersApi } from "@/api/users/users.api";
@@ -50,7 +51,7 @@ export function useVerifyPhoneCode() {
     ) => {
       const verificationToken = useSessionStore.getState().verificationToken;
       if (!verificationToken) {
-        throw new Error("Tasdiqlash muddati tugadi, raqamni qaytadan yuboring");
+        throw new Error(i18n.t("auth.code.sessionExpired"));
       }
 
       await authApi.verifyPhoneCode({ verificationToken, code: payload.code });

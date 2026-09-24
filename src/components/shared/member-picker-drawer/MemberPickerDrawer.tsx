@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
@@ -23,11 +24,12 @@ interface MemberPickerDrawerProps {
 export function MemberPickerDrawer({
   open,
   onClose,
-  title = "Сотрудники",
+  title,
   members,
   selectedIds,
   onApply,
 }: MemberPickerDrawerProps) {
+  const { t } = useTranslation();
   // Tashqi (qo'llanilgan) tanlovdan mustaqil qoralama — "Отмена" bosilsa
   // o'zgarishlar tashlab yuboriladi, faqat "Применить" ularni chinakam saqlaydi.
   const [draftIds, setDraftIds] = useState(selectedIds);
@@ -68,21 +70,21 @@ export function MemberPickerDrawer({
       onClose={handleCancel}
       placement="end"
       size="full"
-      title={title}
+      title={title ?? t("common.memberPicker.title")}
       footer={
         <div className="flex w-full gap-2">
           <CusButton variant="outline" className="flex-1" onClick={handleCancel}>
-            Отмена
+            {t("common.actions.cancel")}
           </CusButton>
           <CusButton className="flex-1" onClick={handleApply}>
-            Применить
+            {t("common.actions.apply")}
           </CusButton>
         </div>
       }
     >
       <div className="mb-3">
         <CusInput
-          placeholder="Поиск сотрудников"
+          placeholder={t("common.memberPicker.search")}
           clearable
           leftElementWidth="2.25rem"
           leftElement={<LuSearch size={18} />}
@@ -99,7 +101,7 @@ export function MemberPickerDrawer({
           isDisabled={isAllSelected}
           onClick={() => setDraftIds(members.map((member) => member.id))}
         >
-          Выбрать всех
+          {t("common.actions.selectAll")}
         </CusButton>
         <CusButton
           variant="outline"
@@ -108,13 +110,13 @@ export function MemberPickerDrawer({
           isDisabled={draftIds.length === 0}
           onClick={() => setDraftIds([])}
         >
-          Очистить
+          {t("common.actions.clear")}
         </CusButton>
       </div>
 
       <div className="flex flex-col">
         {filteredMembers.length === 0 && (
-          <p className="py-6 text-center text-sm text-secondary">Hech kim topilmadi</p>
+          <p className="py-6 text-center text-sm text-secondary">{t("common.memberPicker.empty")}</p>
         )}
         {filteredMembers.map((member) => (
           <div

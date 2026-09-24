@@ -1,6 +1,7 @@
+import { getApiErrorMessage } from "@/utils/apiErrorMessage";
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { LuPlus, LuTriangleAlert, LuX } from "react-icons/lu";
-import axios from "axios";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
@@ -24,14 +25,6 @@ import type { RawTaskRoutine } from "@/api/task-routines/task-routines.types";
 
 const ALL_PROJECTS_ID = "all";
 
-function getErrorMessage(err: unknown): string {
-  if (axios.isAxiosError(err)) {
-    const message = err.response?.data?.message;
-    if (typeof message === "string" && message) return message;
-  }
-  return "Amalni bajarib bo'lmadi. Qaytadan urinib ko'ring.";
-}
-
 function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length >= 2) return `${parts[0].charAt(0)}${parts[1].charAt(0)}`.toUpperCase();
@@ -39,6 +32,7 @@ function initialsOf(name: string): string {
 }
 
 export default function FeatureSettingsRepeatingTasks() {
+  const { t } = useTranslation();
   const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
   const [projectId, setProjectId] = useState(ALL_PROJECTS_ID);
   const [frequency, setFrequency] = useState<RoutineFilter>("all");
@@ -93,7 +87,7 @@ export default function FeatureSettingsRepeatingTasks() {
     () => [
       {
         id: ALL_PROJECTS_ID,
-        projectName: "Все",
+        projectName: t("routines.allProjects"),
         projectTaskCount: routines.length,
       },
       ...allProjects.map((project) => ({
@@ -118,7 +112,7 @@ export default function FeatureSettingsRepeatingTasks() {
         routineId: String(routine.id),
         payload: { active },
       },
-      { onError: (err) => setErrorToast(getErrorMessage(err)) },
+      { onError: (err) => setErrorToast(getApiErrorMessage(err)) },
     );
   };
 
@@ -129,17 +123,19 @@ export default function FeatureSettingsRepeatingTasks() {
         projectId: deletingRoutine.projectId,
         routineId: String(deletingRoutine.routine.id),
       },
-      { onError: (err) => setErrorToast(getErrorMessage(err)) },
+      { onError: (err) => setErrorToast(getApiErrorMessage(err)) },
     );
     setDeletingRoutine(null);
   };
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <SettingsBackHeader title="Повторные задачи" />
+      <SettingsBackHeader title={t("routines.title")} />
 
       <p className="-mt-2 text-sm font-semibold text-brand">
-        {isRoutinesPending ? "Yuklanmoqda..." : `${routines.length} регулярных задач`}
+        {isRoutinesPending
+          ? t("common.states.loading")
+          : t("routines.count", { count: routines.length })}
       </p>
 
       <ProjectsTabs tabs={projectTabs} activeId={projectId} onChange={setProjectId} />
@@ -163,7 +159,7 @@ export default function FeatureSettingsRepeatingTasks() {
           setIsFormOpen(true);
         }}
       >
-        Добавить задачу
+        {t("routines.addTask")}
       </CusButton>
 
       <div className="flex flex-col gap-3">
@@ -249,13 +245,13 @@ export default function FeatureSettingsRepeatingTasks() {
       <CusDialog
         open={deletingRoutine !== null}
         onClose={() => setDeletingRoutine(null)}
-        title="Vazifani o'chirish"
+        title={t("routines.delete.title")}
         size="sm"
         centered
         footer={
           <>
             <CusButton variant="outline" onClick={() => setDeletingRoutine(null)}>
-              Bekor qilish
+              {t("common.actions.cancel")}
             </CusButton>
             <CusButton
               onClick={confirmDelete}
@@ -264,7 +260,7 @@ export default function FeatureSettingsRepeatingTasks() {
                 color: "var(--text-on-brand)",
               }}
             >
-              Ha, o'chirish
+              {t("routines.delete.confirm")}
             </CusButton>
           </>
         }
@@ -285,8 +281,7 @@ export default function FeatureSettingsRepeatingTasks() {
             <LuTriangleAlert size={18} color="var(--status-warning-text)" />
           </div>
           <p style={{ fontSize: 14, color: "var(--text-primary)" }}>
-            "{deletingRoutine?.routine.title}" doimiy vazifasi butunlay o'chiriladi — yangi nusxalar
-            yaratilmaydi. Bu amalni qaytarib bo'lmaydi.
+            {t("routines.delete.text", { title: deletingRoutine?.routine.title ?? "" })}
           </p>
         </div>
       </CusDialog>
@@ -304,7 +299,7 @@ export default function FeatureSettingsRepeatingTasks() {
           <span className="flex-1 text-sm font-medium">{errorToast}</span>
           <button
             type="button"
-            aria-label="Yopish"
+            aria-label={t("common.actions.close")}
             onClick={() => setErrorToast(null)}
             className="flex-none"
           >

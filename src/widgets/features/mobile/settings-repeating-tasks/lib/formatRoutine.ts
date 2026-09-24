@@ -1,24 +1,28 @@
+import i18n from "@/i18n";
 import type { RawTaskRoutine } from "@/api/task-routines/task-routines.types";
-import { MONTH_NOMINATIVE, WEEKDAY_SHORT } from "./routineSchedule";
+import { dayMonthLabel, weekdayShortLabel } from "./routineSchedule";
 
-/** Routine kartasidagi "Har kuni 09:00" / "Har hafta Dush, Chor 10:00" kabi qator. */
+/**
+ * Routine kartasidagi "Каждый день 09:00" / "Har hafta Du, Chor 10:00" kabi qator.
+ * Render paytida chaqiriladi — chaqiruvchi `useTranslation` ishlatgani uchun til
+ * almashganda qayta hisoblanadi.
+ */
 export function formatRepeatLabel(routine: RawTaskRoutine): string {
   const time = routine.time_of_day;
   switch (routine.frequency) {
     case "daily":
-      return `Har kuni ${time}`;
+      return i18n.t("routines.repeat.daily", { time });
     case "weekly": {
-      const days = routine.weekdays.map((d) => WEEKDAY_SHORT[d] ?? d).join(", ");
-      return `Har hafta ${days || "-"} ${time}`;
+      const days = routine.weekdays.map(weekdayShortLabel).join(", ");
+      return i18n.t("routines.repeat.weekly", { days: days || "-", time });
     }
     case "monthly": {
       const days = routine.month_days.join(", ");
-      return `Har oy, ${days || "-"}-sana ${time}`;
+      return i18n.t("routines.repeat.monthly", { days: days || "-", time });
     }
     case "yearly": {
       const [, month, day] = routine.start_date.split("-").map(Number);
-      const monthName = MONTH_NOMINATIVE[(month ?? 1) - 1] ?? "";
-      return `Har yil, ${day} ${monthName} ${time}`;
+      return i18n.t("routines.repeat.yearly", { date: dayMonthLabel(month ?? 1, day ?? 1), time });
     }
     default:
       return time;
@@ -41,7 +45,7 @@ export function formatApiDate(date: string): string {
   return `${d}.${m}.${y}`;
 }
 
-/** "Keyingisi: DD.MM.YYYY HH:mm" — `next_run_at` dan. */
+/** "Следующий запуск: DD.MM.YYYY HH:mm" — `next_run_at` dan. */
 export function formatNextRunLabel(routine: RawTaskRoutine): string {
-  return `Keyingisi: ${formatDateTime(routine.next_run_at)}`;
+  return i18n.t("routines.nextRun", { date: formatDateTime(routine.next_run_at) });
 }

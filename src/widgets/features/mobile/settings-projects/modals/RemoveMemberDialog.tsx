@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuUserMinus } from "react-icons/lu";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -15,23 +16,24 @@ export function RemoveMemberDialog({
   onConfirm,
   memberName,
 }: RemoveMemberDialogProps) {
+  const { t } = useTranslation();
   return (
     <CusDialog
       open={open}
       onClose={onClose}
-      title="Убрать сотрудника"
+      title={t("projects.removeMember.title")}
       size="sm"
       centered
       footer={
         <>
           <CusButton variant="outline" onClick={onClose}>
-            Bekor qilish
+            {t("common.actions.cancel")}
           </CusButton>
           <CusButton
             onClick={onConfirm}
             style={{ background: "var(--status-error-solid)", color: "var(--text-on-brand)" }}
           >
-            Убрать
+            {t("common.actions.remove")}
           </CusButton>
         </>
       }
@@ -52,8 +54,8 @@ export function RemoveMemberDialog({
           <LuUserMinus size={18} color="var(--status-error-text)" />
         </div>
         <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>
-          <strong style={{ color: "var(--text-primary)" }}>{memberName}</strong> shu loyihadan
-          olib tashlanadi. O'zgarish faqat "Сохранить" bosilgandan keyin kuchga kiradi.
+          <strong style={{ color: "var(--text-primary)" }}>{memberName}</strong>{" "}
+          {t("projects.removeMember.textAfterName", { save: t("common.actions.save") })}
         </p>
       </div>
     </CusDialog>

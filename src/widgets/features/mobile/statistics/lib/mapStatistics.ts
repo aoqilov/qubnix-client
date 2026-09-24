@@ -1,3 +1,5 @@
+import { currentIntlLocale } from "@/i18n/useIntlLocale";
+import i18n from "@/i18n";
 import type { TaskPriority, TaskStatistics } from "@/api/tasks/tasks.types";
 import { fromApiDate } from "@/utils/apiDate";
 import type {
@@ -8,10 +10,10 @@ import type {
   StatsPeriod,
 } from "../types";
 
-export const CHART_TITLES: Record<StatsPeriod, string> = {
-  week: "ПО ДНЯМ НЕДЕЛИ",
-  month: "ПО НЕДЕЛЯМ МЕСЯЦА",
-};
+export const CHART_TITLE_KEYS = {
+  week: "statistics.chart.byWeekday",
+  month: "statistics.chart.byWeek",
+} as const satisfies Record<StatsPeriod, string>;
 
 const PRIORITY_ORDER: TaskPriority[] = ["high", "medium", "low"];
 
@@ -40,15 +42,15 @@ export function toCompletion(stats: TaskStatistics): CompletionSummary {
   };
 }
 
-/** weekly → kun nomlari ("ПН"), monthly → "1 нед.", "2 нед.", ... */
+/** weekly → kun nomlari ("ПН"/"DU"), monthly → "1 нед." / "1-hafta", ... */
 export function toChartBars(stats: TaskStatistics, period: StatsPeriod): StatBarChartItem[] {
   return stats.timeline.map((bucket, index) => ({
     label:
       period === "week"
-        ? new Intl.DateTimeFormat("ru-RU", { weekday: "short" })
+        ? new Intl.DateTimeFormat(currentIntlLocale(), { weekday: "short" })
             .format(fromApiDate(bucket.start_date))
             .toUpperCase()
-        : `${index + 1} нед.`,
+        : i18n.t("statistics.chart.weekShort", { n: index + 1 }),
     done: bucket.totals.done,
     notDone: bucket.totals.not_done,
     total: bucket.totals.total,
