@@ -704,8 +704,11 @@ export default function FeatureTasks() {
 
       {errorToast && (
         <div
-          className="fixed inset-x-4 top-4 z-toast flex items-center gap-2 rounded-card border px-4 py-3 shadow-md"
+          className="fixed inset-x-4 z-toast flex items-center gap-2 rounded-card border px-4 py-3 shadow-md"
           style={{
+            // Telegram notch/header ostiga tushmasligi uchun safe-area + 16px
+            // (oddiy brauzerda o'zgaruvchilar yo'q — 16px qoladi).
+            top: "calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px) + 16px)",
             background: "var(--status-error-bg)",
             borderColor: "var(--status-error-text)",
             color: "var(--status-error-text)",
