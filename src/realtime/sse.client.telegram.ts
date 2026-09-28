@@ -20,6 +20,9 @@ export const connectTelegramSse: SseConnect = (url, handlers) => {
   let closed = false;
   let controller: AbortController | null = null;
   let retryTimer: ReturnType<typeof setTimeout> | null = null;
+  // Ketma-ket muvaffaqiyatsiz urinishlar. Oqim ochilishi bilan nolga qaytadi —
+  // aks holda server idle ulanishni yopib turganda kechikish 30s'da qotib qoladi.
+  let failures = 0;
 
   const handleFrameData = (event: string, data: string) => {
     if (event === SSE_CONNECTED_EVENT) {
@@ -69,6 +72,7 @@ export const connectTelegramSse: SseConnect = (url, handlers) => {
     }
 
     // `connected` hodisasi kelmasa ham ulanish ochilgan hisoblanadi.
+    failures = 0;
     handlers.onStatus("live");
 
     const reader = response.body.getReader();
@@ -96,8 +100,6 @@ export const connectTelegramSse: SseConnect = (url, handlers) => {
   };
 
   const run = async () => {
-    let failures = 0;
-
     while (!closed) {
       let canRetry = false;
       try {

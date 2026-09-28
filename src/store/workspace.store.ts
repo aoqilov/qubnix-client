@@ -105,6 +105,8 @@ interface WorkspaceState {
   selectedWorkspaceType: OrganizationType | null;
   selectedFilterId: string | null;
   selectWorkspace: (id: string, type?: OrganizationType) => void;
+  /** Foydalanuvchi tanlangan workspace'dan chiqarilganda (SSE `member.removed`). */
+  clearSelectedWorkspace: () => void;
   /** Backend'dan kelgan `organization.type` bilan sinxronlash uchun — id o'zgarmaydi. */
   setSelectedWorkspaceType: (type: OrganizationType) => void;
   selectFilter: (id: string) => void;
@@ -121,6 +123,11 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     localStorage.setItem(SELECTED_WORKSPACE_KEY, id);
     localStorage.setItem(SELECTED_WORKSPACE_TYPE_KEY, type);
     set({ selectedWorkspaceId: id, selectedWorkspaceType: type, selectedFilterId: "all" });
+  },
+  clearSelectedWorkspace: () => {
+    localStorage.removeItem(SELECTED_WORKSPACE_KEY);
+    localStorage.removeItem(SELECTED_WORKSPACE_TYPE_KEY);
+    set({ selectedWorkspaceId: null, selectedWorkspaceType: null, selectedFilterId: "all" });
   },
   setSelectedWorkspaceType: (type) => {
     localStorage.setItem(SELECTED_WORKSPACE_TYPE_KEY, type);

@@ -7,9 +7,9 @@ import { RealtimeBridge } from "./realtime";
 export default function App() {
   return (
     <ChakraProvider value={system}>
-      {/* SSE oqimi — UI chiqarmaydi, sessiya paydo bo'lganda ulanadi. */}
-      <RealtimeBridge />
       <BrowserRouter>
+        {/* SSE oqimi — UI chiqarmaydi, sessiya paydo bo'lganda ulanadi. */}
+        <RealtimeBridge />
         <AppRoutes />
       </BrowserRouter>
     </ChakraProvider>

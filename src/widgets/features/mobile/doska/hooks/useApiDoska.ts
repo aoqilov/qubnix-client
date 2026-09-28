@@ -19,7 +19,9 @@ function toWorkspaceSummary(org: RawOrganization): WorkspaceSummary {
 }
 
 export const DOSKA_KEYS = {
-  workspaces: () => ["organizations"] as const,
+  /** `["organizations"]` emas: u butun tashkilot daraxtining prefiksi bo'lib,
+   * ro'yxatni yangilash ilovadagi barcha so'rovlarni qayta yuklardi. */
+  workspaces: () => ["organizations", "list"] as const,
   personal: () => ["personal"] as const,
   invitations: () => ["organization-invitations", "received"] as const,
 };

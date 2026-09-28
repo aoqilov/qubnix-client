@@ -17,6 +17,9 @@ export const SSE_EVENT_TYPES = [
   "organization.invitation.accepted",
   "organization.invitation.rejected",
   "organization.invitation.cancelled",
+  "organization.member.created",
+  "organization.member.updated",
+  "organization.member.removed",
 
   "task.created",
   "task.updated",
