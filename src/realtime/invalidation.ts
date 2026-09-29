@@ -1,10 +1,28 @@
 import type { QueryClient, QueryKey } from "@tanstack/react-query";
-import { DOSKA_KEYS } from "@/widgets/features/mobile/doska/hooks/useApiDoska";
+import { DOSKA_KEYS } from "@/queries/doska.queries";
 import { SETTINGS_KEYS } from "@/widgets/features/mobile/settings/hooks/useApiSettings";
 import { INVITATIONS_KEYS } from "@/widgets/features/mobile/settings-members/hooks/useApiInvitations";
 import { MEMBERS_KEYS } from "@/widgets/features/mobile/settings-members/hooks/useApiSettingsMembers";
 import { PROJECTS_KEYS } from "@/widgets/features/mobile/settings-projects/hooks/useApiSettingsProjects";
-import type { SseEnvelope } from "./sse.types";
+import type { SseEnvelope, SseEventType } from "./sse.types";
+
+/**
+ * Vazifa hodisalari — bularning mahalliy mutation'i (tasks.queries.ts,
+ * useInvalidateTasks) muvaffaqiyatdan keyin keshni allaqachon to'liq
+ * yangilaydi. O'zimiz keltirib chiqargan hodisa uchun SSE orqali yana bir
+ * marta invalidate qilish keraksiz qo'sh so'rov beradi (masalan kanban'da
+ * statusni tez-tez o'zgartirishda) — shuning uchun faqat boshqa foydalanuvchi
+ * (actor_id boshqa) keltirib chiqargan holatda ishlaydi.
+ */
+const SELF_COVERED_TASK_EVENTS = new Set<SseEventType>([
+  "task.created",
+  "task.updated",
+  "task.deleted",
+  "task.status_changed",
+  "task.assignees_changed",
+  "task.subtasks_changed",
+  "routine.task_created",
+]);
 
 /** Butun tashkilot daraxti — faqat qamrovni aniqlab bo'lmaganda. */
 const ALL_ORGANIZATIONS: QueryKey = ["organizations"];
@@ -136,7 +154,19 @@ function scheduleInvalidate(queryClient: QueryClient, key: QueryKey): void {
   );
 }
 
-export function invalidateForEvent(queryClient: QueryClient, envelope: SseEnvelope): void {
+export function invalidateForEvent(
+  queryClient: QueryClient,
+  envelope: SseEnvelope,
+  /** Joriy foydalanuvchi id'si — o'z vazifa amalini filtrlash uchun. */
+  selfUserId?: string,
+): void {
+  if (
+    selfUserId &&
+    envelope.actor_id === selfUserId &&
+    SELF_COVERED_TASK_EVENTS.has(envelope.type)
+  ) {
+    return;
+  }
   for (const key of keysFor(envelope)) scheduleInvalidate(queryClient, key);
 }
 

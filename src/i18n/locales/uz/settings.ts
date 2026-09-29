@@ -1,7 +1,7 @@
 import type ru from "../ru/settings";
 
 const settings: typeof ru = {
-  title: "Workspace sozlamalari",
+  title: "Tashkilot: {{name}}",
   loadError: "Workspace ma'lumotlarini yuklab bo'lmadi. Sahifani yangilang.",
   manage: "BOSHQARUV",
   leave: "Workspace'dan chiqish",
@@ -24,10 +24,15 @@ const settings: typeof ru = {
     generalHint: "Nomi, taklifnomalar, tarif",
   },
   reminders: {
-    newTask: "Yangi vazifa berilganda",
-    projectManagement: "Loyihani yuritish",
-    performance: "O'zlashtirish",
-    push: "Push-bildirishnoma",
+    newTask: "Yangi vazifa",
+    newTaskHint: "Yangi vazifa berilganda",
+    deadline: "Vazifa muddati",
+    deadlineHint: "Muddatdan 10 daqiqa oldin",
+    taskCompleted: "Vazifa bajarildi",
+    taskCompletedHint: "Vazifa bajarilgan deb belgilanganda",
+    taskOverdue: "Vazifa muddati o'tdi",
+    taskOverdueHint: "Vazifa muddati tugaganda",
+    loadError: "Bildirishnoma sozlamalarini yuklab bo'lmadi.",
   },
   general: {
     orgName: "Tashkilot nomi",
@@ -35,13 +40,6 @@ const settings: typeof ru = {
     active: "Faol",
     remaining: "{{label}} qoldi — {{date}} gacha",
     extend: "Obunani uzaytirish",
-  },
-  memberReminders: {
-    title: "ESLATMALAR",
-    deadline: "Vazifa muddati",
-    deadlineHint: "Muddatdan 10 daqiqa oldin",
-    newTask: "Yangi vazifa",
-    newTaskHint: "Yangi vazifa berilganda",
   },
 };
 

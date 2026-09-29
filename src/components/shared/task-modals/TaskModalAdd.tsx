@@ -13,6 +13,7 @@ import {
 } from "react-icons/lu";
 import { IoFlagSharp } from "react-icons/io5";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
+import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusTextArea } from "@/components/ui/inputs/CusTextArea";
@@ -66,6 +67,11 @@ interface TaskModalAddProps {
   isLoadingMembers?: boolean;
   /** Personal workspace — xodim tanlanmaydi, vazifa chaqiruvchi tomonidan o'ziga biriktiriladi. */
   hideMembers?: boolean;
+  /**
+   * "steps" (default) — mobil: to'liq ekran drawer, 1→2 qadam.
+   * "split" — desktop: markazdagi keng dialog, ikkala qism yonma-yon, qadamlarsiz.
+   */
+  layout?: "steps" | "split";
 }
 
 const QUICK_TIMES = ["09:00", "12:00", "15:00", "18:00", "21:00"];
@@ -191,6 +197,7 @@ function TaskModalAdd({
   members,
   isLoadingMembers,
   hideMembers = false,
+  layout = "steps",
 }: TaskModalAddProps) {
   const { t } = useTranslation();
   const [step, setStep] = useState<1 | 2>(1);
@@ -365,6 +372,306 @@ function TaskModalAdd({
     }
   }
 
+  const step1Content = (
+          <div className="flex flex-col gap-4">
+            <CusInput
+              ref={titleInputRef}
+              label={t("tasks.modal.nameLabel")}
+              isRequired
+              placeholder={t("tasks.modal.namePlaceholder")}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                  {t("tasks.modal.description")}
+                </span>
+                <div className="flex gap-1 rounded-full border border-default bg-surface p-1">
+                  <button
+                    type="button"
+                    aria-label={t("tasks.modal.descriptionText")}
+                    onClick={() => setDescriptionMode("text")}
+                    className="flex size-9 items-center justify-center rounded-full"
+                    style={
+                      descriptionMode === "text"
+                        ? {
+                            background: "var(--brand-default)",
+                            color: "var(--text-on-brand)",
+                          }
+                        : { color: "var(--text-secondary)" }
+                    }
+                  >
+                    <LuType size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={t("tasks.modal.descriptionVoice")}
+                    onClick={() => setDescriptionMode("voice")}
+                    className="flex size-9 items-center justify-center rounded-full"
+                    style={
+                      descriptionMode === "voice"
+                        ? {
+                            background: "var(--brand-default)",
+                            color: "var(--text-on-brand)",
+                          }
+                        : { color: "var(--text-secondary)" }
+                    }
+                  >
+                    <LuMic size={16} />
+                  </button>
+                </div>
+              </div>
+              {descriptionMode === "text" ? (
+                <CusTextArea
+                  placeholder={t("tasks.modal.descriptionPlaceholder")}
+                  autoresize
+                  maxH="10lh"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              ) : (
+                <VoiceNoteRecorder value={voiceNote} onChange={setVoiceNote} />
+              )}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                  {t(DUE_SECTION_LABEL[activeDueIcon])}
+                </span>
+                <div className="flex gap-1 rounded-full border border-default bg-surface p-1">
+                  <IconToggle
+                    icon={<LuCalendar size={16} />}
+                    ariaLabel={t("tasks.modal.pickDate")}
+                    active={activeDueIcon === "custom"}
+                    onClick={() => setDueMode("custom")}
+                  />
+                  <IconToggle
+                    icon={<LuClock size={16} />}
+                    ariaLabel={t("tasks.modal.quickTime")}
+                    active={activeDueIcon === "quick"}
+                    onClick={() => setDueMode("quick")}
+                  />
+                </div>
+              </div>
+              {activeDueIcon === "quick" && (
+                <>
+                  <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-0.5">
+                    <Pill
+                      label={t("tasks.modal.customTime")}
+                      className="flex-none"
+                      active={isCustomQuickTime}
+                      onClick={() => setIsCustomQuickTime(true)}
+                    />
+                    {[...QUICK_TIMES]
+                      .sort((a, b) => Number(isPastQuickTime(a)) - Number(isPastQuickTime(b)))
+                      .map((time) => (
+                        <Pill
+                          key={time}
+                          label={time}
+                          className="flex-none"
+                          active={!isCustomQuickTime && quickTime === time}
+                          disabled={isPastQuickTime(time)}
+                          onClick={() => {
+                            setIsCustomQuickTime(false);
+                            setQuickTime(time);
+                          }}
+                        />
+                      ))}
+                  </div>
+                  {isCustomQuickTime && (
+                    <CusTimepicker
+                      placeholder={t("ui.timepicker.placeholder")}
+                      value={quickTime}
+                      onChange={setQuickTime}
+                      variant="modal"
+                      modalTitle={t("tasks.modal.pickTimeTitle")}
+                      minTime={todayMinTime}
+                    />
+                  )}
+                </>
+              )}
+              {dueMode === "custom" && (
+                <div className="flex flex-col gap-2 pt-1">
+                  <CusCalendar
+                    placeholder={t("tasks.modal.datePlaceholder")}
+                    value={customDate}
+                    onValueChange={(details) => setCustomDate(details.value)}
+                    variant="modal"
+                    modalTitle={t("tasks.modal.pickDateTitle")}
+                  />
+                  <CusTimepicker
+                    label={t("tasks.modal.time")}
+                    placeholder={t("ui.timepicker.placeholder")}
+                    value={customTime}
+                    onChange={setCustomTime}
+                    variant="modal"
+                    modalTitle={t("tasks.modal.pickTimeTitle")}
+                    minTime={customMinTime}
+                  />
+                </div>
+              )}
+            </div>
+
+            {!hideMembers && (
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                  {t("tasks.modal.members")}{" "}
+                  <span style={{ color: "var(--status-error-text)" }}>*</span>
+                </span>
+                <AssigneeChecklist
+                  members={members}
+                  selectedIds={assigneeIds}
+                  onToggle={toggleAssignee}
+                  isLoading={isLoadingMembers}
+                />
+              </div>
+            )}
+
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                {t("tasks.modal.priority")}
+              </span>
+              <div className="flex gap-2">
+                {PRIORITY_OPTIONS.map((p) => (
+                  <Pill
+                    key={p.value}
+                    label={t(p.labelKey)}
+                    icon={PRIORITY_ICON}
+                    active={priority === p.value}
+                    activeColor={p.activeColor}
+                    className="flex-1"
+                    onClick={() => setPriority(p.value)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+  );
+
+  const step2Content = (
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                {t("tasks.modal.subtasks")}
+              </span>
+              <div className="flex gap-2">
+                <CusInput
+                  ref={subtaskInputRef}
+                  placeholder={t("tasks.modal.subtaskPlaceholder")}
+                  value={subtaskInput}
+                  onChange={(e) => setSubtaskInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addSubtask();
+                    }
+                  }}
+                />
+                <CusButton
+                  variant="outline"
+                  onClick={addSubtask}
+                  style={{
+                    borderColor: "var(--brand-default)",
+                    color: "var(--brand-default)",
+                  }}
+                >
+                  <LuPlus size={16} />
+                </CusButton>
+              </div>
+              {subtasks.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  {subtasks.map((s) => (
+                    <div
+                      key={s.id}
+                      className="flex items-center gap-2 rounded-input border border-subtle bg-surface px-3 py-2"
+                    >
+                      <span className="min-w-0 flex-1 truncate text-sm text-primary">
+                        {s.label}
+                      </span>
+                      <button
+                        type="button"
+                        aria-label={t("common.actions.delete")}
+                        onClick={() => removeSubtask(s.id)}
+                        className="flex-none text-secondary"
+                      >
+                        <LuX size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <CusFileUpload
+              variant="button"
+              maxFiles={5}
+              buttonText={t("common.actions.attachFile")}
+              onFileChange={setFiles}
+            />
+
+            <div className="flex flex-col divide-y divide-[var(--border-default)] rounded-input border border-subtle bg-surface px-4">
+              <div className="flex items-center justify-between py-3 text-sm">
+                <span className="text-secondary">{t("tasks.modal.summaryTask")}</span>
+                <span className="min-w-0 max-w-[60%] truncate font-medium text-primary">
+                  {title || "-"}
+                </span>
+              </div>
+              {!hideMembers && (
+                <div className="flex items-center justify-between py-3 text-sm">
+                  <span className="text-secondary">{t("tasks.modal.summaryAssignee")}</span>
+                  <span className="font-medium text-primary">
+                    {assigneeSummary}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center justify-between py-3 text-sm">
+                <span className="text-secondary">{t("tasks.modal.summaryDue")}</span>
+                <span className="font-medium text-primary">
+                  {dueDateLabel || "-"}
+                </span>
+              </div>
+            </div>
+          </div>
+  );
+
+  // Desktop: ikkala qism yonma-yon, bitta umumiy footer ("Отмена" / submit).
+  if (layout === "split") {
+    return (
+      <CusDialog
+        open={open}
+        onClose={handleClose}
+        title={t("tasks.modal.titleAdd")}
+        centered
+        fitContent
+        closeOnBackdrop={false}
+        footer={
+          <>
+            <CusButton variant="outline" isDisabled={isSubmitting} onClick={handleClose}>
+              {t("common.actions.cancel")}
+            </CusButton>
+            <CusButton
+              isDisabled={!title.trim() || (!hideMembers && assigneeIds.length === 0)}
+              isLoading={isSubmitting}
+              loadingText={t("common.states.sending")}
+              onClick={handleSubmit}
+              style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
+            >
+              {t("common.actions.create")}
+            </CusButton>
+          </>
+        }
+      >
+        <div className="grid w-[880px] max-w-[85vw] grid-cols-2 gap-6">
+          {step1Content}
+          <div className="border-l border-subtle pl-6">{step2Content}</div>
+        </div>
+      </CusDialog>
+    );
+  }
+
   return (
     <CusDrawer
       open={open}
@@ -423,268 +730,7 @@ function TaskModalAdd({
     >
       <StepIndicator step={step} />
 
-      {step === 1 ? (
-        <div className="flex flex-col gap-4">
-          <CusInput
-            ref={titleInputRef}
-            label={t("tasks.modal.nameLabel")}
-            isRequired
-            placeholder={t("tasks.modal.namePlaceholder")}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-                {t("tasks.modal.description")}
-              </span>
-              <div className="flex gap-1 rounded-full border border-default bg-surface p-1">
-                <button
-                  type="button"
-                  aria-label={t("tasks.modal.descriptionText")}
-                  onClick={() => setDescriptionMode("text")}
-                  className="flex size-9 items-center justify-center rounded-full"
-                  style={
-                    descriptionMode === "text"
-                      ? {
-                          background: "var(--brand-default)",
-                          color: "var(--text-on-brand)",
-                        }
-                      : { color: "var(--text-secondary)" }
-                  }
-                >
-                  <LuType size={16} />
-                </button>
-                <button
-                  type="button"
-                  aria-label={t("tasks.modal.descriptionVoice")}
-                  onClick={() => setDescriptionMode("voice")}
-                  className="flex size-9 items-center justify-center rounded-full"
-                  style={
-                    descriptionMode === "voice"
-                      ? {
-                          background: "var(--brand-default)",
-                          color: "var(--text-on-brand)",
-                        }
-                      : { color: "var(--text-secondary)" }
-                  }
-                >
-                  <LuMic size={16} />
-                </button>
-              </div>
-            </div>
-            {descriptionMode === "text" ? (
-              <CusTextArea
-                placeholder={t("tasks.modal.descriptionPlaceholder")}
-                autoresize
-                maxH="10lh"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            ) : (
-              <VoiceNoteRecorder value={voiceNote} onChange={setVoiceNote} />
-            )}
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-                {t(DUE_SECTION_LABEL[activeDueIcon])}
-              </span>
-              <div className="flex gap-1 rounded-full border border-default bg-surface p-1">
-                <IconToggle
-                  icon={<LuCalendar size={16} />}
-                  ariaLabel={t("tasks.modal.pickDate")}
-                  active={activeDueIcon === "custom"}
-                  onClick={() => setDueMode("custom")}
-                />
-                <IconToggle
-                  icon={<LuClock size={16} />}
-                  ariaLabel={t("tasks.modal.quickTime")}
-                  active={activeDueIcon === "quick"}
-                  onClick={() => setDueMode("quick")}
-                />
-              </div>
-            </div>
-            {activeDueIcon === "quick" && (
-              <>
-                <div className="flex flex-nowrap gap-1.5 overflow-x-auto pb-0.5">
-                  <Pill
-                    label={t("tasks.modal.customTime")}
-                    className="flex-none"
-                    active={isCustomQuickTime}
-                    onClick={() => setIsCustomQuickTime(true)}
-                  />
-                  {[...QUICK_TIMES]
-                    .sort((a, b) => Number(isPastQuickTime(a)) - Number(isPastQuickTime(b)))
-                    .map((time) => (
-                      <Pill
-                        key={time}
-                        label={time}
-                        className="flex-none"
-                        active={!isCustomQuickTime && quickTime === time}
-                        disabled={isPastQuickTime(time)}
-                        onClick={() => {
-                          setIsCustomQuickTime(false);
-                          setQuickTime(time);
-                        }}
-                      />
-                    ))}
-                </div>
-                {isCustomQuickTime && (
-                  <CusTimepicker
-                    placeholder={t("ui.timepicker.placeholder")}
-                    value={quickTime}
-                    onChange={setQuickTime}
-                    variant="modal"
-                    modalTitle={t("tasks.modal.pickTimeTitle")}
-                    minTime={todayMinTime}
-                  />
-                )}
-              </>
-            )}
-            {dueMode === "custom" && (
-              <div className="flex flex-col gap-2 pt-1">
-                <CusCalendar
-                  placeholder={t("tasks.modal.datePlaceholder")}
-                  value={customDate}
-                  onValueChange={(details) => setCustomDate(details.value)}
-                  variant="modal"
-                  modalTitle={t("tasks.modal.pickDateTitle")}
-                />
-                <CusTimepicker
-                  label={t("tasks.modal.time")}
-                  placeholder={t("ui.timepicker.placeholder")}
-                  value={customTime}
-                  onChange={setCustomTime}
-                  variant="modal"
-                  modalTitle={t("tasks.modal.pickTimeTitle")}
-                  minTime={customMinTime}
-                />
-              </div>
-            )}
-          </div>
-
-          {!hideMembers && (
-            <div className="flex flex-col gap-2">
-              <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-                {t("tasks.modal.members")}{" "}
-                <span style={{ color: "var(--status-error-text)" }}>*</span>
-              </span>
-              <AssigneeChecklist
-                members={members}
-                selectedIds={assigneeIds}
-                onToggle={toggleAssignee}
-                isLoading={isLoadingMembers}
-              />
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              {t("tasks.modal.priority")}
-            </span>
-            <div className="flex gap-2">
-              {PRIORITY_OPTIONS.map((p) => (
-                <Pill
-                  key={p.value}
-                  label={t(p.labelKey)}
-                  icon={PRIORITY_ICON}
-                  active={priority === p.value}
-                  activeColor={p.activeColor}
-                  className="flex-1"
-                  onClick={() => setPriority(p.value)}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-              {t("tasks.modal.subtasks")}
-            </span>
-            <div className="flex gap-2">
-              <CusInput
-                ref={subtaskInputRef}
-                placeholder={t("tasks.modal.subtaskPlaceholder")}
-                value={subtaskInput}
-                onChange={(e) => setSubtaskInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addSubtask();
-                  }
-                }}
-              />
-              <CusButton
-                variant="outline"
-                onClick={addSubtask}
-                style={{
-                  borderColor: "var(--brand-default)",
-                  color: "var(--brand-default)",
-                }}
-              >
-                <LuPlus size={16} />
-              </CusButton>
-            </div>
-            {subtasks.length > 0 && (
-              <div className="flex flex-col gap-2">
-                {subtasks.map((s) => (
-                  <div
-                    key={s.id}
-                    className="flex items-center gap-2 rounded-input border border-subtle bg-surface px-3 py-2"
-                  >
-                    <span className="min-w-0 flex-1 truncate text-sm text-primary">
-                      {s.label}
-                    </span>
-                    <button
-                      type="button"
-                      aria-label={t("common.actions.delete")}
-                      onClick={() => removeSubtask(s.id)}
-                      className="flex-none text-secondary"
-                    >
-                      <LuX size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <CusFileUpload
-            variant="button"
-            maxFiles={5}
-            buttonText={t("common.actions.attachFile")}
-            onFileChange={setFiles}
-          />
-
-          <div className="flex flex-col divide-y divide-[var(--border-default)] rounded-input border border-subtle bg-surface px-4">
-            <div className="flex items-center justify-between py-3 text-sm">
-              <span className="text-secondary">{t("tasks.modal.summaryTask")}</span>
-              <span className="min-w-0 max-w-[60%] truncate font-medium text-primary">
-                {title || "-"}
-              </span>
-            </div>
-            {!hideMembers && (
-              <div className="flex items-center justify-between py-3 text-sm">
-                <span className="text-secondary">{t("tasks.modal.summaryAssignee")}</span>
-                <span className="font-medium text-primary">
-                  {assigneeSummary}
-                </span>
-              </div>
-            )}
-            <div className="flex items-center justify-between py-3 text-sm">
-              <span className="text-secondary">{t("tasks.modal.summaryDue")}</span>
-              <span className="font-medium text-primary">
-                {dueDateLabel || "-"}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
+      {step === 1 ? step1Content : step2Content}
     </CusDrawer>
   );
 }

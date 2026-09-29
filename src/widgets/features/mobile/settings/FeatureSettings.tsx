@@ -11,6 +11,7 @@ import {
   LuLogOut,
 } from "react-icons/lu";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
+import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { SettingsWorkspaceCard } from "./components/SettingsWorkspaceCard";
 import { SettingsMenuRow } from "./components/SettingsMenuRow";
 import {
@@ -19,7 +20,6 @@ import {
 } from "./hooks/useApiSettings";
 import type { SettingsMenuItem } from "./types";
 import { RoleGate, hasRole } from "@/components/shared/role-gate/RoleGate";
-import { MemberReminderSettings } from "./components/MemberReminderSettings";
 import { WORKSPACE_ROLES } from "@/const/roles";
 import { useWorkspaceStore } from "@/store/workspace.store";
 
@@ -40,10 +40,16 @@ export default function FeatureSettings() {
   const workspace = workspaceQuery.data;
   // GET .../members member'da 403 qaytadi, shuning uchun rol aniqlanib,
   // admin/owner/viewer ekani bilinmaguncha so'rov yuborilmaydi.
-  const isManager = hasRole(workspace ? [workspace.role] : [], MANAGE_VIEW_ROLES);
-  const isPersonal = useWorkspaceStore((s) => s.selectedWorkspaceType) === "personal";
+  const isManager = hasRole(
+    workspace ? [workspace.role] : [],
+    MANAGE_VIEW_ROLES,
+  );
+  const isPersonal =
+    useWorkspaceStore((s) => s.selectedWorkspaceType) === "personal";
   // Personal'da xodimlar soni kerak emas — so'rov umuman yuborilmaydi.
-  const membersCountQuery = useOrganizationMembersCount(isManager && !isPersonal);
+  const membersCountQuery = useOrganizationMembersCount(
+    isManager && !isPersonal,
+  );
 
   if (workspaceQuery.isPending) {
     return (
@@ -58,9 +64,7 @@ export default function FeatureSettings() {
   if (workspaceQuery.isError || !workspace) {
     return (
       <div className="p-4">
-        <p className="text-sm text-error-strong">
-          {t("settings.loadError")}
-        </p>
+        <p className="text-sm text-error-strong">{t("settings.loadError")}</p>
       </div>
     );
   }
@@ -118,20 +122,20 @@ export default function FeatureSettings() {
 
   return (
     <div className="flex flex-col gap-5 p-4">
-      <div>
-        <h1 className="font-condensed text-2xl tracking-wide text-primary">
-          {t("settings.title")}
-        </h1>
-        <p className="mt-0.5 text-sm font-semibold text-brand">
-          {workspace.name.toUpperCase()} - {organizationRoleLabel(workspace.role)}
-        </p>
-      </div>
-
       <SettingsWorkspaceCard
         workspace={workspace}
         membersCount={membersCountQuery.data}
         isPersonal={isPersonal}
       />
+      {/* Personal'da foydalanuvchi doim egasi — rol hech narsa bildirmaydi. */}
+      {!isPersonal && (
+        <div className="flex flex-col items-center gap-1.5 text-center">
+          <CusBadge variant="subtle" size="lg" tone="brand">
+            {organizationRoleLabel(workspace.role)}
+          </CusBadge>
+        </div>
+      )}
+
       {/* admin owner viewer */}
       <RoleGate roles={[workspace.role]} allow={MANAGE_VIEW_ROLES}>
         <div className="flex flex-col gap-2">
@@ -151,13 +155,26 @@ export default function FeatureSettings() {
       </RoleGate>
       {/* member */}
       <RoleGate roles={[workspace.role]} allow={[WORKSPACE_ROLES.MEMBER]}>
-        <MemberReminderSettings />
+        {/* Member boshqaruv bo'limlarini ko'rmaydi — faqat rollar tavsifi (kim nima qila oladi). */}
+        <CusCardbox
+          className="flex flex-col divide-y divide-[var(--border-subtle)] rounded-card"
+          style={{ padding: 0 }}
+        >
+          {allMenuItems
+            .filter((item) => item.to === "/settings/roles")
+            .map((item) => (
+              <SettingsMenuRow key={item.to} {...item} />
+            ))}
+        </CusCardbox>
       </RoleGate>
 
-      <button className="flex w-full items-center justify-center gap-2 rounded-button border border-error py-3 text-sm font-semibold text-error-strong">
-        <LuLogOut size={16} />
-        {t("settings.leave")}
-      </button>
+      {/* Shaxsiy maydondan chiqib bo'lmaydi. Tashkilot uchun chiqish endpointi hali yo'q — tugma ishlamaydi. */}
+      {!isPersonal && (
+        <button className="flex w-full items-center justify-center gap-2 rounded-button border border-error py-3 text-sm font-semibold text-error-strong">
+          <LuLogOut size={16} />
+          {t("settings.leave")}
+        </button>
+      )}
     </div>
   );
 }

@@ -6,6 +6,7 @@ const doska = {
     organizations: "Организации",
   },
   listError: "Не удалось загрузить список. Обновите страницу.",
+  emptyOrganizations: "Вы пока не состоите ни в одной организации",
   personal: {
     title: "Личные задачи",
     today: "Сегодня {{label}}",

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   LuChevronDown,
+  LuCirclePlay,
   LuClock,
   LuSquareCheck,
   LuPaperclip,
@@ -53,7 +54,10 @@ interface TaskCardProps {
   statusId: string;
   onStatusChange: (id: string) => void;
 
-  dateRangeLabel: string;
+  /** Muddat — "04.10 18:00" yoki "Без срока". */
+  dueLabel: string;
+  /** Diapazonli vazifada boshlanish — alohida badge; bir kunlik diapazonda faqat soat ("09:00"). */
+  startLabel?: string;
   subtaskCountLabel: string;
   fileCount: number;
 
@@ -104,7 +108,8 @@ function TaskCard({
   statusOptions,
   statusId,
   onStatusChange,
-  dateRangeLabel,
+  dueLabel,
+  startLabel,
   subtaskCountLabel,
   fileCount,
   members,
@@ -202,12 +207,21 @@ function TaskCard({
       </div>
 
       {/* Vaqt + subtask/file badge'lar */}
-      <div className="flex items-center justify-between gap-2">
-        <TaskMetaBadge
-          icon={<LuClock size={14} />}
-          label={dateRangeLabel}
-          bg={isOverdue ? "var(--status-error-bg)" : "var(--bg-surface-secondary)"}
-        />
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {startLabel && (
+            <TaskMetaBadge
+              icon={<LuCirclePlay size={14} />}
+              label={startLabel}
+              bg="var(--bg-surface-secondary)"
+            />
+          )}
+          <TaskMetaBadge
+            icon={<LuClock size={14} />}
+            label={dueLabel}
+            bg={isOverdue ? "var(--status-error-bg)" : "var(--bg-surface-secondary)"}
+          />
+        </div>
         <div className="flex items-center gap-2">
           {Number(subtaskCountLabel.split("/")[1] ?? 0) > 0 && (
             <TaskMetaBadge

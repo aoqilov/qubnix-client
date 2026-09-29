@@ -25,7 +25,12 @@ export function RealtimeBridge() {
   const sessionStatus = useSessionStore((s) => s.status);
   const initData = useSessionStore((s) => s.initData);
   const clearSession = useSessionStore((s) => s.clearSession);
+  const currentUserId = useSessionStore((s) => s.user?.id);
   const navigate = useNavigate();
+  // Effekt bog'liqligiga qo'yilmaydi — ulanish qayta ochilmasligi kerak,
+  // shuning uchun onEvent ichida eng so'nggi qiymat uchun ref orqali o'qiladi.
+  const currentUserIdRef = useRef(currentUserId);
+  currentUserIdRef.current = currentUserId;
   // navigate har marshrut o'zgarishida yangilanishi mumkin — effekt
   // bog'liqligiga qo'yilsa, oqim har navigatsiyada qayta ulanardi.
   const navigateRef = useRef(navigate);
@@ -47,7 +52,8 @@ export function RealtimeBridge() {
             `org=${envelope.organization_id} project=${envelope.project_id} actor=${envelope.actor_id}`,
           );
         }
-        invalidateForEvent(queryClient, envelope);
+        const selfUserId = currentUserIdRef.current;
+        invalidateForEvent(queryClient, envelope, selfUserId != null ? String(selfUserId) : undefined);
         void lostAccessToSelectedWorkspace(envelope).then((lost) => {
           if (lost) navigateRef.current("/doska", { replace: true });
         });

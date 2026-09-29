@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
+import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusCheckbox } from "@/components/ui/inputs/CusCheckbox";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusInput } from "@/components/ui/inputs/CusInput";
@@ -19,6 +20,8 @@ interface MemberPickerDrawerProps {
   members: MemberPickerItem[];
   selectedIds: string[];
   onApply: (ids: string[]) => void;
+  /** "drawer" (default) — mobil, o'ngdan to'liq ekran; "dialog" — desktop, markazda. */
+  variant?: "drawer" | "dialog";
 }
 
 export function MemberPickerDrawer({
@@ -28,6 +31,7 @@ export function MemberPickerDrawer({
   members,
   selectedIds,
   onApply,
+  variant = "drawer",
 }: MemberPickerDrawerProps) {
   const { t } = useTranslation();
   // Tashqi (qo'llanilgan) tanlovdan mustaqil qoralama — "Отмена" bosilsa
@@ -64,24 +68,19 @@ export function MemberPickerDrawer({
     setDraftIds((prev) => (prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]));
   };
 
-  return (
-    <CusDrawer
-      open={open}
-      onClose={handleCancel}
-      placement="end"
-      size="full"
-      title={title ?? t("common.memberPicker.title")}
-      footer={
-        <div className="flex w-full gap-2">
-          <CusButton variant="outline" className="flex-1" onClick={handleCancel}>
-            {t("common.actions.cancel")}
-          </CusButton>
-          <CusButton className="flex-1" onClick={handleApply}>
-            {t("common.actions.apply")}
-          </CusButton>
-        </div>
-      }
-    >
+  const footer = (
+    <div className="flex w-full gap-2">
+      <CusButton variant="outline" className="flex-1" onClick={handleCancel}>
+        {t("common.actions.cancel")}
+      </CusButton>
+      <CusButton className="flex-1" onClick={handleApply}>
+        {t("common.actions.apply")}
+      </CusButton>
+    </div>
+  );
+
+  const content = (
+    <>
       <div className="mb-3">
         <CusInput
           placeholder={t("common.memberPicker.search")}
@@ -142,6 +141,34 @@ export function MemberPickerDrawer({
           </div>
         ))}
       </div>
+    </>
+  );
+
+  if (variant === "dialog") {
+    return (
+      <CusDialog
+        open={open}
+        onClose={handleCancel}
+        title={title ?? t("common.memberPicker.title")}
+        size="md"
+        centered
+        footer={footer}
+      >
+        {content}
+      </CusDialog>
+    );
+  }
+
+  return (
+    <CusDrawer
+      open={open}
+      onClose={handleCancel}
+      placement="end"
+      size="full"
+      title={title ?? t("common.memberPicker.title")}
+      footer={footer}
+    >
+      {content}
     </CusDrawer>
   );
 }

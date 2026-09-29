@@ -1,35 +1,39 @@
+import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";
-import { LuChevronRight, LuGem, LuPackage } from "react-icons/lu";
+import { LuChartBarIncreasing, LuChevronRight, LuSlidersVertical } from "react-icons/lu";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
-import { CusButton } from "@/components/ui/buttons/CusButton";
-import { useBuyTariff, useTariffs } from "../hooks/useApiTariffs";
+import { PricingPlans } from "@/components/shared/pricing/PricingPlans";
+import {
+  OrgTariffCard,
+  OrgTariffCardSkeleton,
+  OrgTariffEmpty,
+} from "@/components/shared/org-tariff-card/OrgTariffCard";
+import { useBuyTariff, useMyTariffs, useTariffs } from "../hooks/useApiTariffs";
 
 export type TariffPanelId = "current-tariff" | "tariffs-list";
 
 interface TariffMenuRowProps {
   icon: ReactNode;
   title: string;
-  subtitle: string;
+  count?: number;
   active?: boolean;
   onClick: () => void;
 }
 
-function TariffMenuRow({ icon, title, subtitle, active, onClick }: TariffMenuRowProps) {
+function TariffMenuRow({ icon, title, count, active, onClick }: TariffMenuRowProps) {
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-[var(--bg-hover)] ${
-        active ? "bg-[var(--bg-hover)]" : ""
+      className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-surface-secondary ${
+        active ? "bg-surface-secondary" : ""
       }`}
     >
-      <span className="flex-none text-[var(--text-muted)]">{icon}</span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-sm font-medium">{title}</span>
-        <span className="block text-xs text-[var(--text-muted)]">
-          {subtitle}
-        </span>
-      </span>
-      <LuChevronRight size={16} className="flex-none text-[var(--text-muted)]" />
+      <span className="flex-none text-secondary">{icon}</span>
+      <span className="flex-1 text-sm font-medium text-primary">{title}</span>
+      {count !== undefined && (
+        <span className="flex-none text-sm font-semibold text-brand">{count}</span>
+      )}
+      <LuChevronRight size={16} className="flex-none text-secondary" />
     </button>
   );
 }
@@ -40,22 +44,29 @@ interface TariffsSectionProps {
 }
 
 export function TariffsSection({ activeId, onSelect }: TariffsSectionProps) {
+  const { t } = useTranslation();
+  // Egasi bo'lgan tashkilotlar soni — yuklanmaguncha son ko'rsatilmaydi.
+  const { data: myTariffs } = useMyTariffs();
   return (
     <div className="flex flex-col gap-2">
-      <div className="text-xs font-semibold tracking-wide text-vio">TARIFLAR</div>
+      <div className="text-xs font-semibold tracking-wide text-secondary">
+        {t("profile.tariffs.section")}
+      </div>
 
-      <CusCardbox style={{ padding: 0 }} className="flex flex-col divide-y divide-[var(--border-default)]">
+      <CusCardbox
+        style={{ padding: 0 }}
+        className="flex flex-col divide-y divide-[var(--border-default)] overflow-hidden rounded-card"
+      >
         <TariffMenuRow
-          icon={<LuPackage size={18} />}
-          title="Mening tariflarim"
-          subtitle="Sotib olingan workspace paketlari"
+          icon={<LuSlidersVertical size={18} />}
+          title={t("profile.tariffs.mine")}
+          count={myTariffs?.length}
           active={activeId === "current-tariff"}
           onClick={() => onSelect("current-tariff")}
         />
         <TariffMenuRow
-          icon={<LuGem size={18} />}
-          title="Tariflar va narxlar"
-          subtitle="Bepul · Start · Pro paketlari"
+          icon={<LuChartBarIncreasing size={18} />}
+          title={t("profile.tariffs.list")}
           active={activeId === "tariffs-list"}
           onClick={() => onSelect("tariffs-list")}
         />
@@ -64,79 +75,56 @@ export function TariffsSection({ activeId, onSelect }: TariffsSectionProps) {
   );
 }
 
-// Backendda foydalanuvchi-darajasidagi tarif ma'lumoti hali yo'q —
-// hozircha statik ko'rsatiladi (workspace.store'dagi mock konvensiyasiga mos).
-const CURRENT_TARIFF = {
-  name: "Pro",
-  description: "Cheklovsiz vazifa va loyihalar",
-  validUntil: "12.10.2026",
-};
-
-export function CurrentTariffCard() {
-  return (
-    <CusCardbox>
-      <div className="mb-2 text-xs font-semibold tracking-wide text-[var(--text-muted)]">
-        MENING TARIFLARIM
-      </div>
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <div className="text-base font-semibold">{CURRENT_TARIFF.name}</div>
-          <div className="mt-0.5 text-sm text-[var(--text-muted)]">
-            {CURRENT_TARIFF.description}
-          </div>
-        </div>
-        <span className="flex-none whitespace-nowrap bg-[var(--vio-10)] px-2.5 py-1 text-[11px] font-semibold tracking-wide text-vio">
-          {CURRENT_TARIFF.validUntil} gacha
-        </span>
-      </div>
-    </CusCardbox>
-  );
+interface CurrentTariffCardProps {
+  /** "Продлить" — to'lov endpointi yo'q, hozircha "Тарифы и цены" panelini ochadi. */
+  onRenew: () => void;
 }
 
-export function TariffsListCard() {
-  const { data: tariffs, isPending, isError } = useTariffs();
-  const buyTariff = useBuyTariff();
+/** "Мои тарифы" — egasi bo'lgan tashkilotlar tarifi, o'ng panelda 2 ustunli grid. */
+export function CurrentTariffCard({ onRenew }: CurrentTariffCardProps) {
+  const { t } = useTranslation();
+  const { data: tariffs = [], isPending, isError } = useMyTariffs();
 
   return (
-    <CusCardbox>
-      <div className="mb-3 text-xs font-semibold tracking-wide text-[var(--text-muted)]">
-        TARIFLAR
+    <div className="flex flex-col gap-3">
+      <div className="text-xs font-semibold uppercase tracking-wide text-secondary">
+        {t("profile.tariffs.mine")}
       </div>
-
-      {isPending && (
-        <p className="text-sm text-[var(--text-muted)]">
-          Yuklanmoqda...
-        </p>
-      )}
-
-      {isError && (
-        <p className="text-sm text-[var(--text-muted)]">
-          Tariflarni olishda xatolik yuz berdi
-        </p>
-      )}
-
-      {tariffs && tariffs.length > 0 && (
-        <div className="flex flex-col divide-y divide-[var(--border-default)]">
+      {isPending ? (
+        <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+          <OrgTariffCardSkeleton />
+          <OrgTariffCardSkeleton />
+        </div>
+      ) : isError ? (
+        <p className="text-sm text-error-strong">{t("profile.tariffs.loadError")}</p>
+      ) : tariffs.length === 0 ? (
+        <OrgTariffEmpty />
+      ) : (
+        <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
           {tariffs.map((tariff) => (
-            <div key={tariff.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-              <div className="min-w-0 flex-1">
-                <div className="font-medium">{tariff.name}</div>
-                <div className="text-sm text-[var(--text-muted)]">
-                  {tariff.price} {tariff.currency}
-                </div>
-              </div>
-              <CusButton
-                size="sm"
-                variant="outline"
-                isLoading={buyTariff.isPending && buyTariff.variables === tariff.id}
-                onClick={() => buyTariff.mutate(tariff.id)}
-              >
-                Tanlash
-              </CusButton>
-            </div>
+            <OrgTariffCard key={tariff.id} tariff={tariff} onRenew={onRenew} />
           ))}
         </div>
       )}
-    </CusCardbox>
+    </div>
+  );
+}
+
+/** "Тарифы и цены" — desktop o'ng panelida, keng ekranda 3 ustun. */
+export function TariffsListCard() {
+  const { t } = useTranslation();
+  const { data: tariffs, isPending, isError } = useTariffs();
+  const buyTariff = useBuyTariff();
+
+  if (isPending) return <p className="text-sm text-secondary">{t("common.states.loading")}</p>;
+  if (isError) return <p className="text-sm text-error-strong">{t("profile.tariffs.loadError")}</p>;
+
+  return (
+    <PricingPlans
+      tariffs={tariffs}
+      columns="three"
+      pendingId={buyTariff.isPending ? buyTariff.variables?.tariffId : null}
+      onChoose={(tariffId, period) => buyTariff.mutate({ tariffId, period })}
+    />
   );
 }

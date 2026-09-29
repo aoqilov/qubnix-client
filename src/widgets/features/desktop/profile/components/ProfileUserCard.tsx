@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LuPencil } from "react-icons/lu";
 import { useSessionStore } from "@/store/session.store";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
@@ -12,17 +13,19 @@ function getInitials(fullName: string): string {
 }
 
 interface ProfileUserCardProps {
+  /** "Tahrirlash" paneli ochiqmi — tugma faol holatda ko'rinadi. */
   active?: boolean;
   onEdit?: () => void;
 }
 
 export function ProfileUserCard({ active, onEdit }: ProfileUserCardProps) {
+  const { t } = useTranslation();
   const user = useSessionStore((s) => s.user);
 
   if (!user) return null;
 
   return (
-    <CusCardbox className="flex items-center gap-4">
+    <CusCardbox className="flex items-center gap-4 rounded-card">
       {user.avatarUrl ? (
         <CusImagePreview
           src={user.avatarUrl}
@@ -33,28 +36,23 @@ export function ProfileUserCard({ active, onEdit }: ProfileUserCardProps) {
           preview={true}
         />
       ) : (
-        <span className="flex h-14 w-14 flex-none items-center justify-center bg-vio font-condensed text-xl text-[var(--text-on-accent)]">
+        <span className="flex h-14 w-14 flex-none items-center justify-center rounded-card bg-brand font-condensed text-xl text-on-brand">
           {getInitials(user.fullName)}
         </span>
       )}
       <div className="min-w-0 flex-1">
-        <div className="text-lg font-semibold">{user.fullName}</div>
-        <div className="mt-0.5 text-sm text-[var(--text-muted)]">
-          {user.phone ? `  ${user.phone}` : ""}
-        </div>
+        <div className="text-lg font-semibold text-primary">{user.fullName}</div>
+        {user.phone && <div className="mt-0.5 text-sm text-secondary">{user.phone}</div>}
       </div>
       {onEdit && (
         <button
           onClick={onEdit}
-          aria-label="Profilni tahrirlash"
-          className={`flex-none rounded-lg p-2 transition hover:bg-[var(--bg-hover)] ${
-            active ? "bg-[var(--bg-hover)]" : ""
+          aria-label={t("profile.editProfile")}
+          className={`flex-none rounded-input p-2 transition hover:bg-surface-secondary ${
+            active ? "bg-surface-secondary" : ""
           }`}
         >
-          <LuPencil
-            size={16}
-            className="text-[var(--text-muted)]"
-          />
+          <LuPencil size={16} className="text-secondary" />
         </button>
       )}
     </CusCardbox>

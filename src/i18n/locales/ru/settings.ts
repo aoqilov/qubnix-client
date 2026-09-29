@@ -1,6 +1,6 @@
 // /settings bosh sahifasi, umumiy sozlamalar (general), eslatmalar (reminders).
 const settings = {
-  title: "Настройка Workspace",
+  title: "Организация: {{name}}",
   loadError: "Не удалось загрузить данные Workspace. Обновите страницу.",
   manage: "УПРАВЛЕНИЕ",
   leave: "Выйти из Workspace",
@@ -23,10 +23,15 @@ const settings = {
     generalHint: "Название, приглашения, тариф",
   },
   reminders: {
-    newTask: "Когда даётся новая задача",
-    projectManagement: "Ведение проекта",
-    performance: "Успеваемость",
-    push: "Push-уведомление",
+    newTask: "Новая задача",
+    newTaskHint: "Когда даётся новая задача",
+    deadline: "Дедлайн задачи",
+    deadlineHint: "За 10 минут до дедлайна",
+    taskCompleted: "Задача выполнена",
+    taskCompletedHint: "Когда задача отмечена как выполненная",
+    taskOverdue: "Задача просрочена",
+    taskOverdueHint: "Когда срок задачи истёк",
+    loadError: "Не удалось загрузить настройки уведомлений.",
   },
   general: {
     orgName: "Название организации",
@@ -34,13 +39,6 @@ const settings = {
     active: "Активно",
     remaining: "Осталось {{label}} — до {{date}}",
     extend: "Продлить подписку",
-  },
-  memberReminders: {
-    title: "НАПОМИНАНИЯ",
-    deadline: "Дедлайн задачи",
-    deadlineHint: "За 10 минут до дедлайна",
-    newTask: "Новая задача",
-    newTaskHint: "Когда даётся новая задача",
   },
 };
 

@@ -44,7 +44,11 @@ export default function FeatureProfile() {
 
       <ProfileSettingsModal open={activeDrawer === "settings"} onClose={close} />
       <ProfileEditModal open={activeDrawer === "edit-profile"} onClose={close} />
-      <CurrentTariffModal open={activeDrawer === "current-tariff"} onClose={close} />
+      <CurrentTariffModal
+        open={activeDrawer === "current-tariff"}
+        onClose={close}
+        onRenew={() => setActiveDrawer("tariffs-list")}
+      />
       <TariffsListModal open={activeDrawer === "tariffs-list"} onClose={close} />
     </div>
   );

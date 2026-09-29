@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useRef, useState, type ChangeEvent } from "react";
 import { LuCamera, LuCheck } from "react-icons/lu";
 import { useSessionStore } from "@/store/session.store";
@@ -20,6 +21,7 @@ interface ProfileEditCardProps {
 }
 
 export function ProfileEditCard({ onSaved }: ProfileEditCardProps) {
+  const { t } = useTranslation();
   const user = useSessionStore((s) => s.user);
   const updateUser = useSessionStore((s) => s.updateUser);
   const [fullName, setFullName] = useState(user?.fullName ?? "");
@@ -57,8 +59,8 @@ export function ProfileEditCard({ onSaved }: ProfileEditCardProps) {
   }
 
   return (
-    <CusCardbox className="flex flex-col gap-4">
-      <div className="text-sm font-semibold">Profilni tahrirlash</div>
+    <CusCardbox className="flex flex-col gap-4 rounded-card">
+      <div className="text-sm font-semibold text-primary">{t("profile.editProfile")}</div>
 
       <div className="flex items-center gap-4">
         <div className="relative flex-none">
@@ -72,16 +74,15 @@ export function ProfileEditCard({ onSaved }: ProfileEditCardProps) {
               preview={false}
             />
           ) : (
-            <span className="flex h-14 w-14 items-center justify-center bg-vio font-condensed text-xl text-[var(--text-on-accent)]">
+            <span className="flex h-14 w-14 items-center justify-center rounded-card bg-brand font-condensed text-xl text-on-brand">
               {getInitials(fullName || user.fullName)}
             </span>
           )}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            aria-label="Rasmni almashtirish"
-            className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[var(--bg-second)] text-[var(--text-on-accent)]"
-            style={{ background: "var(--vio)" }}
+            aria-label={t("profile.edit.changePhoto")}
+            className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[var(--bg-surface)] bg-brand text-on-brand"
           >
             <LuCamera size={12} />
           </button>
@@ -93,17 +94,15 @@ export function ProfileEditCard({ onSaved }: ProfileEditCardProps) {
             onChange={handleFileChange}
           />
         </div>
-        <div className="text-sm text-[var(--text-muted)]">
-          Rasmni almashtirish uchun kamera belgisini bosing
-        </div>
+        <div className="text-sm text-secondary">{t("profile.edit.changePhotoHint")}</div>
       </div>
 
       <CusInput
-        label="Ism familiya"
+        label={t("profile.edit.fullName")}
         value={fullName}
         onChange={(e) => setFullName(e.target.value)}
       />
-      <CusInput label="Telefon raqam" value={user.phone ?? ""} disabled />
+      <CusInput label={t("profile.edit.phone")} value={user.phone ?? ""} disabled />
       <div className="flex justify-end">
         <CusButton
           isDisabled={!isDirty}
@@ -111,7 +110,7 @@ export function ProfileEditCard({ onSaved }: ProfileEditCardProps) {
           leftIcon={<LuCheck size={16} />}
           onClick={handleSave}
         >
-          Saqlash
+          {t("common.actions.save")}
         </CusButton>
       </div>
     </CusCardbox>

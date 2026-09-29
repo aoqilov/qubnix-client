@@ -7,6 +7,7 @@ const doska: typeof ru = {
     organizations: "Tashkilotlar",
   },
   listError: "Ro'yxatni yuklab bo'lmadi. Sahifani yangilang.",
+  emptyOrganizations: "Siz hali hech qaysi tashkilotga a'zo emassiz",
   personal: {
     title: "Shaxsiy vazifalar",
     today: "Bugun {{label}}",

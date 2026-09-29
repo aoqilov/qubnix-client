@@ -24,6 +24,8 @@ export default function FeatureSettingsRoles() {
         ]}
       />
 
+      <p className="px-1 text-xs text-secondary">{t("roles.combineHint")}</p>
+
       <CusAccordion
         key={scope}
         items={scope === "organization" ? buildOrganizationRoleItems(t) : buildProjectRoleItems(t)}

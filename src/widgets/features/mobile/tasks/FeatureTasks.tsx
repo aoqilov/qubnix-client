@@ -2,7 +2,7 @@ import { getApiErrorMessage } from "@/utils/apiErrorMessage";
 import i18n from "@/i18n";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState, type ReactNode } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { useSessionStore } from "@/store/session.store";
@@ -13,6 +13,8 @@ import {
   LuLoaderCircle,
   LuCircleCheck,
   LuCircleX,
+  LuFolderOpen,
+  LuPlus,
   LuListChecks,
   LuTriangleAlert,
   LuX,
@@ -21,6 +23,7 @@ import type { TaskStatusColor } from "@/components/shared/task-card/mini-compone
 import { projectsApi } from "@/api/projects/projects.api";
 import type { RawTask, TaskStatus } from "@/api/tasks/tasks.types";
 import { fromApiDate, getDayKind, todayApiDate } from "@/utils/apiDate";
+import { isTaskOverdue } from "@/utils/taskDateLabels";
 import { formatWeekdayDate } from "@/utils/formatWeekdayDate";
 import ProjectsTabs from "@/components/shared/project-tab/ProjectsTabs";
 import PageTitleDynamic from "@/components/shared/page-title-dynamic/PageTitleDynamic";
@@ -112,14 +115,67 @@ function TasksEmptyState({ statusLabel }: { statusLabel: string }) {
   );
 }
 
+function NoProjectsState({ isPersonal }: { isPersonal: boolean }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  return (
+    <div className="flex flex-col items-center gap-2 py-12 text-center">
+      <span className="flex size-11 items-center justify-center rounded-avatar bg-surface-secondary text-secondary">
+        <LuFolderOpen size={20} />
+      </span>
+      {/* Personal'da loyihaga hech kim qo'shmaydi — foydalanuvchi o'zi yaratadi. */}
+      <p className="text-sm font-medium text-primary">
+        {isPersonal ? t("tasks.page.noProjectsPersonal") : t("tasks.page.noProjects")}
+      </p>
+      <p className="text-xs text-secondary">
+        {isPersonal ? t("tasks.page.noProjectsPersonalHint") : t("tasks.page.noProjectsHint")}
+      </p>
+      {isPersonal && (
+        <CusButton
+          size="sm"
+          rounded="9999px"
+          className="mt-2"
+          leftIcon={<LuPlus size={14} />}
+          onClick={() => navigate("/settings/projects")}
+          style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
+        >
+          {t("tasks.page.createProject")}
+        </CusButton>
+      )}
+    </div>
+  );
+}
+
+function pad2(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+function formatDayMonth(d: Date): string {
+  return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}`;
+}
+
+function formatTime(d: Date): string {
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+
+/** Muddat — "04.10 00:00"; muddat yo'q bo'lsa "Без срока". */
 function formatDueLabel(task: RawTask): string {
   if (!task.due_at) return i18n.t("tasks.card.noDeadline");
-  const d = new Date(task.due_at);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const hh = String(d.getHours()).padStart(2, "0");
-  const mm = String(d.getMinutes()).padStart(2, "0");
-  return `${day}.${month} ${hh}:${mm}`;
+  const due = new Date(task.due_at);
+  return `${formatDayMonth(due)} ${formatTime(due)}`;
+}
+
+/**
+ * Diapazonli vazifaning boshlanishi (start_at bor va due_at'dan oldin) — alohida badge uchun.
+ * Bir kun ichida — faqat soat ("09:00"), bir necha kunga — "28.09 09:00". Diapazon bo'lmasa undefined.
+ */
+function formatStartLabel(task: RawTask): string | undefined {
+  if (!task.start_at || !task.due_at) return undefined;
+  const start = new Date(task.start_at);
+  const due = new Date(task.due_at);
+  if (start.getTime() >= due.getTime()) return undefined;
+  if (start.toDateString() === due.toDateString()) return formatTime(start);
+  return `${formatDayMonth(start)} ${formatTime(start)}`;
 }
 
 interface TasksNavigationState {
@@ -151,6 +207,9 @@ export default function FeatureTasks() {
     enabled: !!organizationId,
   });
   const projects = projectsQuery.data?.projects ?? [];
+  // Foydalanuvchi hech qaysi loyihaga qo'shilmagan — vazifalar so'rovi ishga tushmaydi,
+  // tab/filtr/ro'yxat o'rniga bildirishnoma ko'rsatiladi.
+  const hasNoProjects = projectsQuery.isSuccess && projects.length === 0;
   const projectTabs = projects.map((p) => ({
     id: String(p.id),
     projectName: p.name,
@@ -256,7 +315,12 @@ export default function FeatureTasks() {
   } | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const { data: projectMembersForTask, isPending: isProjectMembersPending } =
-    useProjectMembersForTask(organizationId, activeTabId, isAddOpen || editingTaskId !== null);
+    // Personal'da xodim tanlanmaydi — ro'yxat so'ralmaydi.
+    useProjectMembersForTask(
+      organizationId,
+      activeTabId,
+      !isPersonal && (isAddOpen || editingTaskId !== null),
+    );
 
   const [errorToast, setErrorToast] = useState<string | null>(null);
   useEffect(() => {
@@ -359,7 +423,10 @@ export default function FeatureTasks() {
         fileIds = uploads.flatMap((uploadedFiles) => uploadedFiles.map((f) => f.id));
       }
 
-      const members = values.assignees.map((a) => ({ user_id: Number(a.id) }));
+      // Personal'da xodim tanlanmaydi — `members` yuborilmaydi, vazifa egasi o'zgarmaydi.
+      const members = isPersonal
+        ? undefined
+        : values.assignees.map((a) => ({ user_id: Number(a.id) }));
       const subtasks = values.subtasks.map((s) => ({ name: s.label, checked: s.checked }));
 
       await updateTask.mutateAsync({
@@ -392,7 +459,29 @@ export default function FeatureTasks() {
     );
   };
 
+  /**
+   * "Бажарилмади" (not_done) — faqat muddati o'tmagan bo'lsa "Бажарилди"га
+   * o'tkaziladi; boshqa statusga yoki muddat o'tgandan keyin bloklanadi
+   * (desktop /tasks'dagi bir xil qoida — FeatureTasks.tsx'ga qarang).
+   */
+  const blockedStatusReason = (task: RawTask, nextStatusId: string): string | null => {
+    if (task.status !== "not_done") return null;
+    if (isTaskOverdue(task)) return t("tasks.page.statusLockedExpired");
+    if (nextStatusId !== "done") {
+      return t("tasks.page.statusLockedNotDoneOnly", {
+        notDone: t("common.taskStatus.not_done"),
+        done: t("common.taskStatus.done"),
+      });
+    }
+    return null;
+  };
+
   const requestStatusChange = (task: RawTask, nextStatusId: string) => {
+    const blocked = blockedStatusReason(task, nextStatusId);
+    if (blocked) {
+      setErrorToast(blocked);
+      return;
+    }
     const hasUnfinishedSubtasks = task.subtasks.some((s) => !s.checked);
     if (nextStatusId === "done" && hasUnfinishedSubtasks) {
       setPendingStatusChange({ taskId: String(task.id), nextStatusId });
@@ -466,6 +555,10 @@ export default function FeatureTasks() {
             </CusButton>
           </div>
         )}
+        {hasNoProjects ? (
+          <NoProjectsState isPersonal={isPersonal} />
+        ) : (
+        <>
         <ProjectsTabs
           tabs={projectTabs}
           activeId={activeTabId}
@@ -527,7 +620,8 @@ export default function FeatureTasks() {
                 statusId={meta?.id ?? "assigned"}
                 onStatusChange={(nextStatusId) => requestStatusChange(task, nextStatusId)}
                 priority={task.priority}
-                dateRangeLabel={formatDueLabel(task)}
+                dueLabel={formatDueLabel(task)}
+                startLabel={formatStartLabel(task)}
                 readOnly={isPast || isViewer}
                 dimmed={isPast}
                 canManage={canManageTasks}
@@ -586,6 +680,8 @@ export default function FeatureTasks() {
               />
             );
           })
+        )}
+        </>
         )}
       </div>
 
@@ -673,7 +769,7 @@ export default function FeatureTasks() {
         onApply={setSelectedMemberIds}
       />
 
-      {!isPast && canManageTasks && <TaskAddButton onClick={() => setIsAddOpen(true)} />}
+      {!isPast && canManageTasks && !hasNoProjects && <TaskAddButton onClick={() => setIsAddOpen(true)} />}
 
       <TaskModalAdd
         open={isAddOpen}
@@ -690,6 +786,7 @@ export default function FeatureTasks() {
         task={editingTask ?? null}
         members={projectMembersForTask ?? []}
         isLoadingMembers={isProjectMembersPending}
+        hideMembers={isPersonal}
         onSubmit={editTask}
       />
 

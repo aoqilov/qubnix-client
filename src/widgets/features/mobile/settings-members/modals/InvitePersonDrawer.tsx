@@ -6,6 +6,7 @@ import {
   LuChevronDown,
   LuCircleCheckBig,
   LuFolderKanban,
+  LuLoaderCircle,
   LuPlus,
   LuSearch,
   LuTriangleAlert,
@@ -255,6 +256,9 @@ export function InvitePersonDrawer({ open, onClose }: InvitePersonDrawerProps) {
   }, [debouncedQuery]);
 
   const searchQuery = useSearchEmployee(debouncedQuery);
+  // Yozilayotgan (debounce kutilayotgan) yoki so'rov ketayotgan paytda — input ichida loader.
+  const isSearching =
+    contact.trim().length >= 3 && (contact.trim() !== debouncedQuery || searchQuery.isFetching);
   const employees = searchQuery.data?.employees ?? [];
   const selectedEmployee = employees.find((e) => e.id === selectedEmployeeId) ?? null;
   const availableRoles = searchQuery.data?.roles ?? [];
@@ -356,6 +360,11 @@ export function InvitePersonDrawer({ open, onClose }: InvitePersonDrawerProps) {
             leftElementWidth="2.25rem"
             value={contact}
             onChange={(e) => setContact(e.target.value)}
+            rightElement={
+              isSearching ? (
+                <LuLoaderCircle size={16} className="animate-spin text-secondary" />
+              ) : undefined
+            }
           />
 
           {debouncedQuery.length > 0 && debouncedQuery.length < 3 && (

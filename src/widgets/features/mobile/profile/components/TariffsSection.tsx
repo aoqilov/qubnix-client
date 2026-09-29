@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";
 import { LuChartBarIncreasing, LuChevronRight, LuSlidersVertical } from "react-icons/lu";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
-import { useWorkspaceStore } from "@/store/workspace.store";
+import { useMyTariffs } from "../hooks/useApiTariffs";
 
 interface TariffMenuRowProps {
   icon: ReactNode;
@@ -34,7 +34,9 @@ interface TariffsSectionProps {
 
 export function TariffsSection({ onSelectCurrent, onSelectList }: TariffsSectionProps) {
   const { t } = useTranslation();
-  const myTariffsCount = useWorkspaceStore((s) => s.workspaces.length);
+  // Egasi bo'lgan tashkilotlar soni — yuklanmaguncha son ko'rsatilmaydi.
+  const { data: myTariffs } = useMyTariffs();
+  const myTariffsCount = myTariffs?.length;
 
   return (
     <div className="flex flex-col gap-2">
