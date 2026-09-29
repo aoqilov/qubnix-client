@@ -16,6 +16,7 @@ import { useMemberViewStyle } from "./hooks/useMemberViewStyle";
 import { useOrganizationMembers } from "./hooks/useApiSettingsMembers";
 import { useSentInvitations } from "./hooks/useApiInvitations";
 import type { MemberRoleFilter } from "./lib/mockMembers";
+import { useIsViewer } from "@/hooks/useIsViewer";
 
 type MembersTab = "general" | "invites";
 
@@ -59,6 +60,8 @@ export default function FeatureSettingsMembers() {
   const [roleFilter, setRoleFilter] = useState<MemberRoleFilter>("all");
   const [isInviteOpen, setInviteOpen] = useState(false);
   const [actionsMemberId, setActionsMemberId] = useState<number | null>(null);
+  // Viewer ro'yxatni ko'radi, lekin taklif/rol/o'chirish amallari yo'q.
+  const isViewer = useIsViewer();
 
   const organizationQuery = useSelectedOrganization();
   const membersQuery = useOrganizationMembers(roleFilter === "all" ? undefined : roleFilter);
@@ -145,7 +148,7 @@ export default function FeatureSettingsMembers() {
                 <MemberCard
                   key={member.id}
                   member={member}
-                  onOpenActions={() => setActionsMemberId(member.id)}
+                  onOpenActions={isViewer ? undefined : () => setActionsMemberId(member.id)}
                 />
               ))}
             </div>
@@ -155,7 +158,7 @@ export default function FeatureSettingsMembers() {
                 <MemberRow
                   key={member.id}
                   member={member}
-                  onOpenActions={() => setActionsMemberId(member.id)}
+                  onOpenActions={isViewer ? undefined : () => setActionsMemberId(member.id)}
                 />
               ))}
             </div>
@@ -163,6 +166,7 @@ export default function FeatureSettingsMembers() {
         </>
       ) : (
         <div className="flex flex-col gap-2">
+          {!isViewer && (
           <CusButton
             variant="plain"
             onClick={() => setInviteOpen(true)}
@@ -179,6 +183,7 @@ export default function FeatureSettingsMembers() {
           >
             {t("members.addPerson")}
           </CusButton>
+          )}
           {invitationsQuery.isPending ? (
             <div className="flex flex-col gap-2">
               <MemberRowSkeleton />
@@ -191,7 +196,7 @@ export default function FeatureSettingsMembers() {
           ) : invites.length === 0 ? (
             <EmptyState />
           ) : (
-            invites.map((invite) => <InviteRow key={invite.id} invite={invite} />)
+            invites.map((invite) => <InviteRow key={invite.id} invite={invite} readOnly={isViewer} />)
           )}
         </div>
       )}

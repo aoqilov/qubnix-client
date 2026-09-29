@@ -213,6 +213,9 @@ export default function FeatureTasks() {
     ]) ||
       !!isProjectManager);
 
+  // Viewer faqat ko'radi — status, subtask va fayl biriktirish ham yopiq.
+  const isViewer = workspaceRole === WORKSPACE_ROLES.VIEWER;
+
   // Bo'sh massiv — "hamma xodimlar".
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const [isMembersFilterOpen, setIsMembersFilterOpen] = useState(false);
@@ -525,7 +528,8 @@ export default function FeatureTasks() {
                 onStatusChange={(nextStatusId) => requestStatusChange(task, nextStatusId)}
                 priority={task.priority}
                 dateRangeLabel={formatDueLabel(task)}
-                readOnly={isPast}
+                readOnly={isPast || isViewer}
+                dimmed={isPast}
                 canManage={canManageTasks}
                 isOverdue={
                   task.status !== "done" && !!task.due_at && new Date(task.due_at) < new Date()

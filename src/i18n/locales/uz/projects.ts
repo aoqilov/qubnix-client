@@ -29,7 +29,7 @@ const projects: typeof ru = {
   },
   removeMember: {
     title: "Xodimni olib tashlash",
-    textAfterName: "shu loyihadan olib tashlanadi. O'zgarish faqat \"{{save}}\" bosilgandan keyin kuchga kiradi.",
+    textAfterName: "shu loyihadan olib tashlanadi.",
   },
 };
 

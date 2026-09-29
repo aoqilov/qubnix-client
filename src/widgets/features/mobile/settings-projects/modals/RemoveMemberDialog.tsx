@@ -8,6 +8,8 @@ interface RemoveMemberDialogProps {
   onClose: () => void;
   onConfirm: () => void;
   memberName: string | null;
+  isLoading?: boolean;
+  errorMessage?: string | null;
 }
 
 export function RemoveMemberDialog({
@@ -15,6 +17,8 @@ export function RemoveMemberDialog({
   onClose,
   onConfirm,
   memberName,
+  isLoading = false,
+  errorMessage,
 }: RemoveMemberDialogProps) {
   const { t } = useTranslation();
   return (
@@ -24,13 +28,15 @@ export function RemoveMemberDialog({
       title={t("projects.removeMember.title")}
       size="sm"
       centered
+      closeOnBackdrop={!isLoading}
       footer={
         <>
-          <CusButton variant="outline" onClick={onClose}>
+          <CusButton variant="outline" onClick={onClose} isDisabled={isLoading}>
             {t("common.actions.cancel")}
           </CusButton>
           <CusButton
             onClick={onConfirm}
+            isLoading={isLoading}
             style={{ background: "var(--status-error-solid)", color: "var(--text-on-brand)" }}
           >
             {t("common.actions.remove")}
@@ -53,10 +59,13 @@ export function RemoveMemberDialog({
         >
           <LuUserMinus size={18} color="var(--status-error-text)" />
         </div>
-        <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>
-          <strong style={{ color: "var(--text-primary)" }}>{memberName}</strong>{" "}
-          {t("projects.removeMember.textAfterName", { save: t("common.actions.save") })}
-        </p>
+        <div>
+          <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>
+            <strong style={{ color: "var(--text-primary)" }}>{memberName}</strong>{" "}
+            {t("projects.removeMember.textAfterName")}
+          </p>
+          {errorMessage && <p className="mt-2 text-xs text-error-strong">{errorMessage}</p>}
+        </div>
       </div>
     </CusDialog>
   );

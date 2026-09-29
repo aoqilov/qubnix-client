@@ -12,9 +12,11 @@ import { CusButton } from "@/components/ui/buttons/CusButton";
 
 interface InviteRowProps {
   invite: RawOrganizationInvitation;
+  /** Viewer uchun — taklifni bekor qilish tugmasi yashiriladi. */
+  readOnly?: boolean;
 }
 
-export function InviteRow({ invite }: InviteRowProps) {
+export function InviteRow({ invite, readOnly = false }: InviteRowProps) {
   const { t } = useTranslation();
   const [isConfirmOpen, setConfirmOpen] = useState(false);
   const { employee, projects } = invite;
@@ -45,6 +47,7 @@ export function InviteRow({ invite }: InviteRowProps) {
             {organizationRoleLabel(invite.role)}
           </CusBadge>
         </span>
+        {!readOnly && (
         <div>
           <CusButton
             variant="outline"
@@ -55,6 +58,7 @@ export function InviteRow({ invite }: InviteRowProps) {
             {t("members.cancelInvite")}
           </CusButton>
         </div>
+        )}
       </div>
 
       {projects.length > 0 && (

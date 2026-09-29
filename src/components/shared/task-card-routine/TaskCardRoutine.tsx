@@ -67,6 +67,8 @@ interface TaskCardRoutineProps {
   onDownloadFile?: (id: string) => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  /** Viewer uchun — switch o'chiriladi, tahrirlash/o'chirish tugmalari yashiriladi. */
+  readOnly?: boolean;
 }
 
 function TaskCardRoutine({
@@ -90,6 +92,7 @@ function TaskCardRoutine({
   onDownloadFile,
   onEdit,
   onDelete,
+  readOnly = false,
 }: TaskCardRoutineProps) {
   const { t } = useTranslation();
   const subtaskCount = subtasks?.length ?? 0;
@@ -120,7 +123,7 @@ function TaskCardRoutine({
         o'lchamiga qisqartiradi, shu bilan o'ng chetga yopishadi. */}
         <div className="flex flex-none flex-col items-end gap-2">
           <div className="flex-none">
-            <CusSwitch checked={active} onCheckedChange={onToggleActive} />
+            <CusSwitch checked={active} onCheckedChange={onToggleActive} disabled={readOnly} />
           </div>
           <div className="flex items-center gap-2">
             <span style={{ color: PRIORITY_FLAG_COLOR[priority ?? "low"] }}>
@@ -238,7 +241,8 @@ function TaskCardRoutine({
         )}
       </AnimatePresence>
 
-      {/* Tugmalar — doim ko'rinadi */}
+      {/* Tugmalar — read-only (viewer) bo'lmasa doim ko'rinadi */}
+      {!readOnly && (
       <div className="flex gap-2">
         <CusButton
           variant="outline"
@@ -262,6 +266,7 @@ function TaskCardRoutine({
           {t("common.actions.edit")}
         </CusButton>
       </div>
+      )}
     </CusCardbox>
   );
 }

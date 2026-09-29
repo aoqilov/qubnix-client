@@ -5,12 +5,15 @@ import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { CusSwitch } from "@/components/ui/inputs/CusSwitch";
 import { SettingsBackHeader } from "@/widgets/features/mobile/settings/components/SettingsBackHeader";
 import { MOCK_REMINDERS } from "./lib/mockReminders";
+import { useIsViewer } from "@/hooks/useIsViewer";
 
 export default function FeatureSettingsReminders() {
   const { t } = useTranslation();
   // Sarlavhadagi nom — mock "Synapse" emas, haqiqiy tanlangan tashkilot.
   const organizationQuery = useSelectedOrganization();
   const [reminders, setReminders] = useState(MOCK_REMINDERS);
+  // Viewer sozlamalarni ko'radi, lekin o'zgartira olmaydi.
+  const isViewer = useIsViewer();
 
   const toggleReminder = (id: string, enabled: boolean) => {
     setReminders((prev) =>
@@ -44,6 +47,7 @@ export default function FeatureSettingsReminders() {
               <CusSwitch
                 checked={reminder.enabled}
                 onCheckedChange={(checked) => toggleReminder(reminder.id, checked)}
+                disabled={isViewer}
               />
             </div>
           </div>

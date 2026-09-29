@@ -10,6 +10,8 @@ interface DeleteProjectDialogProps {
   onConfirm: () => void;
   project: ProjectStatsItem | null;
   isLoading?: boolean;
+  /** Backend xatosi — dialog ichida ko'rsatiladi, aks holda o'chirish jimgina "ishlamay" qoladi. */
+  errorMessage?: string | null;
 }
 
 export function DeleteProjectDialog({
@@ -18,6 +20,7 @@ export function DeleteProjectDialog({
   onConfirm,
   project,
   isLoading = false,
+  errorMessage,
 }: DeleteProjectDialogProps) {
   const { t } = useTranslation();
   return (
@@ -66,6 +69,9 @@ export function DeleteProjectDialog({
           <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4, lineHeight: 1.5 }}>
             {t("projects.delete.text")}
           </p>
+          {errorMessage && (
+            <p className="mt-2 text-xs text-error-strong">{errorMessage}</p>
+          )}
         </div>
       </div>
     </CusDialog>

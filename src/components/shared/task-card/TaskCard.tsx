@@ -66,8 +66,10 @@ interface TaskCardProps {
   expanded: boolean;
   onToggleExpanded: () => void;
 
-  /** O'tgan kun — faqat ko'rish: status, subtask, tahrirlash va o'chirish yopiq. */
+  /** Faqat ko'rish (o'tgan kun yoki viewer): status, subtask, fayl, tahrirlash va o'chirish yopiq. */
   readOnly?: boolean;
+  /** O'tgan kun — karta biroz xiralashtiriladi. `readOnly`dan alohida: viewer'da karta xira bo'lmaydi. */
+  dimmed?: boolean;
   /** "Изменить"/"Удалить" tugmalari — faqat vazifani boshqarish huquqi borlarga. Default true. */
   canManage?: boolean;
   /** Muddati o'tgan va bajarilmagan — vaqt badge'i qizil bo'ladi. */
@@ -112,6 +114,7 @@ function TaskCard({
   expanded,
   onToggleExpanded,
   readOnly,
+  dimmed,
   canManage = true,
   isOverdue,
   description,
@@ -132,7 +135,7 @@ function TaskCard({
   return (
     <CusCardbox
       className="flex flex-col gap-3 rounded-input"
-      style={readOnly ? { opacity: 0.85 } : undefined}
+      style={dimmed ? { opacity: 0.85 } : undefined}
     >
       {/* Header */}
       <div className="flex items-center justify-between gap-2">

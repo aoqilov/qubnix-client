@@ -8,7 +8,12 @@ import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { avatarColorVar } from "@/utils/avatarColor";
 import { ProjectMemberSelectList } from "../components/ProjectMemberSelectList";
 import { RemoveMemberDialog } from "./RemoveMemberDialog";
-import { useAvailableProjectMembers, useUpdateProject } from "../hooks/useApiSettingsProjects";
+import {
+  useAvailableProjectMembers,
+  useRemoveProjectMember,
+  useUpdateProject,
+} from "../hooks/useApiSettingsProjects";
+import { getApiErrorMessage } from "@/utils/apiErrorMessage";
 import type { ProjectMemberRole, ProjectStatsItem } from "../types";
 import { useWorkspaceStore } from "@/store/workspace.store";
 
@@ -37,6 +42,7 @@ export function EditProjectDrawer({
   // Personal workspace'da xodimlar bo'limi yo'q — faqat nom tahrirlanadi.
   const isPersonal = useWorkspaceStore((s) => s.selectedWorkspaceType) === "personal";
   const updateProject = useUpdateProject(organizationId);
+  const removeProjectMember = useRemoveProjectMember(organizationId);
   const availableQuery = useAvailableProjectMembers(
     organizationId,
     project?.id ?? null,
@@ -54,9 +60,12 @@ export function EditProjectDrawer({
       setAdditions({});
       setRemovingMemberId(null);
       updateProject.reset();
+      removeProjectMember.reset();
     }
+    // Faqat ochilganda yoki boshqa loyihaga o'tilganda — xodim olib tashlangach ro'yxat
+    // qayta yuklanadi (yangi `project` obyekti), bu kiritilgan nom/qo'shilganlarni o'chirmasligi kerak.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, project]);
+  }, [open, project?.id]);
 
   if (!project) return null;
 
@@ -73,8 +82,16 @@ export function EditProjectDrawer({
 
   const handleConfirmRemove = () => {
     if (!removingMemberId) return;
-    removeMember(removingMemberId);
-    setRemovingMemberId(null);
+    const userId = removingMemberId;
+    removeProjectMember.mutate(
+      { projectId: project.id, userId },
+      {
+        onSuccess: () => {
+          removeMember(userId);
+          setRemovingMemberId(null);
+        },
+      },
+    );
   };
 
   const toggleAddition = (id: string) => {
@@ -227,9 +244,16 @@ export function EditProjectDrawer({
 
       <RemoveMemberDialog
         open={removingMemberId !== null}
-        onClose={() => setRemovingMemberId(null)}
+        onClose={() => {
+          setRemovingMemberId(null);
+          removeProjectMember.reset();
+        }}
         onConfirm={handleConfirmRemove}
         memberName={removingMember?.name ?? null}
+        isLoading={removeProjectMember.isPending}
+        errorMessage={
+          removeProjectMember.isError ? getApiErrorMessage(removeProjectMember.error) : null
+        }
       />
     </CusDrawer>
   );

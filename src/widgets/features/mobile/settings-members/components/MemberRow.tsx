@@ -12,7 +12,8 @@ function initialsOf(member: RawOrganizationMember): string {
 
 interface MemberRowProps {
   member: RawOrganizationMember;
-  onOpenActions: () => void;
+  /** Berilmasa (viewer) — amallar tugmasi ko'rsatilmaydi. */
+  onOpenActions?: () => void;
 }
 
 export function MemberRow({ member, onOpenActions }: MemberRowProps) {
@@ -40,13 +41,15 @@ export function MemberRow({ member, onOpenActions }: MemberRowProps) {
       <CusBadge variant="subtle" tone="neutral">
         {organizationRoleLabel(member.organization_role)}
       </CusBadge>
-      <button
-        type="button"
-        onClick={onOpenActions}
-        className="flex size-8 flex-none items-center justify-center rounded-input text-secondary hover:bg-surface-secondary"
-      >
-        <LuChevronRight size={16} />
-      </button>
+      {onOpenActions && (
+        <button
+          type="button"
+          onClick={onOpenActions}
+          className="flex size-8 flex-none items-center justify-center rounded-input text-secondary hover:bg-surface-secondary"
+        >
+          <LuChevronRight size={16} />
+        </button>
+      )}
     </div>
   );
 }

@@ -101,7 +101,8 @@ function YearView({ routine }: { routine: RawTaskRoutine }) {
 interface RoutineScheduleDialogProps {
   routine: RawTaskRoutine | null;
   onClose: () => void;
-  onEdit: (routine: RawTaskRoutine) => void;
+  /** Berilmasa (viewer) — "Tahrirlash" tugmasi ko'rsatilmaydi. */
+  onEdit?: (routine: RawTaskRoutine) => void;
 }
 
 export function RoutineScheduleDialog({ routine, onClose, onEdit }: RoutineScheduleDialogProps) {
@@ -118,6 +119,7 @@ export function RoutineScheduleDialog({ routine, onClose, onEdit }: RoutineSched
           <CusButton variant="outline" className="flex-1" onClick={onClose}>
             {t("common.actions.close")}
           </CusButton>
+          {onEdit && (
           <CusButton
             className="flex-1"
             leftIcon={<LuPencil size={16} />}
@@ -126,6 +128,7 @@ export function RoutineScheduleDialog({ routine, onClose, onEdit }: RoutineSched
           >
             {t("common.actions.edit")}
           </CusButton>
+          )}
         </>
       }
     >

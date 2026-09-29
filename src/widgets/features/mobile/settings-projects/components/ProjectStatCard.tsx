@@ -56,6 +56,8 @@ export function ProjectStatCard({ project, onOpen, onEdit, onDelete }: ProjectSt
 
       <TaskAvatarGroup members={project.members} overflowCount={project.overflowCount} />
 
+      {/* Viewer'da onEdit/onDelete berilmaydi — tugmalar ko'rsatilmaydi. */}
+      {(onEdit || onDelete) && (
       <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
         <CusButton
           variant="outline"
@@ -78,6 +80,7 @@ export function ProjectStatCard({ project, onOpen, onEdit, onDelete }: ProjectSt
           {t("common.actions.delete")}
         </CusButton>
       </div>
+      )}
     </CusCardbox>
   );
 }

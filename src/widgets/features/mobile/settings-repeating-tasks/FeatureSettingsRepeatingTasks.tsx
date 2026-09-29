@@ -22,6 +22,7 @@ import {
 import { formatNextRunLabel, formatRepeatLabel } from "./lib/formatRoutine";
 import type { RoutineFilter } from "./types";
 import type { RawTaskRoutine } from "@/api/task-routines/task-routines.types";
+import { useIsViewer } from "@/hooks/useIsViewer";
 
 const ALL_PROJECTS_ID = "all";
 
@@ -59,6 +60,8 @@ export default function FeatureSettingsRepeatingTasks() {
   );
   const updateRoutine = useUpdateRoutine(organizationId);
   const deleteRoutine = useDeleteRoutine(organizationId);
+  // Viewer shablonlarni ko'radi, lekin qo'shish/yoqish-o'chirish/tahrirlash yo'q.
+  const isViewer = useIsViewer();
 
   const toggleExpanded = (id: number) => {
     setExpandedIds((prev) => {
@@ -142,6 +145,7 @@ export default function FeatureSettingsRepeatingTasks() {
 
       <RoutineFrequencyTabs value={frequency} onChange={setFrequency} />
 
+      {!isViewer && (
       <CusButton
         variant="plain"
         className="w-full"
@@ -161,6 +165,7 @@ export default function FeatureSettingsRepeatingTasks() {
       >
         {t("routines.addTask")}
       </CusButton>
+      )}
 
       <div className="flex flex-col gap-3">
         {filteredRoutines.map((routine) => {
@@ -175,6 +180,7 @@ export default function FeatureSettingsRepeatingTasks() {
               projectLabel={routine.projectName}
               priority={routine.priority}
               active={routine.active}
+              readOnly={isViewer}
               onToggleActive={(active) => toggleActive(routine, active)}
               repeatLabel={formatRepeatLabel(routine)}
               nextRunLabel={formatNextRunLabel(routine)}
@@ -226,11 +232,15 @@ export default function FeatureSettingsRepeatingTasks() {
       <RoutineScheduleDialog
         routine={scheduleRoutine}
         onClose={() => setScheduleRoutine(null)}
-        onEdit={(routine) => {
-          setScheduleRoutine(null);
-          setEditing({ projectId: String(routine.project_id), routine });
-          setIsFormOpen(true);
-        }}
+        onEdit={
+          isViewer
+            ? undefined
+            : (routine) => {
+                setScheduleRoutine(null);
+                setEditing({ projectId: String(routine.project_id), routine });
+                setIsFormOpen(true);
+              }
+        }
       />
 
       <RoutineFormDrawer

@@ -24,6 +24,8 @@ import { WORKSPACE_ROLES } from "@/const/roles";
 import { useWorkspaceStore } from "@/store/workspace.store";
 
 const MANAGER_ROLES = [WORKSPACE_ROLES.ADMIN, WORKSPACE_ROLES.OWNER];
+// Viewer admin ko'radigan bo'limlarni ko'radi — ichkarida hamma amal yopiq (read-only).
+const MANAGE_VIEW_ROLES = [...MANAGER_ROLES, WORKSPACE_ROLES.VIEWER];
 
 /** Personal workspace'da boshqa xodim yo'q — xodimlar bilan bog'liq bo'limlar ko'rsatilmaydi. */
 const PERSONAL_HIDDEN_ROUTES = new Set([
@@ -36,9 +38,9 @@ export default function FeatureSettings() {
   const { t } = useTranslation();
   const workspaceQuery = useSelectedOrganization();
   const workspace = workspaceQuery.data;
-  // GET .../members faqat admin/owner uchun ruxsat etilgan — member'da 403 qaytadi,
-  // shuning uchun rol aniqlanib, admin/owner ekani bilinmaguncha so'rov yuborilmaydi.
-  const isManager = hasRole(workspace ? [workspace.role] : [], MANAGER_ROLES);
+  // GET .../members member'da 403 qaytadi, shuning uchun rol aniqlanib,
+  // admin/owner/viewer ekani bilinmaguncha so'rov yuborilmaydi.
+  const isManager = hasRole(workspace ? [workspace.role] : [], MANAGE_VIEW_ROLES);
   const isPersonal = useWorkspaceStore((s) => s.selectedWorkspaceType) === "personal";
   // Personal'da xodimlar soni kerak emas — so'rov umuman yuborilmaydi.
   const membersCountQuery = useOrganizationMembersCount(isManager && !isPersonal);
@@ -130,8 +132,8 @@ export default function FeatureSettings() {
         membersCount={membersCountQuery.data}
         isPersonal={isPersonal}
       />
-      {/* admin owner */}
-      <RoleGate roles={[workspace.role]} allow={MANAGER_ROLES}>
+      {/* admin owner viewer */}
+      <RoleGate roles={[workspace.role]} allow={MANAGE_VIEW_ROLES}>
         <div className="flex flex-col gap-2">
           <div className="text-xs font-semibold tracking-wide text-secondary">
             {t("settings.manage")}

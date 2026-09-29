@@ -12,20 +12,23 @@ function initialsOf(member: RawOrganizationMember): string {
 
 interface MemberCardProps {
   member: RawOrganizationMember;
-  onOpenActions: () => void;
+  /** Berilmasa (viewer) — amallar tugmasi ko'rsatilmaydi. */
+  onOpenActions?: () => void;
 }
 
 export function MemberCard({ member, onOpenActions }: MemberCardProps) {
   const { t } = useTranslation();
   return (
     <div className="relative flex flex-col items-center gap-2 rounded-card border border-subtle bg-surface p-3 text-center">
-      <button
-        type="button"
-        onClick={onOpenActions}
-        className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-input text-secondary hover:bg-surface-secondary"
-      >
-        <LuChevronRight size={14} />
-      </button>
+      {onOpenActions && (
+        <button
+          type="button"
+          onClick={onOpenActions}
+          className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-input text-secondary hover:bg-surface-secondary"
+        >
+          <LuChevronRight size={14} />
+        </button>
+      )}
       <span
         className="flex size-11 flex-none items-center justify-center rounded-avatar text-sm font-semibold text-on-brand"
         style={{ background: avatarColorVar(member.id) }}

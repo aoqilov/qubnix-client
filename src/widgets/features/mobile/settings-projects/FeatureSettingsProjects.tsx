@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { getApiErrorMessage } from "@/utils/apiErrorMessage";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LuPlus, LuSearch, LuSearchX } from "react-icons/lu";
@@ -11,6 +12,7 @@ import { CreateProjectDrawer } from "./modals/CreateProjectDrawer";
 import { EditProjectDrawer } from "./modals/EditProjectDrawer";
 import { DeleteProjectDialog } from "./modals/DeleteProjectDialog";
 import { useDeleteProject, useProjectsList } from "./hooks/useApiSettingsProjects";
+import { useIsViewer } from "@/hooks/useIsViewer";
 
 function EmptyState({ hasQuery }: { hasQuery: boolean }) {
   const { t } = useTranslation();
@@ -39,6 +41,8 @@ export default function FeatureSettingsProjects() {
   const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
   const projectsQuery = useProjectsList(organizationId);
   const deleteProject = useDeleteProject(organizationId);
+  // Viewer loyihalarni ko'radi, lekin yaratish/tahrirlash/o'chirish yo'q.
+  const isViewer = useIsViewer();
 
   const [search, setSearch] = useState("");
   const [isCreateOpen, setCreateOpen] = useState(false);
@@ -72,6 +76,7 @@ export default function FeatureSettingsProjects() {
         onChange={(e) => setSearch(e.target.value)}
       />
 
+      {!isViewer && (
       <CusButton
         variant="plain"
         className="w-full"
@@ -88,6 +93,7 @@ export default function FeatureSettingsProjects() {
       >
         {t("projects.newProject")}
       </CusButton>
+      )}
 
       {projectsQuery.isPending ? (
         <div className="flex flex-col gap-3">
@@ -105,8 +111,8 @@ export default function FeatureSettingsProjects() {
               key={project.id}
               project={project}
               onOpen={() => navigate(`/settings/projects/${project.id}`)}
-              onEdit={() => setEditingProjectId(project.id)}
-              onDelete={() => setDeletingProjectId(project.id)}
+              onEdit={isViewer ? undefined : () => setEditingProjectId(project.id)}
+              onDelete={isViewer ? undefined : () => setDeletingProjectId(project.id)}
             />
           ))}
         </div>
@@ -127,10 +133,14 @@ export default function FeatureSettingsProjects() {
 
       <DeleteProjectDialog
         open={deletingProjectId !== null}
-        onClose={() => setDeletingProjectId(null)}
+        onClose={() => {
+          setDeletingProjectId(null);
+          deleteProject.reset();
+        }}
         onConfirm={handleConfirmDelete}
         project={deletingProject}
         isLoading={deleteProject.isPending}
+        errorMessage={deleteProject.isError ? getApiErrorMessage(deleteProject.error) : null}
       />
     </div>
   );

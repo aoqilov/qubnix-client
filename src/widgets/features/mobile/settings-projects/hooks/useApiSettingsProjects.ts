@@ -97,8 +97,11 @@ export function useUpdateProject(organizationId: string | null) {
       projectId: string;
       payload: UpdateProjectRequest;
     }) => projectsApi.update(organizationId!, projectId, payload),
-    onSuccess: () => {
+    onSuccess: (_data, { projectId }) => {
       queryClient.invalidateQueries({ queryKey: PROJECTS_KEYS.list(organizationId ?? "") });
+      queryClient.invalidateQueries({
+        queryKey: PROJECTS_KEYS.detail(organizationId ?? "", projectId),
+      });
     },
   });
 }
@@ -110,6 +113,25 @@ export function useDeleteProject(organizationId: string | null) {
     mutationFn: (projectId: string) => projectsApi.remove(organizationId!, projectId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PROJECTS_KEYS.list(organizationId ?? "") });
+    },
+  });
+}
+
+/**
+ * Bitta xodimni loyihadan darhol olib tashlaydi (DELETE .../members/{user_id}) —
+ * PATCH'dagi `members` ro'yxati xodimni o'chirmaydi.
+ */
+export function useRemoveProjectMember(organizationId: string | null) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ projectId, userId }: { projectId: string; userId: string }) =>
+      projectsApi.removeMember(organizationId!, projectId, userId),
+    onSuccess: (_data, { projectId }) => {
+      queryClient.invalidateQueries({ queryKey: PROJECTS_KEYS.list(organizationId ?? "") });
+      queryClient.invalidateQueries({
+        queryKey: PROJECTS_KEYS.detail(organizationId ?? "", projectId),
+      });
     },
   });
 }
