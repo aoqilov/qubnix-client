@@ -9,7 +9,7 @@ export function Header() {
   const user = useSessionStore((s) => s.user);
 
   return (
-    <header className="flex h-14 flex-none items-center justify-end gap-4 border-b border-subtle bg-surface pr-[50px] ">
+    <header className="flex h-14 flex-none items-center justify-end gap-4 border-b border-subtle bg-surface pr-[100px] ">
       {/* Profil menyusi — ochilganda tema, til, shrift o'lchami. */}
       <CusPopover
         placement="bottom-end"
