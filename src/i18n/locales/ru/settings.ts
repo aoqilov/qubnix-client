@@ -6,6 +6,7 @@ const settings = {
   leave: "Выйти из Workspace",
   back: "Назад",
   personalSpace: "Личное пространство",
+  pageTitle: "Настройки",
   menu: {
     members: "Сотрудники",
     membersHint: "Роли, приглашения",

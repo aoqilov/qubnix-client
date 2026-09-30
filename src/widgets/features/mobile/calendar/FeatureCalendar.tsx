@@ -10,11 +10,11 @@ import { CalendarDayInfoBox } from "./components/CalendarDayInfoBox";
 import { CalendarProjectsCard } from "./components/CalendarProjectsCard";
 import { CalendarWeekStrip } from "./components/CalendarWeekStrip";
 import { addDays, buildWeekDays, formatMonthLabel, getWeekStart, toDateKey } from "@/utils/weekDays";
-import { useCalendarDay } from "./hooks/useApiCalendar";
+import { useCalendarDay } from "@/hooks/useApiCalendar";
 import type { CalendarProjectSummary, DayTaskStats } from "./types";
 import { getDayKind, toApiDate } from "@/utils/apiDate";
 import { useWorkspaceStore } from "@/store/workspace.store";
-import type { TaskStatusTotals } from "@/api/tasks/tasks.types";
+import { initialsOf, toDayStats } from "@/utils/calendarDay";
 
 const monthToggleStyle: React.CSSProperties = {
   width: 44,
@@ -25,16 +25,6 @@ const monthToggleStyle: React.CSSProperties = {
 };
 
 const EMPTY_STATS: DayTaskStats = { total: 0, done: 0, overdue: 0, left: 0 };
-
-function toDayStats(t: TaskStatusTotals): DayTaskStats {
-  return { total: t.total, done: t.done, overdue: t.not_done, left: t.todo + t.in_progress };
-}
-
-function initialsOf(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length >= 2) return `${parts[0].charAt(0)}${parts[1].charAt(0)}`.toUpperCase();
-  return name.trim().slice(0, 2).toUpperCase();
-}
 
 export default function FeatureCalendar() {
   const { t } = useTranslation();

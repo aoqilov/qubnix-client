@@ -8,6 +8,7 @@ const calendar = {
     future: "Запланировано",
   },
   dayInfo: {
+    total: "Всего",
     tasks: "Задачи",
     done: "Сдано — {{count}}",
     notDone: "Не выполнено — {{count}}",
@@ -20,6 +21,7 @@ const calendar = {
     overdue: "Просрочено",
     overdueCount: "Просрочено {{count}}",
     completed: "Выполнено",
+    doneCount: "Выполнено {{count}}",
   },
   empty: {
     past: {

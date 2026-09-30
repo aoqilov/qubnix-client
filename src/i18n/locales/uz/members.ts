@@ -3,6 +3,10 @@ import type ru from "../ru/members";
 const members: typeof ru = {
   title: "Xodimlar",
   usersCount: "{{name}} - {{label}}",
+  invitesCount_one: "{{count}} ta taklifnoma",
+  invitesCount_few: "{{count}} ta taklifnoma",
+  invitesCount_many: "{{count}} ta taklifnoma",
+  invitesCount_other: "{{count}} ta taklifnoma",
   tabs: {
     general: "Umumiy",
     invites: "Taklifnomalar",

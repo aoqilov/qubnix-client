@@ -1,9 +1,9 @@
 import type { QueryClient, QueryKey } from "@tanstack/react-query";
 import { DOSKA_KEYS } from "@/queries/doska.queries";
-import { SETTINGS_KEYS } from "@/widgets/features/mobile/settings/hooks/useApiSettings";
-import { INVITATIONS_KEYS } from "@/widgets/features/mobile/settings-members/hooks/useApiInvitations";
-import { MEMBERS_KEYS } from "@/widgets/features/mobile/settings-members/hooks/useApiSettingsMembers";
-import { PROJECTS_KEYS } from "@/widgets/features/mobile/settings-projects/hooks/useApiSettingsProjects";
+import { SETTINGS_KEYS } from "@/hooks/useApiSettings";
+import { INVITATIONS_KEYS } from "@/components/shared/settings/members/hooks/useApiInvitations";
+import { MEMBERS_KEYS } from "@/components/shared/settings/members/hooks/useApiSettingsMembers";
+import { PROJECTS_KEYS } from "@/components/shared/settings/projects/hooks/useApiSettingsProjects";
 import type { SseEnvelope, SseEventType } from "./sse.types";
 
 /**

@@ -1,7 +1,7 @@
 import { membersLabel } from "@/utils/countLabels";
 import { useTranslation } from "react-i18next";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
-import type { SettingsWorkspace } from "../hooks/useApiSettings";
+import type { SettingsWorkspace } from "@/hooks/useApiSettings";
 
 interface SettingsWorkspaceCardProps {
   workspace: SettingsWorkspace;

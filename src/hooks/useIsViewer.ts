@@ -1,5 +1,5 @@
 import { WORKSPACE_ROLES } from "@/const/roles";
-import { useSelectedOrganization } from "@/widgets/features/mobile/settings/hooks/useApiSettings";
+import { useSelectedOrganization } from "@/hooks/useApiSettings";
 
 /**
  * Joriy workspace'da foydalanuvchi viewer (kuzatuvchi)mi — viewer admin ko'radigan

@@ -8,6 +8,7 @@ export interface RawUser {
   telegram_avatar_url: string | null;
   first_name: string;
   last_name: string;
+  phone_number: string | null;
   index_quality: number;
   registered_at: string;
 }

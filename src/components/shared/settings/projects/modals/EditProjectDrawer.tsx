@@ -1,0 +1,262 @@
+import { projectRoleLabel } from "@/utils/roleLabels";
+import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
+import { SettingsModal, type SettingsModalVariant } from "@/components/shared/settings/SettingsModal";
+import { CusInput } from "@/components/ui/inputs/CusInput";
+import { CusButton } from "@/components/ui/buttons/CusButton";
+import { CusBadge } from "@/components/ui/badge/CusBadge";
+import { avatarColorVar } from "@/utils/avatarColor";
+import { ProjectMemberSelectList } from "@/components/shared/settings/projects/components/ProjectMemberSelectList";
+import { RemoveMemberDialog } from "@/components/shared/settings/projects/modals/RemoveMemberDialog";
+import {
+  useAvailableProjectMembers,
+  useRemoveProjectMember,
+  useUpdateProject,
+} from "@/components/shared/settings/projects/hooks/useApiSettingsProjects";
+import { getApiErrorMessage } from "@/utils/apiErrorMessage";
+import type { ProjectMemberRole, ProjectStatsItem } from "@/components/shared/settings/projects/types";
+import { useWorkspaceStore } from "@/store/workspace.store";
+
+interface EditProjectDrawerProps {
+  /** "dialog" — desktop, markazda; default "drawer" — mobil. */
+  variant?: SettingsModalVariant;
+  open: boolean;
+  onClose: () => void;
+  organizationId: string | null;
+  project: ProjectStatsItem | null;
+}
+
+export function EditProjectDrawer({
+  variant = "drawer",
+  open,
+  onClose,
+  organizationId,
+  project,
+}: EditProjectDrawerProps) {
+  const { t } = useTranslation();
+  const [name, setName] = useState("");
+  // Loyihada qolayotgan mavjud xodimlar: userId -> rol.
+  const [keptRoles, setKeptRoles] = useState<Record<string, ProjectMemberRole>>({});
+  const [isAddingOpen, setAddingOpen] = useState(false);
+  // Yangi qo'shilayotgan xodimlar: userId -> rol.
+  const [additions, setAdditions] = useState<Record<string, ProjectMemberRole>>({});
+  const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
+
+  // Personal workspace'da xodimlar bo'limi yo'q — faqat nom tahrirlanadi.
+  const isPersonal = useWorkspaceStore((s) => s.selectedWorkspaceType) === "personal";
+  const updateProject = useUpdateProject(organizationId);
+  const removeProjectMember = useRemoveProjectMember(organizationId);
+  const availableQuery = useAvailableProjectMembers(
+    organizationId,
+    project?.id ?? null,
+    isAddingOpen,
+  );
+  const availableMembers = availableQuery.data ?? [];
+
+  // Drawer har safar (boshqa proyekt uchun ham) ochilganda o'sha proyektning
+  // joriy holatidan qayta boshlanadi.
+  useEffect(() => {
+    if (open && project) {
+      setName(project.name);
+      setKeptRoles(Object.fromEntries(project.members.map((member) => [member.id, member.role])));
+      setAddingOpen(false);
+      setAdditions({});
+      setRemovingMemberId(null);
+      updateProject.reset();
+      removeProjectMember.reset();
+    }
+    // Faqat ochilganda yoki boshqa loyihaga o'tilganda — xodim olib tashlangach ro'yxat
+    // qayta yuklanadi (yangi `project` obyekti), bu kiritilgan nom/qo'shilganlarni o'chirmasligi kerak.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, project?.id]);
+
+  if (!project) return null;
+
+  const members = project.members.filter((member) => member.id in keptRoles);
+  const removingMember = members.find((member) => member.id === removingMemberId) ?? null;
+
+  const removeMember = (id: string) => {
+    setKeptRoles((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
+  const handleConfirmRemove = () => {
+    if (!removingMemberId) return;
+    const userId = removingMemberId;
+    removeProjectMember.mutate(
+      { projectId: project.id, userId },
+      {
+        onSuccess: () => {
+          removeMember(userId);
+          setRemovingMemberId(null);
+        },
+      },
+    );
+  };
+
+  const toggleAddition = (id: string) => {
+    setAdditions((prev) => {
+      if (id in prev) {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      }
+      return { ...prev, [id]: "project_member" };
+    });
+  };
+
+  const setAdditionRole = (id: string, role: ProjectMemberRole) => {
+    setAdditions((prev) => ({ ...prev, [id]: role }));
+  };
+
+  const handleSave = () => {
+    if (!name.trim()) return;
+    updateProject.mutate(
+      {
+        projectId: project.id,
+        payload: {
+          name: name.trim(),
+          // Personal'da yuborilmaydi — `members` berilsa backend ro'yxatni to'liq almashtiradi.
+          members: isPersonal
+            ? undefined
+            : [
+                ...Object.entries(keptRoles).map(([userId, role]) => ({
+                  user_id: Number(userId),
+                  role,
+                })),
+                ...Object.entries(additions).map(([userId, role]) => ({
+                  user_id: Number(userId),
+                  role,
+                })),
+              ],
+        },
+      },
+      { onSuccess: onClose },
+    );
+  };
+
+  return (
+    <SettingsModal
+      variant={variant}
+      open={open}
+      onClose={onClose}
+      title={t("projects.edit.title")}
+      footer={
+        <div className="flex w-full gap-2">
+          <CusButton
+            variant="outline"
+            className="flex-1"
+            onClick={onClose}
+            isDisabled={updateProject.isPending}
+          >
+            {t("common.actions.cancel")}
+          </CusButton>
+          <CusButton
+            className="flex-1"
+            isDisabled={!name.trim()}
+            isLoading={updateProject.isPending}
+            loadingText={t("common.states.saving")}
+            onClick={handleSave}
+          >
+            {t("common.actions.save")}
+          </CusButton>
+        </div>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <CusInput label={t("projects.create.nameLabel")} value={name} onChange={(e) => setName(e.target.value)} />
+
+        {updateProject.isError && (
+          <p className="text-sm text-error-strong">
+            {t("projects.edit.error")}
+          </p>
+        )}
+
+        {!isPersonal && (
+          <>
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                {t("projects.members")}
+              </span>
+
+              {members.length === 0 && (
+                <p className="py-4 text-center text-sm text-secondary">{t("projects.noMembers")}</p>
+              )}
+
+              {members.map((member) => (
+                <div
+                  key={member.id}
+                  className="flex items-center gap-2 rounded-input border border-subtle p-2"
+                >
+                  <span
+                    className="flex size-8 flex-none items-center justify-center rounded-avatar text-xs font-semibold text-on-brand"
+                    style={{ background: avatarColorVar(member.id) }}
+                  >
+                    {member.initials}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-primary">
+                    {member.name}
+                  </span>
+                  <CusBadge tone={member.role === "project_manager" ? "brand" : "neutral"}>
+                    {projectRoleLabel(member.role)}
+                  </CusBadge>
+                  <CusButton
+                    variant="outline"
+                    colorPalette="red"
+                    size="xs"
+                    onClick={() => setRemovingMemberId(member.id)}
+                  >
+                    {t("common.actions.remove")}
+                  </CusButton>
+                </div>
+              ))}
+            </div>
+
+            {isAddingOpen ? (
+              <div className="flex flex-col">
+                <span className="mb-2 text-xs font-medium uppercase tracking-wide text-secondary">
+                  {t("projects.addMember")}
+                </span>
+                {availableQuery.isPending ? (
+                  <p className="py-4 text-center text-sm text-secondary">{t("common.states.loading")}</p>
+                ) : availableMembers.length === 0 ? (
+                  <p className="py-4 text-center text-sm text-secondary">
+                    {t("projects.allMembersAdded")}
+                  </p>
+                ) : (
+                  <ProjectMemberSelectList
+                    members={availableMembers}
+                    selections={additions}
+                    onToggle={toggleAddition}
+                    onRoleChange={setAdditionRole}
+                  />
+                )}
+              </div>
+            ) : (
+              <CusButton variant="outline" className="w-full" onClick={() => setAddingOpen(true)}>
+                {t("projects.addMember")}
+              </CusButton>
+            )}
+          </>
+        )}
+      </div>
+
+      <RemoveMemberDialog
+        open={removingMemberId !== null}
+        onClose={() => {
+          setRemovingMemberId(null);
+          removeProjectMember.reset();
+        }}
+        onConfirm={handleConfirmRemove}
+        memberName={removingMember?.name ?? null}
+        isLoading={removeProjectMember.isPending}
+        errorMessage={
+          removeProjectMember.isError ? getApiErrorMessage(removeProjectMember.error) : null
+        }
+      />
+    </SettingsModal>
+  );
+}

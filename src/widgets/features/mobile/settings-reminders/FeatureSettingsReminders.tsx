@@ -1,4 +1,4 @@
-import { useSelectedOrganization } from "@/widgets/features/mobile/settings/hooks/useApiSettings";
+import { useSelectedOrganization } from "@/hooks/useApiSettings";
 import { useTranslation } from "react-i18next";
 import { SettingsBackHeader } from "@/widgets/features/mobile/settings/components/SettingsBackHeader";
 import { NotificationSettingsList } from "@/components/shared/notification-settings/NotificationSettingsList";

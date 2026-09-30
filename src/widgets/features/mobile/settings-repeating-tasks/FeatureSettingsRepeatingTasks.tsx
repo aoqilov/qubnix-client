@@ -9,18 +9,18 @@ import ProjectsTabs from "@/components/shared/project-tab/ProjectsTabs";
 import TaskCardRoutine from "@/components/shared/task-card-routine/TaskCardRoutine";
 import type { TaskCardMember } from "@/components/shared/task-card/mini-components/TaskAvatarGroup";
 import { SettingsBackHeader } from "@/widgets/features/mobile/settings/components/SettingsBackHeader";
-import { RoutineFrequencyTabs } from "./components/RoutineFrequencyTabs";
-import { RoutineFormDrawer, type RoutineFormInitial } from "./modals/RoutineFormDrawer";
-import { RoutineScheduleDialog } from "./modals/RoutineScheduleDialog";
+import { RoutineFrequencyTabs } from "@/components/shared/settings/repeating-tasks/components/RoutineFrequencyTabs";
+import { RoutineFormDrawer, type RoutineFormInitial } from "@/components/shared/settings/repeating-tasks/modals/RoutineFormDrawer";
+import { RoutineScheduleDialog } from "@/components/shared/settings/repeating-tasks/modals/RoutineScheduleDialog";
 import {
   useOrgMembersDirectory,
   useOrgProjectsForRoutines,
   useDeleteRoutine,
   useRoutinesForProjects,
   useUpdateRoutine,
-} from "./hooks/useApiRepeatingTasks";
-import { formatNextRunLabel, formatRepeatLabel } from "./lib/formatRoutine";
-import type { RoutineFilter } from "./types";
+} from "@/components/shared/settings/repeating-tasks/hooks/useApiRepeatingTasks";
+import { formatNextRunLabel, formatRepeatLabel } from "@/components/shared/settings/repeating-tasks/lib/formatRoutine";
+import type { RoutineFilter } from "@/components/shared/settings/repeating-tasks/types";
 import type { RawTaskRoutine } from "@/api/task-routines/task-routines.types";
 import { useIsViewer } from "@/hooks/useIsViewer";
 

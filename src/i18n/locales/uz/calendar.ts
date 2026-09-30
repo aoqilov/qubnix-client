@@ -9,6 +9,7 @@ const calendar: typeof ru = {
     future: "Rejalashtirilgan",
   },
   dayInfo: {
+    total: "Jami",
     tasks: "Vazifalar",
     done: "Topshirildi — {{count}}",
     notDone: "Bajarilmadi — {{count}}",
@@ -21,6 +22,7 @@ const calendar: typeof ru = {
     overdue: "Muddati o'tgan",
     overdueCount: "Muddati o'tgan {{count}}",
     completed: "Bajarildi",
+    doneCount: "Bajarildi {{count}}",
   },
   empty: {
     past: {

@@ -1,11 +1,5 @@
 export type { WeekDayCell as CalendarDayCell } from "@/utils/weekDays";
-
-export interface DayTaskStats {
-  total: number;
-  done: number;
-  overdue: number;
-  left: number;
-}
+export type { DayTaskStats } from "@/utils/calendarDay";
 
 export interface CalendarProjectSummary {
   id: string;

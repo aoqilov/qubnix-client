@@ -8,10 +8,10 @@ import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { SettingsBackHeader } from "@/widgets/features/mobile/settings/components/SettingsBackHeader";
-import { useSelectedOrganization } from "@/widgets/features/mobile/settings/hooks/useApiSettings";
-import type { SettingsWorkspace } from "@/widgets/features/mobile/settings/hooks/useApiSettings";
-import { useRenameOrganization } from "./hooks/useApiSettingsGeneral";
-import { MOCK_PRO_STATUS } from "./lib/mockGeneralSettings";
+import { useSelectedOrganization } from "@/hooks/useApiSettings";
+import type { SettingsWorkspace } from "@/hooks/useApiSettings";
+import { useRenameOrganization } from "@/components/shared/settings/general/hooks/useApiSettingsGeneral";
+import { MOCK_PRO_STATUS } from "@/components/shared/settings/general/lib/mockGeneralSettings";
 import { RoleGate } from "@/components/shared/role-gate/RoleGate";
 import { WORKSPACE_ROLES } from "@/const/roles";
 

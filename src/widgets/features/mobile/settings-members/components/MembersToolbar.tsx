@@ -6,8 +6,8 @@ import { LuSearch, LuFilter, LuLayoutGrid, LuList } from "react-icons/lu";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusMenuList } from "@/components/ui/menu-list/CusMenuList";
 import { organizationRoleLabel } from "@/utils/roleLabels";
-import type { MemberViewStyle } from "../hooks/useMemberViewStyle";
-import type { MemberRoleFilter } from "../lib/mockMembers";
+import type { MemberViewStyle } from "@/components/shared/settings/members/hooks/useMemberViewStyle";
+import type { MemberRoleFilter } from "@/components/shared/settings/members/lib/mockMembers";
 
 // Matnlar render paytida olinadi — til almashsa yangilanadi.
 const buildViewStyleItems = () => [

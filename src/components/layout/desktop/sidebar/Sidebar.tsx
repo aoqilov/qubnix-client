@@ -11,6 +11,7 @@ import {
   LuLayoutGrid,
   LuPanelLeftClose,
   LuPanelLeftOpen,
+  LuSettings,
   LuUser,
 } from "react-icons/lu";
 import { useWorkspaceStore } from "@/store/workspace.store";
@@ -55,7 +56,7 @@ function WorkspaceAvatar({ workspace, size = 32 }: { workspace: CurrentWorkspace
 }
 
 function navLinkClass(isActive: boolean, collapsed: boolean) {
-  return `flex items-center gap-2 rounded-input py-2 text-base font-medium transition-colors ${
+  return `flex items-center gap-3 rounded-input py-2.5 text-lg font-medium transition-colors ${
     collapsed ? "justify-center px-2" : "px-3"
   } ${isActive ? "bg-brand text-on-brand" : "text-secondary hover:bg-surface-secondary hover:text-primary"}`;
 }
@@ -121,6 +122,7 @@ export function Sidebar() {
     { to: "/tasks", label: t("layout.sidebar.today"), icon: LuCalendarCheck, count: current?.tasksCount },
     { to: "/calendar", label: t("layout.sidebar.calendar"), icon: LuCalendar },
     { to: "/statistics", label: t("layout.sidebar.statistics"), icon: LuChartColumn },
+    { to: "/settings", label: t("layout.sidebar.settings"), icon: LuSettings },
   ];
 
   return (
@@ -153,7 +155,7 @@ export function Sidebar() {
             title={item.label}
             className={({ isActive }) => navLinkClass(isActive, collapsed)}
           >
-            <item.icon size={18} />
+            <item.icon size={22} />
             {!collapsed && item.label}
           </NavLink>
         ))}
@@ -173,8 +175,8 @@ export function Sidebar() {
 
         {!isHome && current && (
           <>
-            {/* Workspace almashtirgich */}
-            <div className="mt-4">
+            {/* Tashkilot almashtirgich */}
+            <div className="mt-[100px]">
               <CusPopover
                 placement="bottom-start"
                 width={240}
@@ -226,12 +228,32 @@ export function Sidebar() {
               </CusPopover>
             </div>
 
+            {/* Bo'limlar */}
+            <div className="mt-4 flex flex-col gap-1">
+              {workspaceItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  title={item.label}
+                  className={({ isActive }) => navLinkClass(isActive, collapsed)}
+                >
+                  <item.icon size={22} />
+                  {!collapsed && <span className="flex-1">{item.label}</span>}
+                  {!collapsed && !!item.count && (
+                    <CusBadge tone="brand" variant="solid" size="sm">
+                      {item.count}
+                    </CusBadge>
+                  )}
+                </NavLink>
+              ))}
+            </div>
+
             {/* Loyihalar */}
             {!collapsed && (
-              <>
+              <div className="mt-auto flex flex-col gap-1 border-t border-subtle pt-3">
                 <button
                   onClick={() => setProjectsOpen((v) => !v)}
-                  className="mt-4 flex w-full items-center justify-between px-3"
+                  className="flex w-full items-center justify-between px-3"
                 >
                   <span className="text-[10px] font-medium uppercase tracking-wide text-disabled">
                     {t("layout.sidebar.projects")}
@@ -275,28 +297,9 @@ export function Sidebar() {
                       );
                     })
                   ))}
-              </>
+              </div>
             )}
 
-            {/* Bo'limlar */}
-            <div className="mt-4 flex flex-col gap-1 border-t border-subtle pt-3">
-              {workspaceItems.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  title={item.label}
-                  className={({ isActive }) => navLinkClass(isActive, collapsed)}
-                >
-                  <item.icon size={18} />
-                  {!collapsed && <span className="flex-1">{item.label}</span>}
-                  {!collapsed && !!item.count && (
-                    <CusBadge tone="brand" variant="solid" size="sm">
-                      {item.count}
-                    </CusBadge>
-                  )}
-                </NavLink>
-              ))}
-            </div>
           </>
         )}
       </nav>

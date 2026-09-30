@@ -9,7 +9,7 @@ import { SettingsBackHeader } from "@/widgets/features/mobile/settings/component
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { avatarColorVar } from "@/utils/avatarColor";
 import { tagColorVar } from "@/utils/tagColor";
-import { useProjectDetail } from "./hooks/useApiSettingsProjects";
+import { useProjectDetail } from "@/components/shared/settings/projects/hooks/useApiSettingsProjects";
 
 function CardSkeleton() {
   return <div className="h-[220px] animate-pulse rounded-input border border-subtle bg-surface" />;

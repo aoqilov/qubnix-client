@@ -7,11 +7,11 @@ import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { SettingsBackHeader } from "@/widgets/features/mobile/settings/components/SettingsBackHeader";
 import { useWorkspaceStore } from "@/store/workspace.store";
-import { ProjectStatCard } from "./components/ProjectStatCard";
-import { CreateProjectDrawer } from "./modals/CreateProjectDrawer";
-import { EditProjectDrawer } from "./modals/EditProjectDrawer";
-import { DeleteProjectDialog } from "./modals/DeleteProjectDialog";
-import { useDeleteProject, useProjectsList } from "./hooks/useApiSettingsProjects";
+import { ProjectStatCard } from "@/components/shared/settings/projects/components/ProjectStatCard";
+import { CreateProjectDrawer } from "@/components/shared/settings/projects/modals/CreateProjectDrawer";
+import { EditProjectDrawer } from "@/components/shared/settings/projects/modals/EditProjectDrawer";
+import { DeleteProjectDialog } from "@/components/shared/settings/projects/modals/DeleteProjectDialog";
+import { useDeleteProject, useProjectsList } from "@/components/shared/settings/projects/hooks/useApiSettingsProjects";
 import { useIsViewer } from "@/hooks/useIsViewer";
 
 function EmptyState({ hasQuery }: { hasQuery: boolean }) {

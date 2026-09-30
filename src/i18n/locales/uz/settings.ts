@@ -6,6 +6,7 @@ const settings: typeof ru = {
   manage: "BOSHQARUV",
   leave: "Workspace'dan chiqish",
   back: "Orqaga",
+  pageTitle: "Sozlamalar",
   personalSpace: "Shaxsiy maydon",
   menu: {
     members: "Xodimlar",

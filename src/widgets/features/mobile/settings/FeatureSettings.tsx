@@ -17,7 +17,7 @@ import { SettingsMenuRow } from "./components/SettingsMenuRow";
 import {
   useOrganizationMembersCount,
   useSelectedOrganization,
-} from "./hooks/useApiSettings";
+} from "@/hooks/useApiSettings";
 import type { SettingsMenuItem } from "./types";
 import { RoleGate, hasRole } from "@/components/shared/role-gate/RoleGate";
 import { WORKSPACE_ROLES } from "@/const/roles";

@@ -2,6 +2,10 @@
 const members = {
   title: "Сотрудники",
   usersCount: "{{name}} - {{label}}",
+  invitesCount_one: "{{count}} приглашение",
+  invitesCount_few: "{{count}} приглашения",
+  invitesCount_many: "{{count}} приглашений",
+  invitesCount_other: "{{count}} приглашения",
   tabs: {
     general: "Общее",
     invites: "Приглашения",

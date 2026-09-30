@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { CusSegment } from "@/components/ui/segment/CusSegment";
 import { CusAccordion } from "@/components/ui/accordion/CusAccordion";
 import { SettingsBackHeader } from "@/widgets/features/mobile/settings/components/SettingsBackHeader";
-import { buildOrganizationRoleItems, buildProjectRoleItems } from "./lib/rolesData";
+import { buildOrganizationRoleItems, buildProjectRoleItems } from "@/components/shared/settings/roles/lib/rolesData";
 
 type RoleScope = "organization" | "project";
 

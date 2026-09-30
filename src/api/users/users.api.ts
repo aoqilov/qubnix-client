@@ -21,6 +21,7 @@ function toSessionUser(raw: RawUser): SessionUser {
     id: raw.id,
     fullName: qubnixName || telegramName || raw.telegram_username || "",
     avatarUrl: raw.telegram_avatar_url || undefined,
+    phone: raw.phone_number || undefined,
   };
 }
 
