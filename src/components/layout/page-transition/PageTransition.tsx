@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import type { CSSProperties } from "react";
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion";
 import {
@@ -34,16 +34,8 @@ function FrozenOutlet() {
   const frozen = useRef({ outlet, location });
   if (isPresent) frozen.current = { outlet, location };
 
-  // Qiymat obyekti har renderda yangi bo'lsa, chiqib ketayotgan sahifadagi barcha useLocation/useNavigate/
-  // NavLink'lar yangi sahifa mount bo'layotgan aynan o'sha kadrda qayta render bo'lardi.
-  const frozenLocation = frozen.current.location;
-  const contextValue = useMemo(
-    () => ({ location: frozenLocation, navigationType }),
-    [frozenLocation, navigationType],
-  );
-
   return (
-    <UNSAFE_LocationContext.Provider value={contextValue}>
+    <UNSAFE_LocationContext.Provider value={{ location: frozen.current.location, navigationType }}>
       {frozen.current.outlet}
     </UNSAFE_LocationContext.Provider>
   );
