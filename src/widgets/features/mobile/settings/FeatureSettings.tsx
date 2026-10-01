@@ -12,6 +12,7 @@ import {
 } from "react-icons/lu";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
+import { CusPageTitle } from "@/components/ui/page-title/CusPageTitle";
 import { SettingsWorkspaceCard } from "./components/SettingsWorkspaceCard";
 import { SettingsMenuRow } from "./components/SettingsMenuRow";
 import {
@@ -51,10 +52,13 @@ export default function FeatureSettings() {
     isManager && !isPersonal,
   );
 
+  // Sarlavha statik — yuklanish va xato holatida ham joyida turadi.
+  const pageTitle = <CusPageTitle title={t("settings.pageTitle")} />;
+
   if (workspaceQuery.isPending) {
     return (
       <div className="flex flex-col gap-5 p-4">
-        <div className="h-8 w-48 animate-pulse rounded-input bg-surface-secondary" />
+        {pageTitle}
         <div className="h-[68px] animate-pulse rounded-card bg-surface-secondary" />
         <div className="h-64 animate-pulse rounded-card bg-surface-secondary" />
       </div>
@@ -64,6 +68,7 @@ export default function FeatureSettings() {
   if (workspaceQuery.isError || !workspace) {
     return (
       <div className="p-4">
+        {pageTitle}
         <p className="text-sm text-error-strong">{t("settings.loadError")}</p>
       </div>
     );
@@ -122,6 +127,7 @@ export default function FeatureSettings() {
 
   return (
     <div className="flex flex-col gap-5 p-4">
+      {pageTitle}
       <SettingsWorkspaceCard
         workspace={workspace}
         membersCount={membersCountQuery.data}
