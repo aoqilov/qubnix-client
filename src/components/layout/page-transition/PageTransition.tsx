@@ -1,6 +1,8 @@
 import { useRef } from "react";
+import type { CSSProperties } from "react";
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion";
 import {
+  type NavigationType,
   UNSAFE_LocationContext,
   useLocation,
   useNavigationType,
@@ -8,14 +10,16 @@ import {
 } from "react-router-dom";
 import { pageFadeVariants, pageVariants } from "@/styles/animaitons/page-animation";
 
-// Sidebar tartibi: pastdagi bo'limga o'tish — push (o'ngdan kiradi), yuqoridagiga — pop.
-const PAGE_ORDER = ["/doska", "/profile", "/tasks", "/calendar", "/statistics", "/settings"];
+/** 1 = push (yangi sahifa o'ngdan kiradi), -1 = pop (orqaga). */
+export type PageDirection = 1 | -1;
 
-// Faqat birinchi segment: /settings/members ↔ /settings/roles butun sahifani qayta animatsiya qilmaydi.
-// "/" darhol /doska'ga yo'naltiriladi — bitta kalit, aks holda ilk yuklanishda sahifa "kirib keladi".
-function pageKey(pathname: string): string {
-  const segment = pathname.split("/")[1];
-  return segment ? `/${segment}` : "/doska";
+interface PageTransitionProps {
+  /** URL → sahifa kaliti. Faqat kalit o'zgarganda animatsiya bo'ladi. */
+  getKey: (pathname: string) => string;
+  getDirection: (from: string, to: string, navigationType: NavigationType) => PageDirection;
+  /** Sahifa qatlamining padding'i — platformaga qarab. */
+  className?: string;
+  style?: CSSProperties;
 }
 
 /**
@@ -37,16 +41,16 @@ function FrozenOutlet() {
   );
 }
 
-export function PageTransition() {
+/** iOS uslubidagi sahifa almashinuvi. Ota element `relative overflow-hidden` bo'lishi kerak. */
+export function PageTransition({ getKey, getDirection, className = "", style }: PageTransitionProps) {
   const { pathname } = useLocation();
+  const navigationType = useNavigationType();
   const reduceMotion = useReducedMotion();
-  const key = pageKey(pathname);
+  const key = getKey(pathname);
 
-  const nav = useRef({ key, direction: 1 });
+  const nav = useRef<{ key: string; direction: PageDirection }>({ key, direction: 1 });
   if (nav.current.key !== key) {
-    const from = PAGE_ORDER.indexOf(nav.current.key);
-    const to = PAGE_ORDER.indexOf(key);
-    nav.current = { key, direction: to >= from ? 1 : -1 };
+    nav.current = { key, direction: getDirection(nav.current.key, key, navigationType) };
   }
   const { direction } = nav.current;
 
@@ -60,8 +64,9 @@ export function PageTransition() {
         animate="center"
         exit="exit"
         // Har sahifa o'z scroll'iga ega va noshaffof — ostidagi sahifa ko'rinmasin.
-        // Soya faqat siljiganda (chap chetida) ko'rinadi, tinch holatda <main> uni kesadi.
-        className="absolute inset-0 overflow-auto bg-canvas p-6 shadow-md"
+        // Soya faqat siljiganda (chap chetida) ko'rinadi, tinch holatda ota element uni kesadi.
+        className={`absolute inset-0 overflow-auto bg-canvas shadow-md ${className}`}
+        style={style}
       >
         <FrozenOutlet />
       </motion.div>

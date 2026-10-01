@@ -22,8 +22,10 @@ export const pageVariants: Variants = {
     filter: "brightness(1)",
     zIndex: direction > 0 ? 2 : 1,
     transition: layered,
-    // Tinch holatda filter qolmasin — u `position: fixed` bolalar uchun yangi containing block yaratadi.
-    transitionEnd: { filter: "none" },
+    // Tinch holatda filter va zIndex qolmasin: filter `position: fixed` bolalar uchun yangi
+    // containing block yaratadi, zIndex esa stacking context — ichidagi toast/FAB'larning z-* qiymatlari
+    // tashqaridagi elementlar (BottomTabBar, header) bilan solishtirilmay qolardi.
+    transitionEnd: { filter: "none", zIndex: "auto" },
   }),
   exit: (direction: number) => ({
     ...(direction > 0
