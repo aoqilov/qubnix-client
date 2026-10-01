@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
-import { LuTrash2 } from "react-icons/lu";
+import { forwardRef, useEffect, useState } from "react";
+import { LuChevronDown, LuTrash2 } from "react-icons/lu";
 import { SettingsModal, type SettingsModalVariant } from "@/components/shared/settings/SettingsModal";
 import { CusButton } from "@/components/ui/buttons/CusButton";
-import { CusSegment } from "@/components/ui/segment/CusSegment";
+import { CusMenuList } from "@/components/ui/menu-list/CusMenuList";
 import { avatarColorVar } from "@/utils/avatarColor";
 import { organizationRoleLabel } from "@/utils/roleLabels";
 import { useRemoveMember, useUpdateMemberRole } from "@/components/shared/settings/members/hooks/useApiSettingsMembers";
@@ -11,6 +11,28 @@ import type {
   OrganizationMemberRole,
   RawOrganizationMember,
 } from "@/api/organizations/organizations.types";
+
+// CusMenuList'ning Menu.Trigger asChild'i trigger DOM node'iga o'z proplarini (ref, onClick, aria-*)
+// beradi — shuning uchun ...propsni to'liq spread qiladigan forwardRef button kerak.
+const RoleTriggerButton = forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { label: string; isOpen: boolean }
+>(function RoleTriggerButton({ label, isOpen, ...props }, ref) {
+  return (
+    <button
+      ref={ref}
+      {...props}
+      type="button"
+      className="flex w-full min-w-0 items-center gap-2 rounded-input border border-default bg-surface px-3 py-2.5 text-left text-sm font-medium text-primary hover:bg-surface-secondary"
+    >
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+      <LuChevronDown
+        size={14}
+        className={`flex-none text-secondary transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+      />
+    </button>
+  );
+});
 
 function initialsOf(member: RawOrganizationMember): string {
   return `${member.first_name.charAt(0)}${member.last_name.charAt(0)}`.toUpperCase();
@@ -80,14 +102,22 @@ export function MemberActionsDrawer({ variant = "drawer", open, onClose, member 
         {/* 1-qator: rol */}
         <div className="flex flex-col gap-2 rounded-card border border-subtle bg-surface p-3">
           <p className="text-xs font-medium uppercase tracking-wide text-secondary">{t("members.actions.role")}</p>
-          <CusSegment
+          <CusMenuList
             value={member.organization_role}
             onValueChange={(v) => handleRoleChange(v as OrganizationMemberRole)}
             items={[
-              { id: "admin", label: organizationRoleLabel("admin") },
-              { id: "member", label: organizationRoleLabel("member") },
-              { id: "viewer", label: organizationRoleLabel("viewer") },
+              { value: "admin", label: organizationRoleLabel("admin") },
+              { value: "member", label: organizationRoleLabel("member") },
+              { value: "viewer", label: organizationRoleLabel("viewer") },
             ]}
+            placement="bottom-start"
+            width={240}
+            trigger={(open) => (
+              <RoleTriggerButton
+                label={organizationRoleLabel(member.organization_role)}
+                isOpen={open}
+              />
+            )}
           />
           {updateRole.isError && (
             <p className="text-xs text-error-strong">{t("members.actions.roleError")}</p>

@@ -1,5 +1,7 @@
+import { useRef } from "react";
 import type { NavigationType } from "react-router-dom";
 import { useSyncWorkspaceType } from "@/hooks/useSyncWorkspaceType";
+import { useMobileBack } from "@/hooks/useMobileBack";
 import { PageTransition, type PageDirection } from "@/components/layout/page-transition/PageTransition";
 import { BottomTabBar } from "./nav/BottomTabBar";
 
@@ -42,6 +44,8 @@ function mobileDirection(from: string, to: string, navigationType: NavigationTyp
 
 export function MobileLayout() {
   useSyncWorkspaceType();
+  const mainRef = useRef<HTMLElement>(null);
+  useMobileBack(mainRef);
 
   return (
     <div
@@ -49,7 +53,7 @@ export function MobileLayout() {
       style={SAFE_AREA_STYLE}
     >
       {/* <Header /> */}
-      <main className="relative flex-1 overflow-hidden border-t border-subtle">
+      <main ref={mainRef} className="relative flex-1 overflow-hidden border-t border-subtle">
         <PageTransition getKey={mobilePageKey} getDirection={mobileDirection} style={PAGE_STYLE} />
       </main>
       <BottomTabBar />
