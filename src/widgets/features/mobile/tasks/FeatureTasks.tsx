@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useState, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import { useSwipeNav } from "@/hooks/useSwipeNav";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { useSessionStore } from "@/store/session.store";
 import { WORKSPACE_ROLES } from "@/const/roles";
@@ -248,6 +250,17 @@ export default function FeatureTasks() {
     setStatusId(isPast ? "failed" : "assigned");
   }, [isPast]);
   const activeStatusMeta = STATUS_META.find((m) => m.id === statusId);
+  // Ro'yxatni chapga/o'ngga surib status almashtirish — chetlarda to'xtaydi (aylanmaydi).
+  const swipeProps = useSwipeNav({
+    onNext: () => {
+      const i = STATUS_META.findIndex((m) => m.id === statusId);
+      if (i < STATUS_META.length - 1) setStatusId(STATUS_META[i + 1].id);
+    },
+    onPrev: () => {
+      const i = STATUS_META.findIndex((m) => m.id === statusId);
+      if (i > 0) setStatusId(STATUS_META[i - 1].id);
+    },
+  });
 
   // "Xodim bo'yicha" filtr workspace owner/admin/viewer yoki shu loyihaning
   // project_manager'iga ko'rinadi — oddiy a'zolar faqat o'z vazifalarini ko'radi.
@@ -587,6 +600,7 @@ export default function FeatureTasks() {
           className="sticky top-0 z-sticky -mx-4 bg-canvas px-4 py-2"
         />
 
+        <motion.div {...swipeProps} className="flex min-h-[50dvh] flex-col gap-3">
         {tasksQuery.isPending ? (
           <>
             <TaskCardSkeleton />
@@ -681,6 +695,7 @@ export default function FeatureTasks() {
             );
           })
         )}
+        </motion.div>
         </>
         )}
       </div>

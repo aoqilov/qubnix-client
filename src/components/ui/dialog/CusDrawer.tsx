@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Drawer, CloseButton } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 import { LuArrowLeft } from "react-icons/lu";
+import { useSwipeToClose } from "@/hooks/useSwipeToClose";
 
 type DrawerSize = "xs" | "sm" | "md" | "lg" | "xl" | "full";
 type DrawerPlacement = "start" | "end" | "top" | "bottom";
@@ -29,6 +30,8 @@ interface CusDrawerProps {
   closeOnBackdrop?: boolean;
   closeOnEscape?: boolean;
   backButton?: boolean;
+  /** Touch qurilmada panelni chetga tortib yopish (default yoqilgan). Slider/input va o'zi scroll bo'ladigan bloklar ustida ishlamaydi. */
+  swipeToClose?: boolean;
   /** Ochilganda fokus oladigan element — berilmasa, birinchi fokuslanadigan element. */
   initialFocusEl?: () => HTMLElement | null;
 }
@@ -45,9 +48,11 @@ export function CusDrawer({
   closeOnBackdrop = true,
   closeOnEscape = true,
   backButton = false,
+  swipeToClose = true,
   initialFocusEl,
 }: CusDrawerProps) {
   const { t } = useTranslation();
+  const contentRef = useSwipeToClose({ enabled: swipeToClose, placement, open, onClose });
   const isBottom = placement === "bottom";
   const isTop = placement === "top";
   const isHorizontal = isBottom || isTop;
@@ -83,6 +88,7 @@ export function CusDrawer({
         }}
       >
         <Drawer.Content
+          ref={contentRef}
           bg="var(--bg-main)"
           borderColor="var(--border-default)"
           borderWidth={isFullScreen ? "0" : "1px"}
