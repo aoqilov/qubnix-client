@@ -36,7 +36,7 @@ export default function FeatureProfile() {
 
   return (
     <div className="flex flex-col gap-5">
-      <CusPageTitle title={t("profile.title")} description={t("profile.description")} />
+      <CusPageTitle className="" title={t("profile.title")} subtitle={t("profile.description")} />
 
       <div className="flex gap-6">
         <div className="flex w-full max-w-xl flex-none flex-col gap-5">

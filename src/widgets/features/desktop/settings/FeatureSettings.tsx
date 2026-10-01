@@ -14,6 +14,7 @@ import { CusButton } from "@/components/ui/buttons/CusButton";
 import { hasRole } from "@/components/shared/role-gate/RoleGate";
 import { WORKSPACE_ROLES } from "@/const/roles";
 import { useOrganizationMembersCount, useSelectedOrganization } from "@/hooks/useApiSettings";
+import { CusPageTitle } from "@/components/ui/page-title/CusPageTitle";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { organizationRoleLabel } from "@/utils/roleLabels";
 import { SettingsNavItem } from "./components/SettingsNavItem";
@@ -97,18 +98,18 @@ export default function FeatureSettings() {
   }
 
   return (
-    // AppLayout'ning <main> p-6 beradi — master-detail butun balandlikni egallashi uchun bekor qilinadi.
+    // Sahifa konteyneri (PageTransition) p-6 beradi — master-detail butun balandlikni egallashi uchun bekor qilinadi.
     <div className="-m-6 flex h-[calc(100%+3rem)]">
       <aside className="flex w-[296px] flex-none flex-col gap-4 overflow-y-auto border-r border-subtle py-5 pl-6 pr-4">
-        <div>
-          <h1 className="font-condensed text-3xl font-semibold leading-none text-primary">{t("settings.pageTitle")}</h1>
-          {workspace && (
-            <p className="mt-1.5 truncate text-sm font-semibold text-brand">
-              {workspace.name}
-              {!isPersonal && ` · ${organizationRoleLabel(workspace.role)}`}
-            </p>
-          )}
-        </div>
+        <CusPageTitle
+          className=""
+          title={t("settings.pageTitle")}
+          subtitle={
+            workspace
+              ? `${workspace.name}${isPersonal ? "" : ` · ${organizationRoleLabel(workspace.role)}`}`
+              : undefined
+          }
+        />
 
         {workspaceQuery.isPending ? (
           <>

@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useIntlLocale } from "@/i18n/useIntlLocale";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
@@ -33,6 +34,13 @@ export function CalendarDayInfoBox({ date, totals }: CalendarDayInfoBoxProps) {
   ];
 
   return (
+    // Kun almashganda sarlavha qismi yengil yangilanib turadi.
+    <motion.div
+      key={dateLabel}
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+    >
     <CusCardbox
       className="flex items-center justify-between gap-6 rounded-card bg-surface px-5 py-4"
       style={{ borderColor: "var(--border-subtle)" }}
@@ -58,5 +66,6 @@ export function CalendarDayInfoBox({ date, totals }: CalendarDayInfoBoxProps) {
         </div>
       </div>
     </CusCardbox>
+    </motion.div>
   );
 }

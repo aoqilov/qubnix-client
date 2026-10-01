@@ -2,6 +2,7 @@
 const calendar = {
   title: "Календарь",
   pickDate: "Выберите дату",
+  backToToday: "К сегодняшнему дню",
   dayKind: {
     past: "Прошедший день",
     today: "Сегодня",

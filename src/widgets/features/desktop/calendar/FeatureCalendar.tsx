@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { parseDate } from "@internationalized/date";
 import { LuCalendarDays } from "react-icons/lu";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
+import { CusPageTitle } from "@/components/ui/page-title/CusPageTitle";
 import { CusCalendar } from "@/components/ui/calendar/CusCalendar";
 import { useCalendarDay } from "@/hooks/useApiCalendar";
 import { useWorkspaceStore } from "@/store/workspace.store";
@@ -63,6 +64,15 @@ export default function FeatureCalendar() {
     });
   }
 
+  const todayKey = toDateKey(new Date());
+  const isTodayView = toDateKey(selectedDate) === todayKey && toDateKey(weekStart) === toDateKey(getWeekStart(new Date()));
+
+  function handleBackToToday() {
+    const now = new Date();
+    setSelectedDate(now);
+    setWeekStart(getWeekStart(now));
+  }
+
   function handlePickDate(date: Date) {
     setSelectedDate(date);
     setWeekStart(getWeekStart(date));
@@ -70,24 +80,32 @@ export default function FeatureCalendar() {
   }
 
   return (
-    <div className="flex flex-col gap-4 ">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="font-condensed text-3xl font-semibold leading-none text-primary">
-            {t("calendar.title")}
-          </h1>
-          <p className="mt-1.5 text-xs font-semibold tracking-widest text-brand">
-            {formatMonthLabel(weekStart)}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setCalendarOpen(true)}
-          className="flex size-9 flex-none items-center justify-center rounded-input border border-subtle bg-surface text-secondary transition-colors hover:border-focus"
-        >
-          <LuCalendarDays size={16} />
-        </button>
-      </div>
+    <div className="flex flex-col gap-5">
+      <CusPageTitle
+        className=""
+        title={t("calendar.title")}
+        subtitle={formatMonthLabel(weekStart)}
+        action={
+          <div className="flex items-center gap-2">
+            {!isTodayView && (
+              <button
+                type="button"
+                onClick={handleBackToToday}
+                className="h-9 rounded-input border border-subtle bg-surface px-3 text-sm font-semibold text-brand transition-colors hover:border-focus"
+              >
+                {t("calendar.backToToday")}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setCalendarOpen(true)}
+              className="flex size-9 flex-none items-center justify-center rounded-input border border-subtle bg-surface text-secondary transition-colors hover:border-focus"
+            >
+              <LuCalendarDays size={16} />
+            </button>
+          </div>
+        }
+      />
 
       <CalendarWeekStrip
         days={days}

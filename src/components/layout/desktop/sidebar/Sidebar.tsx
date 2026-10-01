@@ -176,7 +176,7 @@ export function Sidebar() {
         {!isHome && current && (
           <>
             {/* Tashkilot almashtirgich */}
-            <div className="mt-[100px]">
+            <div className="mt-[70px]">
               <CusPopover
                 placement="bottom-start"
                 width={240}

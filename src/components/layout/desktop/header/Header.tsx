@@ -1,15 +1,33 @@
-import { LuChevronDown } from "react-icons/lu";
+import { useTranslation } from "react-i18next";
+import { LuChevronDown, LuMaximize, LuMinimize } from "react-icons/lu";
 import { useSessionStore } from "@/store/session.store";
+import { useFullscreen } from "@/hooks/useFullscreen";
+import { isTelegramMiniApp } from "@/utils/platform";
 import { CusPopover } from "@/components/ui/popover/CusPopover";
 import { ProfilePreferencesList } from "@/components/shared/profile-preferences/ProfilePreferencesList";
 import { avatarColorVar } from "@/utils/avatarColor";
 import { initialsOf } from "@/utils/calendarDay";
 
 export function Header() {
+  const { t } = useTranslation();
   const user = useSessionStore((s) => s.user);
+  const fullscreen = useFullscreen();
 
   return (
     <header className="flex h-14 flex-none items-center justify-end gap-4 border-b border-subtle bg-surface pr-[100px] ">
+      {/* To'liq ekran — faqat oddiy brauzerda (Telegram o'z oynasini boshqaradi). */}
+      {!isTelegramMiniApp() && fullscreen.isSupported && (
+        <button
+          type="button"
+          onClick={fullscreen.toggle}
+          aria-label={fullscreen.isFullscreen ? t("layout.header.exitFullscreen") : t("layout.header.fullscreen")}
+          title={fullscreen.isFullscreen ? t("layout.header.exitFullscreen") : t("layout.header.fullscreen")}
+          className="flex size-9 items-center justify-center rounded-input text-secondary transition-colors hover:bg-surface-secondary hover:text-primary"
+        >
+          {fullscreen.isFullscreen ? <LuMinimize size={18} /> : <LuMaximize size={18} />}
+        </button>
+      )}
+
       {/* Profil menyusi — ochilganda tema, til, shrift o'lchami. */}
       <CusPopover
         placement="bottom-end"

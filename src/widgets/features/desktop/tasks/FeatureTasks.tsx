@@ -17,6 +17,7 @@ import { useWorkspaceStore } from "@/store/workspace.store";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
+import { CusPageTitle } from "@/components/ui/page-title/CusPageTitle";
 import { CusMenuList } from "@/components/ui/menu-list/CusMenuList";
 import { CusToasterFull, useToasterFull } from "@/components/ui/toaster/CusToasterFull";
 import ProjectsTabs from "@/components/shared/project-tab/ProjectsTabs";
@@ -247,32 +248,30 @@ export default function FeatureTasks() {
   return (
     <div className="flex flex-col gap-5">
       {/* Sarlavha */}
-      <header className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold leading-tight text-primary">
-            {isToday ? t("tasks.desktop.titleToday") : t("tasks.desktop.titleDate", { date: dateLabel })}
-          </h1>
-          <p className="mt-1 text-sm">
-            <span className="font-semibold text-brand">
-              {counts?.done ?? 0}/{counts?.total ?? 0}
-            </span>{" "}
-            <span className="text-xs uppercase tracking-wide text-secondary">{t("tasks.desktop.doneOf")}</span>
-          </p>
-        </div>
-        <div className="flex flex-col items-end gap-1 text-right">
-          <span className="text-2xl font-bold text-primary">{dateLabel}</span>
-          <span className="text-xs uppercase tracking-wide text-secondary">{weekday}</span>
-          {!isToday && (
-            <button
-              type="button"
-              onClick={() => setSelectedDate(todayApiDate())}
-              className="text-xs font-semibold text-brand hover:underline"
-            >
-              {t("tasks.desktop.backToToday")}
-            </button>
-          )}
-        </div>
-      </header>
+      <CusPageTitle
+        className=""
+        title={isToday ? t("tasks.desktop.titleToday") : t("tasks.desktop.titleDate", { date: dateLabel })}
+        subtitle={
+          <>
+            {counts?.done ?? 0}/{counts?.total ?? 0} {t("tasks.desktop.doneOf")}
+          </>
+        }
+        action={
+          <div className="flex flex-col items-end gap-1 text-right">
+            <span className="text-2xl font-bold text-primary">{dateLabel}</span>
+            <span className="text-xs uppercase tracking-wide text-secondary">{weekday}</span>
+            {!isToday && (
+              <button
+                type="button"
+                onClick={() => setSelectedDate(todayApiDate())}
+                className="text-xs font-semibold text-brand hover:underline"
+              >
+                {t("tasks.desktop.backToToday")}
+              </button>
+            )}
+          </div>
+        }
+      />
 
       {isPast && (
         <div className="rounded-card bg-warning-soft px-4 py-2 text-sm font-medium text-warning-strong">

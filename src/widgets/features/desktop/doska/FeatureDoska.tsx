@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LuBell, LuBuilding2, LuPlus } from "react-icons/lu";
+import { CusPageTitle } from "@/components/ui/page-title/CusPageTitle";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import type { OrganizationType } from "@/api/organizations/organizations.types";
 import { formatWeekdayDate } from "@/utils/formatWeekdayDate";
@@ -32,13 +33,8 @@ export default function FeatureDoska() {
   };
 
   return (
-    <div className="flex w-full flex-col gap-8">
-      <header>
-        <h1 className="text-3xl font-bold leading-tight text-primary">{t("doska.title")}</h1>
-        <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-brand">
-          {formatWeekdayDate()}
-        </p>
-      </header>
+    <div className="flex w-full flex-col gap-5">
+      <CusPageTitle className="" title={t("doska.title")} subtitle={formatWeekdayDate()} />
 
       {/* Shaxsiy vazifalar — to'liq en */}
       <section>

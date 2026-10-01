@@ -29,6 +29,10 @@ const layout: typeof ru = {
     collapse: "Menyuni yig'ish",
     expand: "Menyuni yoyish",
   },
+  header: {
+    fullscreen: "To'liq ekran",
+    exitFullscreen: "To'liq ekrandan chiqish",
+  },
 };
 
 export default layout;

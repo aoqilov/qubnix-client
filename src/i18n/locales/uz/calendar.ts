@@ -3,6 +3,7 @@ import type ru from "../ru/calendar";
 const calendar: typeof ru = {
   title: "Kalendar",
   pickDate: "Sanani tanlang",
+  backToToday: "Bugunga qaytish",
   dayKind: {
     past: "O'tgan kun",
     today: "Bugun",

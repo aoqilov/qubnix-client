@@ -28,6 +28,10 @@ const layout = {
     collapse: "Свернуть меню",
     expand: "Развернуть меню",
   },
+  header: {
+    fullscreen: "Полноэкранный режим",
+    exitFullscreen: "Выйти из полноэкранного режима",
+  },
 };
 
 export default layout;
