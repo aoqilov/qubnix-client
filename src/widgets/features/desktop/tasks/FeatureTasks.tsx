@@ -44,12 +44,11 @@ import {
   useProjectsByDate,
   useTasksList,
 } from "./hooks/useApiTasks";
+import { useTasksViewMode } from "./hooks/useTasksViewMode";
 import { TaskRow } from "./components/TaskRow";
 import { StatusSegments } from "./components/StatusSegments";
 import { KanbanBoard } from "./components/KanbanBoard";
 import { TaskDetailsDrawer } from "./modals/TaskDetailsDrawer";
-
-type ViewMode = "list" | "board";
 
 interface TasksNavigationState {
   /** /calendar'dan kelganda — YYYY-MM-DD. Sana tanlash desktop'da /calendar'da. */
@@ -133,7 +132,7 @@ export default function FeatureTasks() {
   }, [isPast]);
   const activeStatus = TASK_STATUS_META.find((m) => m.id === statusId);
   const [sort, setSort] = useState<TaskSortKey>("deadline");
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [viewMode, setViewMode] = useTasksViewMode();
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const [isMembersFilterOpen, setMembersFilterOpen] = useState(false);
   useEffect(() => {
