@@ -183,11 +183,6 @@ function TaskModalEdit({
 
   // ── Step 1 ──────────────────────────────────────────────────────────────────
   const [title, setTitle] = useState("");
-  const [descriptionMode, setDescriptionMode] = useState<"text" | "voice">("text");
-  const [description, setDescription] = useState("");
-  const [voiceNote, setVoiceNote] = useState<VoiceNoteValue | null>(null);
-  const [audioTouched, setAudioTouched] = useState(false);
-  const [existingAudioFileId, setExistingAudioFileId] = useState<string | null>(null);
   const [dueMode, setDueMode] = useState<"quick" | "custom">("quick");
   const [quickTime, setQuickTime] = useState(QUICK_TIMES[0]);
   const [isCustomQuickTime, setIsCustomQuickTime] = useState(false);
@@ -197,6 +192,11 @@ function TaskModalEdit({
   const [priority, setPriority] = useState<TaskPriority>("medium");
 
   // ── Step 2 ──────────────────────────────────────────────────────────────────
+  const [descriptionMode, setDescriptionMode] = useState<"text" | "voice">("text");
+  const [description, setDescription] = useState("");
+  const [voiceNote, setVoiceNote] = useState<VoiceNoteValue | null>(null);
+  const [audioTouched, setAudioTouched] = useState(false);
+  const [existingAudioFileId, setExistingAudioFileId] = useState<string | null>(null);
   const [subtaskInput, setSubtaskInput] = useState("");
   const [subtasks, setSubtasks] = useState<TaskModalAddSubtask[]>([]);
   const [existingFiles, setExistingFiles] = useState<ExistingTaskFile[]>([]);
@@ -373,53 +373,6 @@ function TaskModalEdit({
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-                  {t("tasks.modal.description")}
-                </span>
-                <div className="flex gap-1 rounded-full border border-default bg-surface p-1">
-                  <button
-                    type="button"
-                    aria-label={t("tasks.modal.descriptionText")}
-                    onClick={() => setDescriptionMode("text")}
-                    className="flex size-9 items-center justify-center rounded-full"
-                    style={
-                      descriptionMode === "text"
-                        ? { background: "var(--brand-default)", color: "var(--text-on-brand)" }
-                        : { color: "var(--text-secondary)" }
-                    }
-                  >
-                    <LuType size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={t("tasks.modal.descriptionVoice")}
-                    onClick={() => setDescriptionMode("voice")}
-                    className="flex size-9 items-center justify-center rounded-full"
-                    style={
-                      descriptionMode === "voice"
-                        ? { background: "var(--brand-default)", color: "var(--text-on-brand)" }
-                        : { color: "var(--text-secondary)" }
-                    }
-                  >
-                    <LuMic size={16} />
-                  </button>
-                </div>
-              </div>
-              {descriptionMode === "text" ? (
-                <CusTextArea
-                  placeholder={t("tasks.modal.descriptionPlaceholder")}
-                  autoresize
-                  maxH="10lh"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              ) : (
-                <VoiceNoteRecorder value={voiceNote} onChange={handleVoiceChange} />
-              )}
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium uppercase tracking-wide text-secondary">
                   {t(DUE_SECTION_LABEL[activeDueIcon])}
                 </span>
                 <div className="flex gap-1 rounded-full border border-default bg-surface p-1">
@@ -533,6 +486,53 @@ function TaskModalEdit({
 
   const step2Content = (
           <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                  {t("tasks.modal.description")}
+                </span>
+                <div className="flex gap-1 rounded-full border border-default bg-surface p-1">
+                  <button
+                    type="button"
+                    aria-label={t("tasks.modal.descriptionText")}
+                    onClick={() => setDescriptionMode("text")}
+                    className="flex size-9 items-center justify-center rounded-full"
+                    style={
+                      descriptionMode === "text"
+                        ? { background: "var(--brand-default)", color: "var(--text-on-brand)" }
+                        : { color: "var(--text-secondary)" }
+                    }
+                  >
+                    <LuType size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={t("tasks.modal.descriptionVoice")}
+                    onClick={() => setDescriptionMode("voice")}
+                    className="flex size-9 items-center justify-center rounded-full"
+                    style={
+                      descriptionMode === "voice"
+                        ? { background: "var(--brand-default)", color: "var(--text-on-brand)" }
+                        : { color: "var(--text-secondary)" }
+                    }
+                  >
+                    <LuMic size={16} />
+                  </button>
+                </div>
+              </div>
+              {descriptionMode === "text" ? (
+                <CusTextArea
+                  placeholder={t("tasks.modal.descriptionPlaceholder")}
+                  autoresize
+                  maxH="10lh"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              ) : (
+                <VoiceNoteRecorder value={voiceNote} onChange={handleVoiceChange} />
+              )}
+            </div>
+
             <div className="flex flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-secondary">
                 {t("tasks.modal.subtasks")}

@@ -154,12 +154,13 @@ export function RoutineFormDrawer({
   const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const descriptionInputRef = useRef<HTMLTextAreaElement>(null);
   const subtaskInputRef = useRef<HTMLInputElement>(null);
 
   // Ochilishdagi fokusni (nom maydoni) CusDrawer'ning initialFocusEl'i beradi;
-  // 2-qadamga o'tilganda esa subtask maydoni fokus oladi.
+  // 2-qadamga o'tilganda esa tavsif maydoni fokus oladi.
   useEffect(() => {
-    if (open && step === 2) subtaskInputRef.current?.focus();
+    if (open && step === 2) descriptionInputRef.current?.focus();
   }, [open, step]);
 
   // Har safar ochilganda — tahrirlash bo'lsa mavjud routine bilan, aks holda bo'sh holat bilan to'ldiriladi.
@@ -352,15 +353,6 @@ export function RoutineFormDrawer({
             placeholder={t("routines.form.namePlaceholder")}
             value={name}
             onChange={(e) => setName(e.target.value)}
-          />
-
-          <CusTextArea
-            label={t("routines.form.description")}
-            placeholder={t("routines.form.descriptionPlaceholder")}
-            autoresize
-            maxH="8lh"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
           />
 
           <div className="flex flex-col gap-2">
@@ -579,6 +571,16 @@ export function RoutineFormDrawer({
 
   const step2Content = (
         <div className="flex flex-col gap-4">
+          <CusTextArea
+            ref={descriptionInputRef}
+            label={t("routines.form.description")}
+            placeholder={t("routines.form.descriptionPlaceholder")}
+            autoresize
+            maxH="8lh"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-secondary">
               {t("tasks.modal.subtasks")}
