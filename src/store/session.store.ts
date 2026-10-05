@@ -2,6 +2,10 @@ import { create } from "zustand";
 
 export interface SessionUser {
   id: number;
+  /** Qubnix'dagi ism (Telegram'dagisi emas) — profilni tahrirlash formasi shundan to'ladi. */
+  firstName: string;
+  lastName: string;
+  /** Ko'rsatish uchun: qubnix ismi, bo'lmasa Telegram ismi, bo'lmasa username. */
   fullName: string;
   avatarUrl?: string;
   phone?: string;

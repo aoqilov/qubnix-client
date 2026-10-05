@@ -22,7 +22,7 @@ function PageTitleDynamic({
   statusColor = "var(--status-success-solid, #10B981)",
 }: PageTitleDynamicProps) {
   return (
-    <div className="flex items-start justify-between">
+    <div className="flex items-end justify-between">
       <div className="flex flex-col gap-1">
         <h1
           style={{

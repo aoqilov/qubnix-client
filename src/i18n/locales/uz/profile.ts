@@ -6,9 +6,8 @@ const profile: typeof ru = {
   settings: "Sozlamalar",
   editProfile: "Profilni tahrirlash",
   edit: {
-    changePhoto: "Rasmni almashtirish",
-    changePhotoHint: "Rasmni almashtirish uchun kamera belgisini bosing",
-    fullName: "Ism familiya",
+    firstName: "Ism",
+    lastName: "Familiya",
     phone: "Telefon raqam",
   },
   prefs: {

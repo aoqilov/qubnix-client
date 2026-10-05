@@ -119,7 +119,7 @@ export function Sidebar() {
     { to: "/profile", label: t("layout.sidebar.profile"), icon: LuUser },
   ];
   const workspaceItems = [
-    { to: "/tasks", label: t("layout.sidebar.today"), icon: LuCalendarCheck, count: current?.tasksCount },
+    { to: "/tasks", label: t("layout.sidebar.tasks"), icon: LuCalendarCheck, count: current?.tasksCount },
     { to: "/calendar", label: t("layout.sidebar.calendar"), icon: LuCalendar },
     { to: "/statistics", label: t("layout.sidebar.statistics"), icon: LuChartColumn },
     { to: "/settings", label: t("layout.sidebar.settings"), icon: LuSettings },

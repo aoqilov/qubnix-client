@@ -14,7 +14,7 @@ function MembersFilterButton({ selectedCount, onClick }: MembersFilterButtonProp
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center rounded-full border text-sm font-medium ${
+      className={`flex items-center rounded-[12px] border text-sm font-medium ${
         isActive ? "border-brand bg-brand-subtle text-brand" : "border-default bg-surface text-primary"
       }`}
       style={{

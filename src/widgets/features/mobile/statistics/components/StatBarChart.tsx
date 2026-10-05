@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import type { StatBarChartItem } from "../types";
 
@@ -8,6 +9,17 @@ interface StatBarChartProps {
 }
 
 const MIN_LABEL_HEIGHT = 14;
+const BAR_SIZE = 32;
+
+/**
+ * Kunlar space-between bo'lsin: Recharts har ustunni o'z bo'lagining (band) o'rtasiga qo'yadi,
+ * shuning uchun chetlarda yarim bo'lak bo'sh qoladi. Shu bo'shliqni yeydigan manfiy gorizontal
+ * margin — birinchi ustun chap chetga, oxirgisi o'ng chetga yopishadi, oraliqlar teng qoladi.
+ */
+function edgeToEdgeMargin(width: number, count: number): number {
+  if (!width || count < 2) return 0;
+  return Math.min(0, (BAR_SIZE * count - width) / (2 * (count - 1)));
+}
 
 function SegmentLabel(props: any) {
   const { x, y, width, height, value } = props;
@@ -88,10 +100,17 @@ function StatBarLegend() {
 }
 
 export function StatBarChart({ data, height = 190 }: StatBarChartProps) {
+  const [width, setWidth] = useState(0);
+  const sideMargin = edgeToEdgeMargin(width, data.length);
+
   return (
     <div className="flex flex-col gap-3">
-      <ResponsiveContainer width="100%" height={height}>
-        <BarChart data={data} barCategoryGap="16%">
+      <ResponsiveContainer width="100%" height={height} onResize={(w) => setWidth(w)}>
+        <BarChart
+          data={data}
+          barCategoryGap="16%"
+          margin={{ top: 5, bottom: 5, left: sideMargin, right: sideMargin }}
+        >
           <XAxis
             dataKey="label"
             axisLine={false}
@@ -107,7 +126,7 @@ export function StatBarChart({ data, height = 190 }: StatBarChartProps) {
             radius={[0, 0, 0, 0]}
             stroke="var(--bg-surface)"
             strokeWidth={2}
-            barSize={32}
+            barSize={BAR_SIZE}
             background={{ fill: "var(--bg-surface-secondary)", radius: 4 }}
           >
             <LabelList dataKey="done" content={<SegmentLabel />} />
@@ -119,7 +138,7 @@ export function StatBarChart({ data, height = 190 }: StatBarChartProps) {
               />
             ))}
           </Bar>
-          <Bar dataKey="notDone" stackId="bucket" radius={[4, 4, 0, 0]} stroke="var(--bg-surface)" strokeWidth={2} barSize={32}>
+          <Bar dataKey="notDone" stackId="bucket" radius={[4, 4, 0, 0]} stroke="var(--bg-surface)" strokeWidth={2} barSize={BAR_SIZE}>
             <LabelList dataKey="notDone" content={<SegmentLabel />} />
             {data.map((bar) => (
               <Cell

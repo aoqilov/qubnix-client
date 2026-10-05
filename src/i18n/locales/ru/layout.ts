@@ -18,7 +18,7 @@ const layout = {
     profile: "Профиль",
     workspace: "Организация",
     projects: "Проекты",
-    today: "Сегодня",
+    tasks: "Задачи",
     calendar: "Календарь",
     statistics: "Статистика",
     settings: "Настройки",

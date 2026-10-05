@@ -19,7 +19,7 @@ const layout: typeof ru = {
     profile: "Profil",
     workspace: "Tashkilot",
     projects: "Loyihalar",
-    today: "Bugun",
+    tasks: "Vazifalar",
     calendar: "Kalendar",
     statistics: "Statistika",
     settings: "Sozlamalar",

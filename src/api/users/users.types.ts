@@ -12,3 +12,9 @@ export interface RawUser {
   index_quality: number;
   registered_at: string;
 }
+
+/** PATCH /api/v1/users/me — `{ data: ... }` ichida yuboriladi. */
+export interface UpdateMeRequest {
+  first_name?: string;
+  last_name?: string;
+}

@@ -43,7 +43,7 @@ function FilterSectionTask({
         trigger={
           <button
             type="button"
-            className="flex items-center rounded-full border border-default bg-surface text-sm font-medium text-primary"
+            className="flex items-center rounded-[12px] border border-default bg-surface text-sm font-medium text-primary"
             style={{
               padding: "var(--space-gap-sm, 8px)",
               gap: "var(--space-gap-xs, 2px)",

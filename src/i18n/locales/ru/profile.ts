@@ -5,9 +5,8 @@ const profile = {
   settings: "Настройки",
   editProfile: "Редактировать профиль",
   edit: {
-    changePhoto: "Сменить фото",
-    changePhotoHint: "Нажмите на значок камеры, чтобы сменить фото",
-    fullName: "Имя и фамилия",
+    firstName: "Имя",
+    lastName: "Фамилия",
     phone: "Номер телефона",
   },
   prefs: {
