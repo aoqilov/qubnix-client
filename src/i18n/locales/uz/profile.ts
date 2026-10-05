@@ -5,6 +5,7 @@ const profile: typeof ru = {
   description: "Hisob va sozlamalar",
   settings: "Sozlamalar",
   editProfile: "Profilni tahrirlash",
+  version: "Versiya {{version}}",
   edit: {
     firstName: "Ism",
     lastName: "Familiya",

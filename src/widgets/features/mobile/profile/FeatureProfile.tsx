@@ -72,6 +72,10 @@ export default function FeatureProfile() {
         onSelectList={() => setActiveDrawer("tariffs-list")}
       />
 
+      <p className="text-center text-xs text-disabled">
+        {t("profile.version", { version: __APP_VERSION__ })}
+      </p>
+
       <ProfileSettingsModal open={activeDrawer === "settings"} onClose={close} />
       <ProfileEditModal open={activeDrawer === "edit-profile"} onClose={close} />
       <CurrentTariffModal

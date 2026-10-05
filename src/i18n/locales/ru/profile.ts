@@ -4,6 +4,7 @@ const profile = {
   description: "Аккаунт и настройки",
   settings: "Настройки",
   editProfile: "Редактировать профиль",
+  version: "Версия {{version}}",
   edit: {
     firstName: "Имя",
     lastName: "Фамилия",

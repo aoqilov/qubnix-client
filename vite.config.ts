@@ -2,6 +2,10 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
+import { readFileSync } from "node:fs";
+
+// Profil pastidagi "Версия" — package.json'dagi `version` dan (reliz qilganda shu yerda oshiriladi).
+const APP_VERSION: string = JSON.parse(readFileSync(path.resolve(__dirname, "package.json"), "utf-8")).version;
 
 // Manifest CSS o'zgaruvchini tushunmaydi — qiymatlar globals.css primitivlaridan ko'chirilgan.
 const CANVAS_LIGHT = "#f8fafc"; // --c-neutral-50 (--bg-canvas, light)
@@ -43,6 +47,9 @@ export default defineConfig({
       },
     }),
   ],
+  define: {
+    __APP_VERSION__: JSON.stringify(APP_VERSION),
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

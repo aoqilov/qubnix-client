@@ -101,6 +101,10 @@ export default function FeatureProfile() {
             }
             onSelect={select}
           />
+
+          <p className="text-center text-xs text-disabled">
+            {t("profile.version", { version: __APP_VERSION__ })}
+          </p>
         </div>
 
         {activePanel && (
