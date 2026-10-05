@@ -20,6 +20,12 @@ declare global {
         isVerticalSwipesEnabled?: boolean;
         enableVerticalSwipes?: () => void;
         disableVerticalSwipes?: () => void;
+        isVersionAtLeast?: (version: string) => boolean;
+        /** Bot API 8.0+ — Mini App yorlig'ini bosh ekranga qo'shish (iOS'da Safari orqali). */
+        addToHomeScreen?: () => void;
+        checkHomeScreenStatus?: (
+          callback: (status: "unsupported" | "unknown" | "added" | "missed") => void,
+        ) => void;
         /** Linkni Telegram'dan tashqarida — tizim brauzerida ochadi. */
         openLink?: (url: string, options?: { try_instant_view?: boolean }) => void;
         onEvent?: (eventType: string, callback: () => void) => void;

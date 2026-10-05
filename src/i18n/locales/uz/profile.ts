@@ -17,6 +17,9 @@ const profile: typeof ru = {
     telegramNote:
       "O'rnatish faqat brauzerda ishlaydi. «Brauzerda ochish»ni bosing, telefon raqamingiz bilan kiring — yo'riqnoma o'zi ochiladi.",
     installed: "Ilova bu qurilmada allaqachon o'rnatilgan.",
+    telegramShortcutNote:
+      "Yorliq qubnix'ni Telegram ichida ochadi. Telegram'siz alohida ilova kerak bo'lsa — «Brauzerda ochish»ni bosing.",
+    shortcutAdded: "qubnix yorlig'i bosh ekranda allaqachon bor.",
     stepsTitle: "Qanday o'rnatiladi",
     platform: {
       ios: "iPhone / iPad",
@@ -26,9 +29,9 @@ const profile: typeof ru = {
     steps: {
       ios: {
         open: "qubnix'ni Safari'da oching",
-        share: "Ekran pastidagi «Ulashish» tugmasini bosing",
-        add: "«Bosh ekranga qo'shish» bandini tanlang",
-        confirm: "«Qo'shish»ni bosing — qubnix belgisi bosh ekranda paydo bo'ladi",
+        share: "Ekran pastidagi «•••» ni bosing va «Поделиться» ni tanlang",
+        add: "«Добавить на экран „Домой“» ni tanlang — ko'rinmasa, «Показать больше» ni bosing",
+        confirm: "«Добавить» ni bosing — qubnix belgisi bosh ekranda paydo bo'ladi",
       },
       android: {
         open: "qubnix'ni Chrome'da oching",
@@ -41,9 +44,20 @@ const profile: typeof ru = {
         confirm: "Tasdiqlang — qubnix alohida oynada ochiladi",
       },
     },
+    telegramSteps: {
+      ios: {
+        menu: "Pastdagi «Bosh ekranga qo'shish»ni yoki tepadagi «•••» → «Добавить на экран „Домой“»ni bosing — Safari ochiladi",
+      },
+      android: {
+        button: "Pastdagi «Bosh ekranga qo'shish»ni yoki tepa o'ngdagi «⋮»ni bosing",
+        confirm: "Tasdiqlang — qubnix yorlig'i bosh ekranda paydo bo'ladi",
+      },
+    },
     actions: {
       install: "O'rnatish",
+      addToHomeScreen: "Bosh ekranga qo'shish",
       openInBrowser: "Brauzerda ochish",
+      gotIt: "Tushunarli",
     },
   },
   prefs: {
