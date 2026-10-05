@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { LuCheck, LuCircleCheck, LuExternalLink } from "react-icons/lu";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
+import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusInput } from "@/components/ui/inputs/CusInput";
@@ -9,12 +10,12 @@ import { useIntlLocale } from "@/i18n/useIntlLocale";
 import { getApiErrorMessage } from "@/utils/apiErrorMessage";
 import { openExternalLink } from "@/utils/telegram";
 import {
-  useCreateTariffOrder,
+  useCreateTariffOrderMutation,
   type BillingPeriod,
   type PaymentProvider,
   type Tariff,
   type TariffOrder,
-} from "../hooks/useApiTariffs";
+} from "@/queries/profile.queries";
 
 /** confirm → organization → payment (pullik) yoki done (bepul). */
 type CheckoutStep = "confirm" | "organization" | "payment" | "done";
@@ -32,6 +33,8 @@ interface TariffCheckoutModalProps {
   onClose: () => void;
   /** Bepul tarif ulangandan keyin "Готово" — tariflar ro'yxatini ham yopadi. */
   onDone: () => void;
+  /** Mobil — to'liq ekran drawer (default), desktop — markazdagi dialog. */
+  variant?: "drawer" | "dialog";
 }
 
 /**
@@ -39,10 +42,17 @@ interface TariffCheckoutModalProps {
  * 1) xulosa + "Вы покупаете …?" (Да / Отмена), 2) tashkilot nomi, 3) pastda Payme / Click.
  * Har ochilishda holat yangidan boshlanadi — ota komponent `key` almashtiradi.
  */
-export function TariffCheckoutModal({ open, tariff, period, onClose, onDone }: TariffCheckoutModalProps) {
+export function TariffCheckoutModal({
+  open,
+  tariff,
+  period,
+  onClose,
+  onDone,
+  variant = "drawer",
+}: TariffCheckoutModalProps) {
   const { t } = useTranslation();
   const intlLocale = useIntlLocale();
-  const createOrder = useCreateTariffOrder();
+  const createOrder = useCreateTariffOrderMutation();
   const [step, setStep] = useState<CheckoutStep>("confirm");
   const [orgName, setOrgName] = useState("");
   const [orgError, setOrgError] = useState<string | null>(null);
@@ -127,6 +137,109 @@ export function TariffCheckoutModal({ open, tariff, period, onClose, onDone }: T
       </CusButton>
     ) : undefined;
 
+  const title = t("profile.checkout.title");
+  const body = (
+    <div className="flex flex-col gap-4">
+      {/* 1. Tasdiqlash */}
+      <CheckoutStepCard index={1} title={t("profile.checkout.steps.confirm")} done={step !== "confirm"}>
+        <dl className="flex flex-col gap-2 text-sm">
+          <SummaryRow label={t("profile.checkout.tariff")} value={tariff.name} />
+          <SummaryRow label={t("profile.checkout.period")} value={periodLabel} />
+          <SummaryRow
+            label={t("profile.checkout.total")}
+            value={isFree ? t("profile.pricing.free") : t("profile.checkout.price", { price })}
+            strong
+          />
+        </dl>
+
+        {step === "confirm" && (
+          <>
+            <p className="rounded-input bg-brand-subtle px-3 py-2.5 text-sm text-primary">
+              {isFree
+                ? t("profile.checkout.confirmQuestionFree", { name: tariff.name })
+                : t("profile.checkout.confirmQuestion", { name: tariff.name, period: periodLabel, price })}
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <CusButton variant="outline" colorPalette="gray" onClick={onClose}>
+                {t("common.actions.cancel")}
+              </CusButton>
+              <CusButton onClick={() => setStep("organization")}>{t("profile.checkout.confirmYes")}</CusButton>
+            </div>
+          </>
+        )}
+      </CheckoutStepCard>
+
+      {/* 2. Tashkilot nomi */}
+      {step !== "confirm" && (
+        <CheckoutStepCard
+          index={2}
+          title={t("profile.checkout.steps.organization")}
+          done={step === "payment" || step === "done"}
+        >
+          {step === "organization" ? (
+            <form onSubmit={submitOrganization} className="flex flex-col gap-3">
+              <CusInput
+                label={t("profile.checkout.orgLabel")}
+                placeholder={t("profile.checkout.orgPlaceholder")}
+                helperText={orgError ? undefined : t("profile.checkout.orgHint")}
+                errorText={orgError ?? undefined}
+                value={orgName}
+                onChange={(e) => {
+                  setOrgName(e.target.value);
+                  setOrgError(null);
+                }}
+                enterKeyHint="done"
+                autoFocus
+              />
+              <CusButton isLoading={createOrder.isPending} onClick={saveOrganization}>
+                {t("common.actions.save")}
+              </CusButton>
+            </form>
+          ) : (
+            <div className="flex items-center justify-between gap-3">
+              <span className="min-w-0 truncate text-sm font-semibold text-primary">{orgName}</span>
+              {step === "payment" && (
+                <CusButton size="sm" variant="ghost" colorPalette="gray" onClick={editOrganization}>
+                  {t("common.actions.edit")}
+                </CusButton>
+              )}
+            </div>
+          )}
+        </CheckoutStepCard>
+      )}
+
+      {/* 3. To'lov — tugmalar pastda (footer) */}
+      {step === "payment" && (
+        <CheckoutStepCard index={3} title={t("profile.checkout.steps.payment")} done={false}>
+          <p className="text-sm text-secondary">{t("profile.checkout.payHint")}</p>
+          {openedProvider && (
+            <p className="rounded-input bg-info-soft px-3 py-2.5 text-sm text-info-strong">
+              {t("profile.checkout.payOpened", {
+                provider: PROVIDERS.find((p) => p.id === openedProvider)?.name,
+              })}
+            </p>
+          )}
+        </CheckoutStepCard>
+      )}
+
+      {step === "done" && order && (
+        <p className="flex items-start gap-2 rounded-input bg-success-soft px-3 py-2.5 text-sm text-success-strong">
+          <LuCircleCheck size={18} className="mt-px flex-none" />
+          {t("profile.checkout.freeDone", { name: order.organizationName, tariff: tariff.name })}
+        </p>
+      )}
+    </div>
+  );
+
+  // Desktop — markazdagi dialog (orqa fon bosilsa yopilmaydi: nom/to'lov yo'qolmasin).
+  if (variant === "dialog") {
+    return (
+      <CusDialog open={open} onClose={onClose} centered size="md" closeOnBackdrop={false} title={title} footer={footer}>
+        {body}
+      </CusDialog>
+    );
+  }
+
   return (
     <CusDrawer
       open={open}
@@ -135,99 +248,10 @@ export function TariffCheckoutModal({ open, tariff, period, onClose, onDone }: T
       size="full"
       closeOnBackdrop={false}
       closeOnEscape={false}
-      title={t("profile.checkout.title")}
+      title={title}
       footer={footer}
     >
-      <div className="flex flex-col gap-4">
-        {/* 1. Tasdiqlash */}
-        <CheckoutStepCard index={1} title={t("profile.checkout.steps.confirm")} done={step !== "confirm"}>
-          <dl className="flex flex-col gap-2 text-sm">
-            <SummaryRow label={t("profile.checkout.tariff")} value={tariff.name} />
-            <SummaryRow label={t("profile.checkout.period")} value={periodLabel} />
-            <SummaryRow
-              label={t("profile.checkout.total")}
-              value={isFree ? t("profile.pricing.free") : t("profile.checkout.price", { price })}
-              strong
-            />
-          </dl>
-
-          {step === "confirm" && (
-            <>
-              <p className="rounded-input bg-brand-subtle px-3 py-2.5 text-sm text-primary">
-                {isFree
-                  ? t("profile.checkout.confirmQuestionFree", { name: tariff.name })
-                  : t("profile.checkout.confirmQuestion", { name: tariff.name, period: periodLabel, price })}
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                <CusButton variant="outline" colorPalette="gray" onClick={onClose}>
-                  {t("common.actions.cancel")}
-                </CusButton>
-                <CusButton onClick={() => setStep("organization")}>{t("profile.checkout.confirmYes")}</CusButton>
-              </div>
-            </>
-          )}
-        </CheckoutStepCard>
-
-        {/* 2. Tashkilot nomi */}
-        {step !== "confirm" && (
-          <CheckoutStepCard
-            index={2}
-            title={t("profile.checkout.steps.organization")}
-            done={step === "payment" || step === "done"}
-          >
-            {step === "organization" ? (
-              <form onSubmit={submitOrganization} className="flex flex-col gap-3">
-                <CusInput
-                  label={t("profile.checkout.orgLabel")}
-                  placeholder={t("profile.checkout.orgPlaceholder")}
-                  helperText={orgError ? undefined : t("profile.checkout.orgHint")}
-                  errorText={orgError ?? undefined}
-                  value={orgName}
-                  onChange={(e) => {
-                    setOrgName(e.target.value);
-                    setOrgError(null);
-                  }}
-                  enterKeyHint="done"
-                  autoFocus
-                />
-                <CusButton isLoading={createOrder.isPending} onClick={saveOrganization}>
-                  {t("common.actions.save")}
-                </CusButton>
-              </form>
-            ) : (
-              <div className="flex items-center justify-between gap-3">
-                <span className="min-w-0 truncate text-sm font-semibold text-primary">{orgName}</span>
-                {step === "payment" && (
-                  <CusButton size="sm" variant="ghost" colorPalette="gray" onClick={editOrganization}>
-                    {t("common.actions.edit")}
-                  </CusButton>
-                )}
-              </div>
-            )}
-          </CheckoutStepCard>
-        )}
-
-        {/* 3. To'lov — tugmalar pastda (footer) */}
-        {step === "payment" && (
-          <CheckoutStepCard index={3} title={t("profile.checkout.steps.payment")} done={false}>
-            <p className="text-sm text-secondary">{t("profile.checkout.payHint")}</p>
-            {openedProvider && (
-              <p className="rounded-input bg-info-soft px-3 py-2.5 text-sm text-info-strong">
-                {t("profile.checkout.payOpened", {
-                  provider: PROVIDERS.find((p) => p.id === openedProvider)?.name,
-                })}
-              </p>
-            )}
-          </CheckoutStepCard>
-        )}
-
-        {step === "done" && order && (
-          <p className="flex items-start gap-2 rounded-input bg-success-soft px-3 py-2.5 text-sm text-success-strong">
-            <LuCircleCheck size={18} className="mt-px flex-none" />
-            {t("profile.checkout.freeDone", { name: order.organizationName, tariff: tariff.name })}
-          </p>
-        )}
-      </div>
+      {body}
     </CusDrawer>
   );
 }

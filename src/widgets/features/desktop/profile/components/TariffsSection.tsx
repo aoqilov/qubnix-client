@@ -4,11 +4,13 @@ import { LuChartBarIncreasing, LuChevronRight, LuSlidersVertical } from "react-i
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { PricingPlans } from "@/components/shared/pricing/PricingPlans";
 import {
-  OrgTariffCard,
+  OrgTariffAccordion,
   OrgTariffCardSkeleton,
   OrgTariffEmpty,
 } from "@/components/shared/org-tariff-card/OrgTariffCard";
-import { useBuyTariff, useMyTariffs, useTariffs } from "../hooks/useApiTariffs";
+import { TariffCheckoutModal } from "@/components/shared/tariff-checkout/TariffCheckoutModal";
+import { useTariffCheckoutSelection } from "@/components/shared/tariff-checkout/useTariffCheckoutSelection";
+import { useMyTariffs, useTariffs } from "../hooks/useApiTariffs";
 
 export type TariffPanelId = "current-tariff" | "tariffs-list";
 
@@ -80,7 +82,7 @@ interface CurrentTariffCardProps {
   onRenew: () => void;
 }
 
-/** "Мои тарифы" — egasi bo'lgan tashkilotlar tarifi, o'ng panelda 2 ustunli grid. */
+/** "Мои тарифы" — egasi bo'lgan tashkilotlar tarifi, o'ng panelda accordion. */
 export function CurrentTariffCard({ onRenew }: CurrentTariffCardProps) {
   const { t } = useTranslation();
   const { data: tariffs = [], isPending, isError } = useMyTariffs();
@@ -91,7 +93,7 @@ export function CurrentTariffCard({ onRenew }: CurrentTariffCardProps) {
         {t("profile.tariffs.mine")}
       </div>
       {isPending ? (
-        <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+        <div className="flex flex-col gap-2">
           <OrgTariffCardSkeleton />
           <OrgTariffCardSkeleton />
         </div>
@@ -100,31 +102,43 @@ export function CurrentTariffCard({ onRenew }: CurrentTariffCardProps) {
       ) : tariffs.length === 0 ? (
         <OrgTariffEmpty />
       ) : (
-        <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
-          {tariffs.map((tariff) => (
-            <OrgTariffCard key={tariff.id} tariff={tariff} onRenew={onRenew} />
-          ))}
-        </div>
+        <OrgTariffAccordion tariffs={tariffs} onRenew={onRenew} />
       )}
     </div>
   );
 }
 
-/** "Тарифы и цены" — desktop o'ng panelida, keng ekranda 3 ustun. */
-export function TariffsListCard() {
+interface TariffsListCardProps {
+  /** Bepul tarif ulangach "Готово" — yangi tashkilot ko'rinadigan "Мои тарифы"ga o'tadi. */
+  onDone: () => void;
+}
+
+/** "Тарифы и цены" — desktop o'ng panelida, keng ekranda 3 ustun. Tanlov → checkout dialog. */
+export function TariffsListCard({ onDone }: TariffsListCardProps) {
   const { t } = useTranslation();
   const { data: tariffs, isPending, isError } = useTariffs();
-  const buyTariff = useBuyTariff();
+  const checkout = useTariffCheckoutSelection(tariffs);
 
   if (isPending) return <p className="text-sm text-secondary">{t("common.states.loading")}</p>;
   if (isError) return <p className="text-sm text-error-strong">{t("profile.tariffs.loadError")}</p>;
 
   return (
-    <PricingPlans
-      tariffs={tariffs}
-      columns="three"
-      pendingId={buyTariff.isPending ? buyTariff.variables?.tariffId : null}
-      onChoose={(tariffId, period) => buyTariff.mutate({ tariffId, period })}
-    />
+    <>
+      <PricingPlans tariffs={tariffs} columns="three" onChoose={checkout.choose} />
+      {checkout.selection && (
+        <TariffCheckoutModal
+          key={checkout.selection.key}
+          variant="dialog"
+          open={checkout.isOpen}
+          tariff={checkout.selection.tariff}
+          period={checkout.selection.period}
+          onClose={checkout.close}
+          onDone={() => {
+            checkout.close();
+            onDone();
+          }}
+        />
+      )}
+    </>
   );
 }

@@ -9,7 +9,7 @@ import { TariffsSection } from "./components/TariffsSection";
 import { ProfileSettingsModal } from "./modals/ProfileSettingsModal";
 import { ProfileEditModal } from "./modals/ProfileEditModal";
 import { CurrentTariffModal } from "./modals/CurrentTariffModal";
-import { TariffsListModal } from "./modals/TariffsListModal";
+import { TariffsListModal } from "@/components/shared/tariff-checkout/TariffsListModal";
 import { InstallAppModal } from "./modals/InstallAppModal";
 import { usePwaStore } from "@/store/pwa.store";
 

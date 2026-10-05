@@ -15,14 +15,17 @@ interface CusAccordionProps {
   /** Bir nechta bo'lim bir vaqtda ochiq turishi mumkinmi. Default: false (faqat bittasi). */
   multiple?: boolean;
   defaultValue?: string[];
+  /** Bo'lim tarkibi faqat birinchi ochilganda yaratiladi — ichidagi so'rovlar ham shunda ketadi. */
+  lazyMount?: boolean;
 }
 
-export function CusAccordion({ items, multiple = false, defaultValue }: CusAccordionProps) {
+export function CusAccordion({ items, multiple = false, defaultValue, lazyMount = false }: CusAccordionProps) {
   return (
     <Accordion.Root
       multiple={multiple}
       collapsible
       defaultValue={defaultValue}
+      lazyMount={lazyMount}
       display="flex"
       flexDirection="column"
       gap="2"

@@ -10,7 +10,6 @@ import { orgsLabel } from "@/utils/countLabels";
 import { PersonalTile } from "./components/PersonalTile";
 import { WorkspaceTile } from "./components/WorkspaceTile";
 import { ActionTile } from "./components/ActionTile";
-import { CreateWorkspaceDialog } from "./modals/CreateWorkspaceDialog";
 import { InvitationsDialog } from "./modals/InvitationsDialog";
 import { usePersonalSummary, useReceivedInvitations, useWorkspaceList } from "./hooks/useApiDoska";
 
@@ -18,7 +17,6 @@ export default function FeatureDoska() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const selectWorkspace = useWorkspaceStore((s) => s.selectWorkspace);
-  const [isCreateOpen, setCreateOpen] = useState(false);
   const [isInvitationsOpen, setInvitationsOpen] = useState(false);
 
   const workspacesQuery = useWorkspaceList();
@@ -48,13 +46,14 @@ export default function FeatureDoska() {
         )}
       </section>
 
-      {/* Amallar — yangi tashkilot va taklifnomalar (ikkalasi ham markazdagi dialog) */}
+      {/* Amallar — yangi tashkilot (profildagi tariflar paneli → checkout) va taklifnomalar (dialog) */}
       <section className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
           <ActionTile
             icon={<LuPlus size={20} />}
             label={t("doska.addOrganization")}
-            onClick={() => setCreateOpen(true)}
+            // Yangi tashkilot tarif tanlashdan boshlanadi; 3 ustunli tariflar paneli profilda.
+            onClick={() => navigate("/profile?tariffs=1")}
           />
           <ActionTile
             icon={<LuBell size={20} />}
@@ -103,7 +102,6 @@ export default function FeatureDoska() {
         )}
       </section>
 
-      <CreateWorkspaceDialog open={isCreateOpen} onClose={() => setCreateOpen(false)} />
       <InvitationsDialog open={isInvitationsOpen} onClose={() => setInvitationsOpen(false)} />
     </div>
   );

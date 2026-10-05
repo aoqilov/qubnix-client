@@ -1,10 +1,7 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import { organizationsApi } from "@/api/organizations/organizations.api";
 import { organizationInvitationsApi } from "@/api/organization-invitations/organization-invitations.api";
-import type {
-  CreateOrganizationRequest,
-  RawOrganization,
-} from "@/api/organizations/organizations.types";
+import type { RawOrganization } from "@/api/organizations/organizations.types";
 import type { InvitationAction } from "@/api/organization-invitations/organization-invitations.types";
 import type { WorkspaceSummary } from "@/store/workspace.store";
 
@@ -75,17 +72,6 @@ export function useRespondInvitationMutation() {
       if (action === "accept") {
         queryClient.invalidateQueries({ queryKey: DOSKA_KEYS.workspaces() });
       }
-    },
-  });
-}
-
-export function useCreateWorkspaceMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (payload: CreateOrganizationRequest) => organizationsApi.create(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: DOSKA_KEYS.workspaces() });
     },
   });
 }

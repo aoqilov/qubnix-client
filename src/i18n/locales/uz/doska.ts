@@ -24,12 +24,6 @@ const doska: typeof ru = {
     reject: "Rad etish",
     accept: "Qabul qilish",
   },
-  createOrganization: {
-    title: "Yangi tashkilot",
-    nameLabel: "Nomi",
-    namePlaceholder: "Masalan, Synapse",
-    error: "Tashkilotni yaratib bo'lmadi. Qaytadan urinib ko'ring.",
-  },
 };
 
 export default doska;

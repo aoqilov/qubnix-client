@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import {
-  OrgTariffCard,
+  OrgTariffAccordion,
   OrgTariffCardSkeleton,
   OrgTariffEmpty,
 } from "@/components/shared/org-tariff-card/OrgTariffCard";
@@ -30,7 +30,7 @@ export function CurrentTariffModal({ open, onClose, onRenew }: CurrentTariffModa
       title={t("profile.tariffs.mine")}
     >
       {isPending ? (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           <OrgTariffCardSkeleton />
           <OrgTariffCardSkeleton />
         </div>
@@ -39,11 +39,7 @@ export function CurrentTariffModal({ open, onClose, onRenew }: CurrentTariffModa
       ) : tariffs.length === 0 ? (
         <OrgTariffEmpty />
       ) : (
-        <div className="flex flex-col gap-3">
-          {tariffs.map((tariff) => (
-            <OrgTariffCard key={tariff.id} tariff={tariff} onRenew={onRenew} />
-          ))}
-        </div>
+        <OrgTariffAccordion tariffs={tariffs} onRenew={onRenew} />
       )}
     </CusDrawer>
   );

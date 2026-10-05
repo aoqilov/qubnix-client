@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import {
   personalSummaryQuery,
   receivedInvitationsQuery,
-  useCreateWorkspaceMutation,
   useRespondInvitationMutation,
   workspaceListQuery,
 } from "@/queries/doska.queries";
@@ -23,4 +22,3 @@ export function useReceivedInvitations() {
 }
 
 export const useRespondInvitation = useRespondInvitationMutation;
-export const useCreateWorkspace = useCreateWorkspaceMutation;

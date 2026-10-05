@@ -46,13 +46,22 @@ export default function FeatureProfile() {
   const isInstalled = usePwaStore((s) => s.isInstalled);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Telegram'dan "Открыть в браузере" → /profile?install=1 — yo'riqnoma o'zi ochiladi.
+  // Tashqaridan panelni to'g'ridan-to'g'ri ochish:
+  // - Telegram'dan "Открыть в браузере" → /profile?install=1 — o'rnatish yo'riqnomasi;
+  // - /doska'dagi "Создать организацию" → /profile?tariffs=1 — tariflar (tanlov → checkout).
   useEffect(() => {
-    if (searchParams.get("install") !== "1") return;
-    setActivePanel("install-app");
+    const panel: PanelId =
+      searchParams.get("install") === "1"
+        ? "install-app"
+        : searchParams.get("tariffs") === "1"
+          ? "tariffs-list"
+          : null;
+    if (!panel) return;
+    setActivePanel(panel);
     setSidebarCollapsed(true);
     const next = new URLSearchParams(searchParams);
     next.delete("install");
+    next.delete("tariffs");
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams, setSidebarCollapsed]);
 
@@ -130,7 +139,7 @@ export default function FeatureProfile() {
             {activePanel === "current-tariff" && (
               <CurrentTariffCard onRenew={() => select("tariffs-list")} />
             )}
-            {activePanel === "tariffs-list" && <TariffsListCard />}
+            {activePanel === "tariffs-list" && <TariffsListCard onDone={() => select("current-tariff")} />}
             {activePanel === "install-app" && <InstallAppCard />}
           </div>
         )}

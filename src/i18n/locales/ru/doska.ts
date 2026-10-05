@@ -23,12 +23,6 @@ const doska = {
     reject: "Отклонить",
     accept: "Принять",
   },
-  createOrganization: {
-    title: "Новая организация",
-    nameLabel: "Название",
-    namePlaceholder: "Например, Synapse",
-    error: "Не удалось создать организацию. Попробуйте ещё раз.",
-  },
 };
 
 export default doska;

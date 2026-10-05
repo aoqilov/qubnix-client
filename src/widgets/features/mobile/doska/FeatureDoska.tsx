@@ -8,8 +8,8 @@ import { PersonalTasksCard } from "./components/PersonalTasksCard";
 import { WorkspaceCard } from "./components/WorkspaceCard";
 import { AddWorkspaceButton } from "./components/AddWorkspaceButton";
 import { AcceptInvitationsButton } from "./components/AcceptInvitationsButton";
-import { ModalAddWorkspace } from "./modals/ModalAddWorkspace";
 import { InvitationsDrawer } from "./modals/InvitationsDrawer";
+import { TariffsListModal } from "@/components/shared/tariff-checkout/TariffsListModal";
 import { usePersonalSummary, useReceivedInvitations, useWorkspaceList } from "./hooks/useApiDoska";
 import { formatWeekdayDate } from "@/utils/formatWeekdayDate";
 import { orgsLabel } from "@/utils/countLabels";
@@ -18,7 +18,8 @@ export default function FeatureDoska() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const selectWorkspace = useWorkspaceStore((s) => s.selectWorkspace);
-  const [isAddOpen, setAddOpen] = useState(false);
+  // Yangi tashkilot — tarif tanlashdan boshlanadi: tarif → tasdiq → nom → (pullik bo'lsa) to'lov.
+  const [isTariffsOpen, setTariffsOpen] = useState(false);
   const [isInvitationsOpen, setInvitationsOpen] = useState(false);
 
   const workspacesQuery = useWorkspaceList();
@@ -66,7 +67,7 @@ export default function FeatureDoska() {
 
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-2 gap-3">
-            <AddWorkspaceButton onClick={() => setAddOpen(true)} />
+            <AddWorkspaceButton onClick={() => setTariffsOpen(true)} />
             <AcceptInvitationsButton
               count={invitationsCount}
               onClick={() => setInvitationsOpen(true)}
@@ -95,7 +96,7 @@ export default function FeatureDoska() {
         </div>
       </section>
 
-      <ModalAddWorkspace open={isAddOpen} onClose={() => setAddOpen(false)} />
+      <TariffsListModal open={isTariffsOpen} onClose={() => setTariffsOpen(false)} />
       <InvitationsDrawer open={isInvitationsOpen} onClose={() => setInvitationsOpen(false)} />
     </div>
   );

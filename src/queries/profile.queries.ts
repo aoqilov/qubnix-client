@@ -1,8 +1,9 @@
-import { queryOptions, useMutation } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSessionStore, type SessionUser } from "@/store/session.store";
 import { usersApi } from "@/api/users/users.api";
 import type { UpdateMeRequest } from "@/api/users/users.types";
 import { organizationsApi } from "@/api/organizations/organizations.api";
+import { projectsApi } from "@/api/projects/projects.api";
 import type {
   OrganizationModuleStatus,
   RawOrganization,
@@ -49,6 +50,17 @@ export type TariffId = "start" | "pro" | "business";
 /** Tarif kartasidagi imkoniyat belgisi — PricingPlans shu nomdan ikonka tanlaydi. */
 export type TariffFeatureIcon = "members" | "projects" | "routines" | "stats";
 
+/** Statistika qancha orqaga ko'rinadi. */
+export type TariffStatsDepth = "today" | "3months" | "full";
+
+/** Tarif chegaralari; null — cheksiz. Narx kartasi ham, "Мои тарифы" ham shundan o'qiydi. */
+export interface TariffLimits {
+  members: number;
+  projects: number | null;
+  routines: number | null;
+  stats: TariffStatsDepth;
+}
+
 /** `profile.pricing.features.*` kalitlari — noto'g'ri yozilsa typecheck xato beradi. */
 type TariffFeatureKey = `profile.pricing.features.${
   | "members"
@@ -79,8 +91,29 @@ export interface Tariff {
   currency: string;
   /** Kartada ajratib ko'rsatiladi ("Рекомендуем"). */
   recommended?: boolean;
-  /** Kartada yuqoridan pastga shu tartibda chiqadi. */
+  limits: TariffLimits;
+  /** Kartada yuqoridan pastga shu tartibda chiqadi — `limits`dan yasaladi. */
   features: TariffFeature[];
+}
+
+const STATS_FEATURE_KEY: Record<TariffStatsDepth, TariffFeatureKey> = {
+  today: "profile.pricing.features.statsToday",
+  "3months": "profile.pricing.features.stats3months",
+  full: "profile.pricing.features.statsFull",
+};
+
+/** Narx kartasidagi qatorlar — limitlardan, alohida qo'lda yozilmaydi (ikki joyda farq qilib qolmasin). */
+function featuresFromLimits(limits: TariffLimits): TariffFeature[] {
+  return [
+    { icon: "members", labelKey: "profile.pricing.features.members", count: limits.members },
+    limits.projects === null
+      ? { icon: "projects", labelKey: "profile.pricing.features.projectsUnlimited" }
+      : { icon: "projects", labelKey: "profile.pricing.features.projects", count: limits.projects },
+    limits.routines === null
+      ? { icon: "routines", labelKey: "profile.pricing.features.routinesUnlimited" }
+      : { icon: "routines", labelKey: "profile.pricing.features.routines", count: limits.routines },
+    { icon: "stats", labelKey: STATS_FEATURE_KEY[limits.stats] },
+  ];
 }
 
 /**
@@ -89,11 +122,11 @@ export interface Tariff {
  *
  * | Tarif    | Oylik   | Yillik    | Xodim | Loyiha  | Takroriy | Statistika |
  * |----------|---------|-----------|-------|---------|----------|------------|
- * | Start    | bepul   | bepul     | 5     | 2       | 3        | bugun      |
- * | Pro      | 149 000 | 1 490 000 | 25    | 20      | 50       | 3 oy       |
+ * | Start    | bepul   | bepul     | 2     | 1       | 3        | bugun      |
+ * | Pro      | 149 000 | 1 490 000 | 10    | 5       | 30       | 3 oy       |
  * | Business | 349 000 | 3 490 000 | 100   | cheksiz | cheksiz  | to'liq     |
  */
-const TARIFFS: Tariff[] = [
+const TARIFF_SEEDS: Omit<Tariff, "features">[] = [
   {
     id: "start",
     name: "Start", // i18n-ignore
@@ -101,24 +134,7 @@ const TARIFFS: Tariff[] = [
     priceMonthly: 0,
     priceYearly: 0,
     currency: "UZS",
-    features: [
-      {
-        icon: "members",
-        labelKey: "profile.pricing.features.members",
-        count: 2,
-      },
-      {
-        icon: "projects",
-        labelKey: "profile.pricing.features.projects",
-        count: 1,
-      },
-      {
-        icon: "routines",
-        labelKey: "profile.pricing.features.routines",
-        count: 3,
-      },
-      { icon: "stats", labelKey: "profile.pricing.features.statsToday" },
-    ],
+    limits: { members: 2, projects: 1, routines: 3, stats: "today" },
   },
   {
     id: "pro",
@@ -128,24 +144,7 @@ const TARIFFS: Tariff[] = [
     priceYearly: 1490000,
     currency: "UZS",
     recommended: true,
-    features: [
-      {
-        icon: "members",
-        labelKey: "profile.pricing.features.members",
-        count: 10,
-      },
-      {
-        icon: "projects",
-        labelKey: "profile.pricing.features.projects",
-        count: 5,
-      },
-      {
-        icon: "routines",
-        labelKey: "profile.pricing.features.routines",
-        count: 30,
-      },
-      { icon: "stats", labelKey: "profile.pricing.features.stats3months" },
-    ],
+    limits: { members: 10, projects: 5, routines: 30, stats: "3months" },
   },
   {
     id: "business",
@@ -154,29 +153,20 @@ const TARIFFS: Tariff[] = [
     priceMonthly: 349000,
     priceYearly: 3490000,
     currency: "UZS",
-    features: [
-      {
-        icon: "members",
-        labelKey: "profile.pricing.features.members",
-        count: 100,
-      },
-      {
-        icon: "projects",
-        labelKey: "profile.pricing.features.projectsUnlimited",
-      },
-      {
-        icon: "routines",
-        labelKey: "profile.pricing.features.routinesUnlimited",
-      },
-      { icon: "stats", labelKey: "profile.pricing.features.statsFull" },
-    ],
+    limits: { members: 100, projects: null, routines: null, stats: "full" },
   },
 ];
+
+const TARIFFS: Tariff[] = TARIFF_SEEDS.map((seed) => ({
+  ...seed,
+  features: featuresFromLimits(seed.limits),
+}));
 
 export type BillingPeriod = "monthly" | "yearly";
 
 export const TARIFFS_KEYS = {
   list: () => ["tariffs"] as const,
+  usage: (organizationId: string) => ["tariffs", "usage", organizationId] as const,
 };
 
 export const tariffsQuery = () =>
@@ -184,18 +174,6 @@ export const tariffsQuery = () =>
     queryKey: TARIFFS_KEYS.list(),
     queryFn: () => Promise.resolve(TARIFFS),
   });
-
-export function useBuyTariffMutation() {
-  return useMutation({
-    mutationFn: ({
-      tariffId,
-      period,
-    }: {
-      tariffId: TariffId;
-      period: BillingPeriod;
-    }) => Promise.resolve({ tariffId, period }),
-  });
-}
 
 export type PaymentProvider = "payme" | "click";
 
@@ -266,10 +244,22 @@ function mockTariffOrder({ tariffId, period, organizationName }: CreateTariffOrd
  * Tarif xaridi: tashkilot nomi saqlanganda buyurtma ochiladi va to'lov havolalari qaytadi.
  * Havolalar oldindan tayyor bo'lishi shart — Payme/Click tugmasi bosilganda `window.open`
  * sinxron chaqirilmasa, brauzer uni popup deb bloklaydi.
+ *
+ * Bepul tarif — to'lovsiz: tashkilot hozirgi ochiq `POST /organizations` orqali haqiqatan
+ * yaratiladi (/doska'dagi "Создать организацию" shu oqimdan o'tadi, yaratish yo'qolmasin).
+ * Pullik tarif — buyurtma hali mock, tashkilot to'lov tasdiqlangach backend'da yaratiladi.
  */
 export function useCreateTariffOrderMutation() {
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateTariffOrderRequest) => Promise.resolve(mockTariffOrder(data)),
+    mutationFn: async (data: CreateTariffOrderRequest) => {
+      const order = mockTariffOrder(data);
+      if (!order.paymentUrls) await organizationsApi.create({ name: data.organizationName });
+      return order;
+    },
+    onSuccess: (order) => {
+      if (!order.paymentUrls) queryClient.invalidateQueries({ queryKey: DOSKA_KEYS.workspaces() });
+    },
   });
 }
 
@@ -294,6 +284,11 @@ export interface OrgTariff {
   expiresAt: string | null;
   /** `expiresAt` bo'lsa — qolgan kunlar. */
   daysLeft: number | null;
+  /**
+   * Qaysi tarif — limitlar shundan. Mock: backend `module`da tarif ID'sini hali qaytarmaydi,
+   * shuning uchun bepul → Start, pullik → Pro. `module.plan` kelganda shu yerdan o'qiladi.
+   */
+  planId: TariffId;
 }
 
 function toOrgTariff(org: RawOrganization): OrgTariff {
@@ -319,6 +314,7 @@ function toOrgTariff(org: RawOrganization): OrgTariff {
     status,
     expiresAt: expires_at,
     daysLeft,
+    planId: is_free ? "start" : "pro",
   };
 }
 
@@ -333,4 +329,26 @@ export const myTariffsQuery = () =>
     queryFn: () => organizationsApi.list({ type: "organization", limit: 100 }),
     select: (data) =>
       data.organizations.filter((org) => org.role === "owner").map(toOrgTariff),
+  });
+
+/** Tashkilotda hozir nechta xodim va loyiha bor — limit bilan solishtirish uchun. */
+export interface OrgUsage {
+  members: number;
+  projects: number;
+}
+
+/**
+ * Ikki yengil so'rov (`limit=1` — faqat jami son kerak). Takroriy vazifalar sanalmaydi: ular
+ * loyiha ichida, har loyihaga alohida so'rov ketardi — backend `usage` bersa, shu yerga qo'shiladi.
+ */
+export const orgUsageQuery = (organizationId: string) =>
+  queryOptions({
+    queryKey: TARIFFS_KEYS.usage(organizationId),
+    queryFn: async (): Promise<OrgUsage> => {
+      const [members, projects] = await Promise.all([
+        organizationsApi.listMembers(organizationId, { limit: 1 }),
+        projectsApi.list(organizationId, { limit: 1 }),
+      ]);
+      return { members: members.members_count, projects: projects.pagination.total };
+    },
   });

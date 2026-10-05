@@ -1,25 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  myTariffsQuery,
-  tariffsQuery,
-  useCreateTariffOrderMutation,
-} from "@/queries/profile.queries";
+import { myTariffsQuery } from "@/queries/profile.queries";
 
-// Kalit, so'rov va mutation umumiy — @/queries/profile.queries (hozircha mock).
-export type {
-  BillingPeriod,
-  OrgTariff,
-  PaymentProvider,
-  Tariff,
-  TariffOrder,
-} from "@/queries/profile.queries";
-
-export function useTariffs() {
-  return useQuery(tariffsQuery());
-}
-
-/** Tarif xaridi: tashkilot nomi → buyurtma + Payme/Click havolalari. */
-export const useCreateTariffOrder = useCreateTariffOrderMutation;
+// Kalit va so'rov umumiy — @/queries/profile.queries. "Тарифы и цены" + xarid oqimi
+// /doska bilan umumiy bo'lgani uchun @/components/shared/tariff-checkout'da.
+export type { OrgTariff } from "@/queries/profile.queries";
 
 /** "Мои тарифы" — owner bo'lgan tashkilotlar moduli (doska bilan bitta so'rov/kesh). */
 export function useMyTariffs() {
