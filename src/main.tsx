@@ -4,6 +4,7 @@ import { queryClient } from "./api-config/queryClient";
 import "./api-config/interceptors";
 import "./i18n"; // App'dan oldin — birinchi render'dayoq tarjima tayyor bo'lsin.
 import { enterWay } from "./components/layout/enter-way";
+import { registerPwa } from "./pwa/registerPwa";
 import App from "./App";
 import "./styles/globals.css";
 
@@ -13,6 +14,9 @@ import "./styles/globals.css";
 // qarab loading/xato/app holatini ko'rsatadi (Telegram uchun
 // TelegramAuthGate, web uchun /login).
 void enterWay();
+
+// O'rnatish oynasi (beforeinstallprompt) va yangilanishlar — web'da service worker.
+registerPwa();
 
 const root = document.getElementById("root")!;
 createRoot(root).render(

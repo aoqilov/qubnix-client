@@ -124,6 +124,14 @@ All user-facing text goes through **i18next** (`react-i18next`). Never hardcode 
 - `api-config/axiosInstance.ts` + `interceptors.ts` — request interceptor attaches `Authorization: Bearer <token>` from the session store; response interceptor clears the session on `401`.
 - Existing `Cus*` components still read the **legacy alias** names (`--bg-second`, `--text-default`, `--color-blue`, `--vio`, …). Those are block 7 of `globals.css` and are deprecated — see "Design tokens" above. To change how a Cus* component looks, edit the semantic token it ultimately resolves to (blocks 2–3), not the alias and not the component markup.
 
+### PWA (web only)
+
+- `vite-plugin-pwa` (`vite.config.ts`), `registerType: "prompt"`, `injectRegister: false`. Registration is `src/pwa/registerPwa.ts`, called once from `main.tsx`; state lives in `store/pwa.store.ts`.
+- **No service worker inside Telegram** (`isTelegramMiniApp()` → skipped) and none in `npm run dev`. Telegram reloads the Mini App itself; a SW there could serve a stale build (and iOS Telegram doesn't support it).
+- Updates are never applied silently: a new build downloads in the background → `needRefresh` → `components/layout/pwa/PwaUpdateToast.tsx` → user taps "Обновить". Checks run every 30 min and on tab focus. `vercel.json` sends `no-cache` for `sw.js`/`index.html`/manifest — keep it, or updates won't be detected.
+- Profile → "Установить приложение" (`components/shared/install-app/`): Telegram → `WebApp.openLink(VITE_WEB_APP_URL + "/profile?install=1")` (the web URL, not a Telegram link); Chrome/Edge/Android → native `beforeinstallprompt`; iOS → steps only. `?install=1` auto-opens the guide on both platforms' profile.
+- `public/*.png` icons are **placeholders** (letter "Q" on brand color) — replace the files, keep the names.
+
 ### Misc gotchas
 
 - Path alias `@` → `src/` (`vite.config.ts`, `tsconfig.app.json`).

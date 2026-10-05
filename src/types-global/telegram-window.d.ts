@@ -20,6 +20,8 @@ declare global {
         isVerticalSwipesEnabled?: boolean;
         enableVerticalSwipes?: () => void;
         disableVerticalSwipes?: () => void;
+        /** Linkni Telegram'dan tashqarida — tizim brauzerida ochadi. */
+        openLink?: (url: string, options?: { try_instant_view?: boolean }) => void;
         onEvent?: (eventType: string, callback: () => void) => void;
         offEvent?: (eventType: string, callback: () => void) => void;
         BackButton: {

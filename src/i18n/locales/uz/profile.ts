@@ -10,6 +10,41 @@ const profile: typeof ru = {
     lastName: "Familiya",
     phone: "Telefon raqam",
   },
+  install: {
+    title: "Ilovani o'rnatish",
+    intro: "qubnix alohida ilova bo'lib ochiladi — ekranda o'z belgisi bilan, brauzer va Telegram'siz.",
+    telegramNote:
+      "O'rnatish faqat brauzerda ishlaydi. «Brauzerda ochish»ni bosing, telefon raqamingiz bilan kiring — yo'riqnoma o'zi ochiladi.",
+    installed: "Ilova bu qurilmada allaqachon o'rnatilgan.",
+    stepsTitle: "Qanday o'rnatiladi",
+    platform: {
+      ios: "iPhone / iPad",
+      android: "Android",
+      desktop: "Kompyuter",
+    },
+    steps: {
+      ios: {
+        open: "qubnix'ni Safari'da oching",
+        share: "Ekran pastidagi «Ulashish» tugmasini bosing",
+        add: "«Bosh ekranga qo'shish» bandini tanlang",
+        confirm: "«Qo'shish»ni bosing — qubnix belgisi bosh ekranda paydo bo'ladi",
+      },
+      android: {
+        open: "qubnix'ni Chrome'da oching",
+        install: "«O'rnatish»ni yoki ⋮ menyu → «Ilovani o'rnatish»ni bosing",
+        confirm: "Tasdiqlang — qubnix belgisi bosh ekranda paydo bo'ladi",
+      },
+      desktop: {
+        open: "qubnix'ni Chrome yoki Edge'da oching",
+        install: "«O'rnatish»ni yoki manzil qatoridagi o'rnatish belgisini bosing",
+        confirm: "Tasdiqlang — qubnix alohida oynada ochiladi",
+      },
+    },
+    actions: {
+      install: "O'rnatish",
+      openInBrowser: "Brauzerda ochish",
+    },
+  },
   prefs: {
     mode: "Rejim",
     light: "Yorug'",

@@ -11,6 +11,7 @@
 const KEEP_LATIN = [
   "Telegram", "Start", "Workspace", "workspace", "PRO", "Sub-Task", "sub-task", "Basic", "Business",
   "Push", "email", "OTP", "ID", "username", "Synapse", "Pro", "qubnix",
+  "Safari", "Chrome", "Edge", "Android", "iPhone", "iPad",
 ];
 
 // "Harf" — lotin ham, allaqachon o'girilgan kirill ham (so'z boshini to'g'ri aniqlash uchun:

@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
-import { LuChevronRight, LuSlidersVertical, LuX } from "react-icons/lu";
+import { useSearchParams } from "react-router-dom";
+import { LuChevronRight, LuDownload, LuSlidersVertical, LuX } from "react-icons/lu";
 import { CusPageTitle } from "@/components/ui/page-title/CusPageTitle";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { useUiStore } from "@/store/ui.store";
@@ -8,8 +9,16 @@ import { TariffsSection, CurrentTariffCard, TariffsListCard } from "./components
 import { ProfileUserCard } from "./components/ProfileUserCard";
 import { ProfileEditCard } from "./components/ProfileEditCard";
 import { ProfileSettingsCard } from "./components/ProfileSettingsCard";
+import { InstallAppCard } from "./components/InstallAppCard";
+import { usePwaStore } from "@/store/pwa.store";
 
-type PanelId = "settings" | "current-tariff" | "tariffs-list" | "edit-profile" | null;
+type PanelId =
+  | "settings"
+  | "current-tariff"
+  | "tariffs-list"
+  | "edit-profile"
+  | "install-app"
+  | null;
 
 /**
  * Desktop profil — chapda menyu, tanlangan bo'lim o'ngdagi panelda ochiladi
@@ -34,6 +43,19 @@ export default function FeatureProfile() {
     return () => setSidebarCollapsed(false);
   }, [setSidebarCollapsed]);
 
+  const isInstalled = usePwaStore((s) => s.isInstalled);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Telegram'dan "Открыть в браузере" → /profile?install=1 — yo'riqnoma o'zi ochiladi.
+  useEffect(() => {
+    if (searchParams.get("install") !== "1") return;
+    setActivePanel("install-app");
+    setSidebarCollapsed(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete("install");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, setSidebarCollapsed]);
+
   return (
     <div className="flex flex-col gap-5">
       <CusPageTitle className="" title={t("profile.title")} subtitle={t("profile.description")} />
@@ -45,7 +67,10 @@ export default function FeatureProfile() {
             onEdit={() => select("edit-profile")}
           />
 
-          <CusCardbox style={{ padding: 0 }} className="overflow-hidden rounded-card">
+          <CusCardbox
+            style={{ padding: 0 }}
+            className="flex flex-col divide-y divide-default overflow-hidden rounded-card"
+          >
             <button
               onClick={() => select("settings")}
               className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-surface-secondary ${
@@ -56,6 +81,18 @@ export default function FeatureProfile() {
               <span className="flex-1 text-sm font-medium text-primary">{t("profile.settings")}</span>
               <LuChevronRight size={16} className="flex-none text-secondary" />
             </button>
+            {!isInstalled && (
+              <button
+                onClick={() => select("install-app")}
+                className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-surface-secondary ${
+                  activePanel === "install-app" ? "bg-surface-secondary" : ""
+                }`}
+              >
+                <LuDownload size={18} className="flex-none text-secondary" />
+                <span className="flex-1 text-sm font-medium text-primary">{t("profile.install.title")}</span>
+                <LuChevronRight size={16} className="flex-none text-secondary" />
+              </button>
+            )}
           </CusCardbox>
 
           <TariffsSection
@@ -83,6 +120,7 @@ export default function FeatureProfile() {
               <CurrentTariffCard onRenew={() => select("tariffs-list")} />
             )}
             {activePanel === "tariffs-list" && <TariffsListCard />}
+            {activePanel === "install-app" && <InstallAppCard />}
           </div>
         )}
       </div>

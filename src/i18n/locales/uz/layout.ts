@@ -29,6 +29,12 @@ const layout: typeof ru = {
     collapse: "Menyuni yig'ish",
     expand: "Menyuni yoyish",
   },
+  pwaUpdate: {
+    title: "Yangi versiya tayyor",
+    text: "Yangilanish yuklab olindi. Qo'llash uchun yangilang.",
+    apply: "Yangilash",
+    later: "Keyinroq",
+  },
   header: {
     fullscreen: "To'liq ekran",
     exitFullscreen: "To'liq ekrandan chiqish",
