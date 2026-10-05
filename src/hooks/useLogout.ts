@@ -4,7 +4,8 @@ import { useSessionStore } from "@/store/session.store";
 
 /**
  * Web uchun /auth/logout chaqiradi (cookie o'chadi), so'ng local sessiyani
- * tozalaydi — AppRoutes shundan keyin avtomatik /login'ga o'tkazadi.
+ * tozalaydi — saqlangan init_data ham (backend uni bekor qilmaydi, clearSession
+ * o'chiradi). AppRoutes shundan keyin avtomatik /login'ga o'tkazadi.
  * Telegram Mini App'da chaqirishning ma'nosi yo'q: initdata backend tomonda
  * bekor bo'lmaydi, keyingi ochilishda baribir avtomatik qayta kiraveradi.
  */

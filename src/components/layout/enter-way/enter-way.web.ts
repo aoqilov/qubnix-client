@@ -1,11 +1,13 @@
 import { usersApi } from "@/api/users/users.api";
-import { useSessionStore } from "@/store/session.store";
+import { readStoredInitData, useSessionStore } from "@/store/session.store";
 
-// initData header yuborilmaydi (web'da initData har doim null) — bu so'rov
-// faqat qubnix_session HttpOnly cookie orqali (withCredentials: true)
-// autentifikatsiya qilinadi. Cookie yo'q/eskirgan bo'lsa 401 keladi va
-// interceptor sessiyani "unauthenticated"ga tozalaydi.
+// Saqlangan init_data bo'lsa — store'ga, interceptor uni `initdata` header qilib
+// yuboradi. Bo'lmasa so'rov qubnix_session cookie bilan ketadi (login shu o'zgarishdan
+// oldin qilingan eski sessiyalar; iOS'da bunday cookie yo'q). Ikkalasi ham yaroqsiz
+// bo'lsa 401 keladi va interceptor sessiyani (saqlangan init_data bilan) tozalaydi.
 export async function enterWayWeb(): Promise<void> {
+  const storedInitData = readStoredInitData();
+  if (storedInitData) useSessionStore.getState().setInitData(storedInitData);
   useSessionStore.getState().setStatus("authenticating");
   try {
     const user = await usersApi.me();

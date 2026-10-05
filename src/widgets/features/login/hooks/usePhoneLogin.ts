@@ -37,10 +37,10 @@ export function useSendPhoneCode() {
 }
 
 /**
- * 2-qadam: kodni tekshirish. Muvaffaqiyatli bo'lsa backend qubnix_session
- * HttpOnly cookie'ni o'zi o'rnatadi (javobdagi init_data'ga web'da ehtiyoj
- * yo'q) — shundan keyingi /users/me so'rovi shu cookie orqali (withCredentials)
- * avtomatik autentifikatsiya qilinadi.
+ * 2-qadam: kodni tekshirish. Javobdagi init_data saqlanadi va shundan keyingi har
+ * so'rovga (/users/me'dan boshlab) `initdata` header bo'lib qo'shiladi. Backend
+ * qo'shimcha qubnix_session cookie ham o'rnatadi, lekin unga tayanmaymiz — iOS uni
+ * boshqa domen cookie'si deb saqlamaydi (session.store.ts).
  */
 export function useVerifyPhoneCode() {
   const setSession = useSessionStore((s) => s.setSession);
@@ -54,7 +54,8 @@ export function useVerifyPhoneCode() {
         throw new Error(i18n.t("auth.code.sessionExpired"));
       }
 
-      await authApi.verifyPhoneCode({ verificationToken, code: payload.code });
+      const { initData } = await authApi.verifyPhoneCode({ verificationToken, code: payload.code });
+      useSessionStore.getState().setWebInitData(initData);
       return usersApi.me();
     },
     onSuccess: (user) => setSession(user),

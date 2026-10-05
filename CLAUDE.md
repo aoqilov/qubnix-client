@@ -119,9 +119,10 @@ All user-facing text goes through **i18next** (`react-i18next`). Never hardcode 
 
 ### State and data
 
-- `store/session.store.ts` (Zustand) — token persisted in `localStorage` (`qubnix_token`), rehydrated on load. `status` drives the auth-fork gate in `AppRoutes.tsx`.
+- `store/session.store.ts` (Zustand) — `initData` is the session credential. Telegram: from the SDK, never stored. Web: `data.init_data` from `POST /api/v1/auth/verify-code`, persisted in `localStorage` (`qubnix_init_data`), restored by `enter-way.web.ts`, removed by `clearSession()` (backend logout does not revoke it). `status` drives the auth-fork gate in `AppRoutes.tsx`.
 - `store/workspace.store.ts` — currently static mock data (3 hardcoded workspaces + per-workspace project filters); `selectedWorkspaceId` persisted in `localStorage` (`qubnix_selected_workspace`). There is no backend workspace-list endpoint wired up yet — `api/workspace/workspace.api.ts` only covers a single "current" workspace and isn't used by this store.
-- `api-config/axiosInstance.ts` + `interceptors.ts` — request interceptor attaches `Authorization: Bearer <token>` from the session store; response interceptor clears the session on `401`.
+- `api-config/axiosInstance.ts` + `interceptors.ts` — request interceptor attaches the `initdata` header from the session store (both platforms); response interceptor clears the session on `401`. SSE (`realtime/connect.ts`) uses the fetch-streaming transport whenever `initData` exists, since `EventSource` can't send headers.
+- **Don't make web auth depend on the backend's `qubnix_session` cookie.** The API (`app.qubnix.uz`) is a different site from the web app (Vercel), and iOS WebKit (every iPhone browser) drops third-party cookies, so cookie-only login fails on iPhone. A Vercel `/api` rewrite proxy was measured and rejected: Tashkent users hit Vercel's `hkg1` edge while the backend is in Tashkent (~80 ms → ~400 ms per request). The cookie is only a fallback for web sessions created before `init_data` was stored.
 - Existing `Cus*` components still read the **legacy alias** names (`--bg-second`, `--text-default`, `--color-blue`, `--vio`, …). Those are block 7 of `globals.css` and are deprecated — see "Design tokens" above. To change how a Cus* component looks, edit the semantic token it ultimately resolves to (blocks 2–3), not the alias and not the component markup.
 
 ### PWA (web only)

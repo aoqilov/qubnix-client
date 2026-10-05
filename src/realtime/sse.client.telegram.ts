@@ -9,9 +9,9 @@ import {
 } from "./sse.types";
 
 /**
- * Telegram Mini App uchun transport. EventSource maxsus header yubora
- * olmaydi, sessiya esa `initdata` header'ida (interceptors.ts dagi kabi) —
- * shuning uchun fetch streaming.
+ * `initdata` header'li transport — Telegram Mini App va web login (saqlangan
+ * init_data) uchun. EventSource maxsus header yubora olmaydi, sessiya esa
+ * `initdata` header'ida (interceptors.ts dagi kabi) — shuning uchun fetch streaming.
  *
  * Bu yerda qayta ulanish qo'lda: fetch oqimi tugasa yoki uzilsa, backoff
  * bilan yangi urinish boshlanadi.

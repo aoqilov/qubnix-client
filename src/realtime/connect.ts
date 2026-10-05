@@ -1,4 +1,5 @@
 import { isTelegramMiniApp } from "@/utils/platform";
+import { useSessionStore } from "@/store/session.store";
 import { connectTelegramSse } from "./sse.client.telegram";
 import { connectWebSse } from "./sse.client.web";
 import type { SseDisconnect, SseHandlers } from "./sse.types";
@@ -22,7 +23,10 @@ let activeDisconnect: SseDisconnect | null = null;
 export function connectRealtime(handlers: SseHandlers): SseDisconnect {
   activeDisconnect?.();
 
-  const connect = isTelegramMiniApp() ? connectTelegramSse : connectWebSse;
+  // EventSource header yubora olmaydi: initdata bor bo'lsa (Telegram va hozirgi web login) —
+  // fetch streaming; yo'q bo'lsa (eski, faqat cookie'li web sessiya) — EventSource + cookie.
+  const connect =
+    isTelegramMiniApp() || useSessionStore.getState().initData ? connectTelegramSse : connectWebSse;
   const disconnect = connect(eventsUrl(), handlers);
   activeDisconnect = disconnect;
 
