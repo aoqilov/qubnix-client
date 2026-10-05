@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { LuChevronRight, LuDownload, LuSlidersVertical, LuX } from "react-icons/lu";
+import { LuChevronRight, LuCircleCheck, LuDownload, LuSlidersVertical, LuX } from "react-icons/lu";
 import { CusPageTitle } from "@/components/ui/page-title/CusPageTitle";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { useUiStore } from "@/store/ui.store";
@@ -81,7 +81,14 @@ export default function FeatureProfile() {
               <span className="flex-1 text-sm font-medium text-primary">{t("profile.settings")}</span>
               <LuChevronRight size={16} className="flex-none text-secondary" />
             </button>
-            {!isInstalled && (
+            {isInstalled ? (
+              <div className="flex w-full items-center gap-3 px-4 py-3.5">
+                <LuCircleCheck size={18} className="flex-none text-success-strong" />
+                <span className="flex-1 text-sm font-medium text-primary">
+                  {t("profile.install.installedTitle")}
+                </span>
+              </div>
+            ) : (
               <button
                 onClick={() => select("install-app")}
                 className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-surface-secondary ${

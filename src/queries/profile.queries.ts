@@ -197,6 +197,82 @@ export function useBuyTariffMutation() {
   });
 }
 
+export type PaymentProvider = "payme" | "click";
+
+export interface CreateTariffOrderRequest {
+  tariffId: TariffId;
+  period: BillingPeriod;
+  /** Tarif ulanadigan yangi tashkilot nomi. */
+  organizationName: string;
+}
+
+export interface TariffOrder {
+  id: string;
+  tariffId: TariffId;
+  period: BillingPeriod;
+  organizationName: string;
+  /** so'm; bepul tarifda 0. */
+  amount: number;
+  /**
+   * To'lov havolalari — backend tayyorlab beradi (merchant ID, buyurtma ID, summa ichida).
+   * Bepul tarifda null: to'lov bosqichi bo'lmaydi.
+   */
+  paymentUrls: Record<PaymentProvider, string> | null;
+}
+
+// ── Mock: to'lov endpointi yo'q. Backend tayyor bo'lganda `POST /tariff-orders` javobi keladi,
+// quyidagi merchant ID'lar va havola yasash frontend'dan butunlay olib tashlanadi.
+const MOCK_PAYME_MERCHANT_ID = "mock-payme-merchant";
+const MOCK_CLICK_SERVICE_ID = "00000";
+const MOCK_CLICK_MERCHANT_ID = "00000";
+
+/** Payme checkout: `m=<merchant>;ac.order_id=<id>;a=<tiyin>;c=<qaytish>` → base64. */
+function mockPaymeUrl(orderId: string, amount: number, returnUrl: string): string {
+  const params = `m=${MOCK_PAYME_MERCHANT_ID};ac.order_id=${orderId};a=${amount * 100};c=${returnUrl}`;
+  return `https://checkout.paycom.uz/${btoa(params)}`;
+}
+
+/** Click: summa so'mda, buyurtma ID — `transaction_param`. */
+function mockClickUrl(orderId: string, amount: number, returnUrl: string): string {
+  const params = new URLSearchParams({
+    service_id: MOCK_CLICK_SERVICE_ID,
+    merchant_id: MOCK_CLICK_MERCHANT_ID,
+    amount: String(amount),
+    transaction_param: orderId,
+    return_url: returnUrl,
+  });
+  return `https://my.click.uz/services/pay?${params}`;
+}
+
+function mockTariffOrder({ tariffId, period, organizationName }: CreateTariffOrderRequest): TariffOrder {
+  const tariff = TARIFFS.find((item) => item.id === tariffId);
+  const amount = !tariff ? 0 : period === "yearly" ? tariff.priceYearly : tariff.priceMonthly;
+  const id = `mock-${Date.now()}`;
+  const returnUrl = `${window.location.origin}/profile`;
+  return {
+    id,
+    tariffId,
+    period,
+    organizationName,
+    amount,
+    paymentUrls:
+      amount === 0
+        ? null
+        : { payme: mockPaymeUrl(id, amount, returnUrl), click: mockClickUrl(id, amount, returnUrl) },
+  };
+}
+
+/**
+ * Tarif xaridi: tashkilot nomi saqlanganda buyurtma ochiladi va to'lov havolalari qaytadi.
+ * Havolalar oldindan tayyor bo'lishi shart — Payme/Click tugmasi bosilganda `window.open`
+ * sinxron chaqirilmasa, brauzer uni popup deb bloklaydi.
+ */
+export function useCreateTariffOrderMutation() {
+  return useMutation({
+    mutationFn: (data: CreateTariffOrderRequest) => Promise.resolve(mockTariffOrder(data)),
+  });
+}
+
 /** Shu kundan kam qolsa — "tez tugaydi" (sariq) holati. */
 export const TARIFF_WARNING_DAYS = 7;
 

@@ -17,6 +17,7 @@ const profile: typeof ru = {
     telegramNote:
       "O'rnatish faqat brauzerda ishlaydi. «Brauzerda ochish»ni bosing, telefon raqamingiz bilan kiring — yo'riqnoma o'zi ochiladi.",
     installed: "Ilova bu qurilmada allaqachon o'rnatilgan.",
+    installedTitle: "Ilova o'rnatilgan",
     telegramShortcutNote:
       "Yorliq qubnix'ni Telegram ichida ochadi. Telegram'siz alohida ilova kerak bo'lsa — «Brauzerda ochish»ni bosing.",
     shortcutAdded: "qubnix yorlig'i bosh ekranda allaqachon bor.",
@@ -127,6 +128,30 @@ const profile: typeof ru = {
       stats3months: "Oxirgi 3 oy statistikasi",
       statsFull: "To'liq statistika tarixi",
     },
+  },
+  checkout: {
+    title: "Tarifni rasmiylashtirish",
+    tariff: "Tarif",
+    period: "Muddat",
+    periodMonthly: "1 oy",
+    periodYearly: "1 yil",
+    total: "Jami",
+    price: "{{price}} so'm",
+    steps: {
+      confirm: "Tasdiqlash",
+      organization: "Tashkilot",
+      payment: "To'lov",
+    },
+    confirmQuestion: "Siz {{name}} tarifini {{period}}ga {{price}} so'mga sotib olyapsiz. Davom etamizmi?",
+    confirmQuestionFree: "Siz bepul {{name}} tarifini ulayapsiz. Davom etamizmi?",
+    confirmYes: "Ha, davom etish",
+    orgLabel: "Tashkilot nomi",
+    orgPlaceholder: "Masalan, «Bahor» MChJ",
+    orgHint: "Tarif shu tashkilotga ulanadi, siz uning egasi bo'lasiz",
+    orgRequired: "Tashkilot nomini kiriting",
+    payHint: "To'lov ilovasi yoki sahifasi ochiladi. To'lovdan so'ng qubnix'ga qayting — tarif avtomatik ulanadi.",
+    payOpened: "{{provider}} to'lov sahifasi ochildi. To'lov tasdig'ini kutyapmiz.",
+    freeDone: "«{{name}}» tashkiloti {{tariff}} tarifida yaratildi.",
   },
 };
 

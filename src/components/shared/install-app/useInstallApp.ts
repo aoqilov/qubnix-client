@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { usePwaStore } from "@/store/pwa.store";
 import { isTelegramMiniApp } from "@/utils/platform";
+import { openExternalLink } from "@/utils/telegram";
 import { webInstallUrl } from "@/pwa/installPlatform";
 
 /**
@@ -76,10 +77,7 @@ export function useInstallApp() {
 
   // Telegram linki emas — web manzil tizim brauzerida ochiladi (u yerda o'rnatish mumkin).
   function openInBrowser() {
-    const url = webInstallUrl();
-    const openLink = window.Telegram?.WebApp?.openLink;
-    if (openLink) openLink(url);
-    else window.open(url, "_blank", "noopener");
+    openExternalLink(webInstallUrl());
   }
 
   // Telegram'ning "•••" → "Добавить на экран «Домой»" bilan bir xil: Android'da tizim oynasi,

@@ -48,3 +48,14 @@ export function setBackButton(onClick: () => void): () => void {
     back?.hide();
   };
 }
+
+/**
+ * Tashqi havola (Payme/Click, web ilova). Mini App ichida `openLink` — webview'dan chiqib tizim
+ * brauzerida ochiladi, telefon havolani o'z ilovasiga (Payme, Click) berishi mumkin. Oddiy
+ * brauzerda — yangi tab. Bosish hodisasi ichida sinxron chaqirilsin, aks holda popup bloklanadi.
+ */
+export function openExternalLink(url: string): void {
+  const openLink = webApp()?.openLink;
+  if (openLink) openLink(url);
+  else window.open(url, "_blank", "noopener");
+}
