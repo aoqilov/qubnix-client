@@ -21,6 +21,7 @@ import { tagColorVar } from "@/utils/tagColor";
 import { todayApiDate } from "@/utils/apiDate";
 import { CusPopover } from "@/components/ui/popover/CusPopover";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
+import { QubnixLogoIntro } from "@/components/shared/enter-logo-page/EnterLogoPage";
 import { personalSummaryQuery, workspaceListQuery } from "@/queries/doska.queries";
 import { useProjectsByDate } from "@/queries/tasks.queries";
 import type { OrganizationType } from "@/api/organizations/organizations.types";
@@ -67,6 +68,8 @@ export function Sidebar() {
   const navigate = useNavigate();
   const collapsed = useUiStore((s) => s.isSidebarCollapsed);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
+  // "system" emas: ui.store faqat `.dark` qo'yadi — OS dark + ilova light bo'lsa matn oq chiqardi.
+  const logoTheme = useUiStore((s) => (s.isDarkMode ? "dark" : "light"));
 
   const selectedWorkspaceId = useWorkspaceStore((s) => s.selectedWorkspaceId);
   const selectWorkspace = useWorkspaceStore((s) => s.selectWorkspace);
@@ -133,9 +136,13 @@ export function Sidebar() {
     >
       <div className={`flex h-14 items-center ${collapsed ? "justify-center" : "justify-between px-5"}`}>
         {!collapsed && (
-          <span className="font-condensed text-xl tracking-wide text-brand">
-            qubnix {/* i18n-ignore — brend */}
-          </span>
+          <QubnixLogoIntro
+            animated={false}
+            theme={logoTheme}
+            className="w-32"
+            // Statik logo 0.88 masshtabda — chap chetga tekislanib tursin.
+            style={{ transformOrigin: "left center" }}
+          />
         )}
         <button
           onClick={toggleSidebar}
