@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Navigate, useLocation, useRoutes } from "react-router-dom";
 import type { RouteObject } from "react-router-dom";
 import { useLayoutMode } from "@/hooks/useLayoutMode";
@@ -11,6 +11,7 @@ import { useSessionStore } from "@/store/session.store";
 import { isTelegramMiniApp } from "@/utils/platform";
 import FeatureLogin from "@/widgets/features/login/FeatureLogin";
 import { AuthLoading, TelegramAuthError } from "@/components/layout/enter-way/TelegramAuthGate";
+import { hasSeenIntro, markIntroSeen } from "@/components/layout/enter-way/introSeen";
 
 // Layout fork: ekran kengligiga qarab (isTma ga emas — Telegram Desktop
 // kabi keng oynalar ham shu yerdan AppLayout'ga tushadi).
@@ -26,12 +27,20 @@ export function AppRoutes() {
   const sessionStatus = useSessionStore((s) => s.status);
   const isTma = isTelegramMiniApp();
 
-  // Loading banner tez o'tib ketib miltillamasligi uchun kamida
-  // MIN_LOADING_MS ko'rinib turishi kerak — enterWay tezroq tugasa ham.
+  // Birinchi ochilishda to'liq logo intro — minimal vaqtni u belgilaydi (tugaguncha).
+  // Keyingi ochilishlarda loading banner tez o'tib ketib miltillamasligi uchun
+  // kamida MIN_LOADING_MS ko'rinib turadi — enterWay tezroq tugasa ham.
+  const [playIntro] = useState(() => !hasSeenIntro());
   const [minLoadingDone, setMinLoadingDone] = useState(false);
   useEffect(() => {
+    if (playIntro) return;
     const timer = setTimeout(() => setMinLoadingDone(true), MIN_LOADING_MS);
     return () => clearTimeout(timer);
+  }, [playIntro]);
+
+  const handleIntroComplete = useCallback(() => {
+    markIntroSeen();
+    setMinLoadingDone(true);
   }, []);
 
   const platformBranch: RouteObject =
@@ -45,7 +54,15 @@ export function AppRoutes() {
   // gate qarorini asossiz qabul qilmaslik uchun har ikkala oqimda ham
   // avval loading ko'rsatamiz.
   if (sessionStatus === "idle" || sessionStatus === "authenticating" || !minLoadingDone) {
-    return useRoutes([{ path: "*", element: <AuthLoading /> }]);
+    return useRoutes([
+      {
+        path: "*",
+        element: (
+          // Intro tugab, enterWay hali kutayotgan bo'lsa — oddiy loading'ga o'tadi.
+          <AuthLoading intro={playIntro && !minLoadingDone} onIntroComplete={handleIntroComplete} />
+        ),
+      },
+    ]);
   }
 
   if (isTma) {

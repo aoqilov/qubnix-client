@@ -1,8 +1,10 @@
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { LuRefreshCw, LuTriangleAlert } from "react-icons/lu";
+import { LuLoaderCircle, LuRefreshCw, LuTriangleAlert } from "react-icons/lu";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
+import { QubnixLogoIntro } from "@/components/shared/enter-logo-page/EnterLogoPage";
+import { useUiStore } from "@/store/ui.store";
 import { enterWayTelegram } from "./enter-way.telegram";
 
 const SAFE_AREA_STYLE = {
@@ -12,57 +14,46 @@ const SAFE_AREA_STYLE = {
     "calc(var(--tg-safe-area-inset-bottom,0px) + var(--tg-content-safe-area-inset-bottom,0px))",
 } as const;
 
-const DOTS = [0, 1, 2];
+interface AuthLoadingProps {
+  /** true — to'liq logo intro (faqat birinchi ochilish, introSeen.ts); false — pulsatsiyali icon + spinner. */
+  intro?: boolean;
+  /** Intro oxirigacha o'ynab bo'lganda. */
+  onIntroComplete?: () => void;
+}
 
 /** enterWay (Telegram yoki web) /users/me javobini kutayotganda ko'rsatiladi. */
-export function AuthLoading() {
+export function AuthLoading({ intro = false, onIntroComplete }: AuthLoadingProps) {
+  const { t } = useTranslation();
+  // "system" emas: ui.store faqat `.dark` qo'yadi — OS dark + ilova light bo'lsa matn oq chiqardi.
+  const logoTheme = useUiStore((s) => (s.isDarkMode ? "dark" : "light"));
+
   return (
     <div
-      className="flex h-dvh w-full flex-col items-center justify-center gap-6 bg-canvas"
+      className="flex h-dvh w-full flex-col items-center justify-center bg-canvas"
       style={SAFE_AREA_STYLE}
     >
-      <motion.div
-        initial={{ scale: 0.6, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative flex h-20 w-20 items-center justify-center rounded-popover"
-        style={{ background: "var(--brand-subtle-bg)" }}
-      >
+      {intro ? (
+        <QubnixLogoIntro theme={logoTheme} onComplete={onIntroComplete} className="w-56" />
+      ) : (
+        // Intro'dan keyin kelsa — keskin almashmasligi uchun yumshoq paydo bo'ladi.
         <motion.div
-          className="absolute inset-0 rounded-popover"
-          style={{ border: "2px solid var(--brand-default)" }}
-          animate={{ scale: [1, 1.3, 1], opacity: [0.6, 0, 0.6] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <span className="text-3xl font-bold" style={{ color: "var(--brand-default)" }}>
-          Q {/* i18n-ignore — brend belgisi */}
-        </span>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15, duration: 0.4 }}
-        className="flex flex-col items-center gap-1"
-      >
-        <span className="text-base font-semibold text-primary">Qubnix</span> {/* i18n-ignore — brend */}
-        <div className="flex items-center gap-1.5 pt-1">
-          {DOTS.map((i) => (
-            <motion.span
-              key={i}
-              className="h-1.5 w-1.5 rounded-full"
-              style={{ background: "var(--brand-default)" }}
-              animate={{ y: [0, -6, 0], opacity: [0.4, 1, 0.4] }}
-              transition={{
-                duration: 0.9,
-                repeat: Infinity,
-                delay: i * 0.15,
-                ease: "easeInOut",
-              }}
-            />
-          ))}
-        </div>
-      </motion.div>
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <motion.div
+            animate={{ opacity: [1, 0.45, 1], scale: [1, 0.96, 1] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <QubnixLogoIntro theme={logoTheme} animated={false} wordmark={false} className="w-20" />
+          </motion.div>
+          <div className="flex items-center gap-2 text-sm text-secondary">
+            <LuLoaderCircle size={16} className="animate-spin text-brand" />
+            {t("common.states.loading")}
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }
