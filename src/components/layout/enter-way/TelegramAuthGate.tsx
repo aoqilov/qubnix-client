@@ -15,7 +15,7 @@ const SAFE_AREA_STYLE = {
 } as const;
 
 interface AuthLoadingProps {
-  /** true — to'liq logo intro (faqat birinchi ochilish, introSeen.ts); false — pulsatsiyali icon + spinner. */
+  /** true — to'liq logo intro (ilova yangi ochilganda, introSeen.ts); false — pulsatsiyali icon + spinner. */
   intro?: boolean;
   /** Intro oxirigacha o'ynab bo'lganda. */
   onIntroComplete?: () => void;

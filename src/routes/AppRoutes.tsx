@@ -27,9 +27,9 @@ export function AppRoutes() {
   const sessionStatus = useSessionStore((s) => s.status);
   const isTma = isTelegramMiniApp();
 
-  // Birinchi ochilishda to'liq logo intro — minimal vaqtni u belgilaydi (tugaguncha).
-  // Keyingi ochilishlarda loading banner tez o'tib ketib miltillamasligi uchun
-  // kamida MIN_LOADING_MS ko'rinib turadi — enterWay tezroq tugasa ham.
+  // Ilova yangi ochilganda to'liq logo intro — minimal vaqtni u belgilaydi (tugaguncha).
+  // Shu sessiyadagi qayta yuklanishlarda (introSeen.ts) loading banner tez o'tib
+  // ketib miltillamasligi uchun kamida MIN_LOADING_MS ko'rinib turadi.
   const [playIntro] = useState(() => !hasSeenIntro());
   const [minLoadingDone, setMinLoadingDone] = useState(false);
   useEffect(() => {
