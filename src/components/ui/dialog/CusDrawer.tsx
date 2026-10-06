@@ -3,6 +3,7 @@ import { Drawer, CloseButton } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 import { LuArrowLeft } from "react-icons/lu";
 import { useSwipeToClose } from "@/hooks/useSwipeToClose";
+import { KEYBOARD_AWARE_POSITIONER } from "@/utils/keyboardInset";
 
 type DrawerSize = "xs" | "sm" | "md" | "lg" | "xl" | "full";
 type DrawerPlacement = "start" | "end" | "top" | "bottom";
@@ -17,6 +18,8 @@ const SAFE_TOP =
   "calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px))";
 const SAFE_BOTTOM =
   "calc(var(--tg-safe-area-inset-bottom, 0px) + var(--tg-content-safe-area-inset-bottom, 0px))";
+// Klaviatura ochiq bo'lsa home-indicator uning ostida qoladi — footer klaviaturaga yopishib tursin.
+const SAFE_BOTTOM_ABOVE_KEYBOARD = `max(0px, ${SAFE_BOTTOM} - var(--keyboard-inset, 0px))`;
 
 interface CusDrawerProps {
   open: boolean;
@@ -82,6 +85,7 @@ export function CusDrawer({
       <Drawer.Positioner
         p="0"
         style={{
+          ...KEYBOARD_AWARE_POSITIONER,
           padding: 0,
           marginTop: 0,
           alignItems: isBottom ? "flex-end" : isTop ? "flex-start" : "stretch",
@@ -96,14 +100,15 @@ export function CusDrawer({
           color="var(--text-default)"
           display="flex"
           flexDirection="column"
-          h={isHorizontal ? undefined : "100dvh"}
-          maxH={isBottom ? "90dvh" : undefined}
+          // dvh emas, % — positioner klaviatura ochilganda qisqaradi, panel ham u bilan qisqarsin.
+          h={isHorizontal && size !== "full" ? undefined : "100%"}
+          maxH={isBottom ? "90%" : "100%"}
           overflow="hidden"
           borderRadius={
             isBottom ? "16px 16px 0 0" : isTop ? "0 0 16px 16px" : undefined
           }
           pt={!isBottom ? SAFE_TOP : undefined}
-          pb={!isTop ? SAFE_BOTTOM : undefined}
+          pb={!isTop ? SAFE_BOTTOM_ABOVE_KEYBOARD : undefined}
         >
           {/* Drag handle — faqat bottom placement uchun */}
           {isBottom && (

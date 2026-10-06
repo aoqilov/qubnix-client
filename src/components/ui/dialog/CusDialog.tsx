@@ -1,5 +1,6 @@
 import { Dialog, CloseButton } from "@chakra-ui/react";
 import type { ReactNode } from "react";
+import { KEYBOARD_AWARE_POSITIONER } from "@/utils/keyboardInset";
 
 type DialogSize = "xs" | "sm" | "md" | "lg" | "xl" | "full";
 
@@ -51,7 +52,7 @@ export function CusDialog({
     >
       <Dialog.Backdrop bg="var(--overlay-backdrop)" backdropFilter="blur(2px)" />
 
-      <Dialog.Positioner px={centered ? "4" : undefined}>
+      <Dialog.Positioner px={centered ? "4" : undefined} style={KEYBOARD_AWARE_POSITIONER}>
         <Dialog.Content
           bg="var(--bg-second)"
           borderColor="var(--border-default)"
@@ -61,12 +62,15 @@ export function CusDialog({
           color="var(--text-default)"
           display="flex"
           flexDirection="column"
-          maxH={centered ? "85dvh" : { lgDown: "90dvh", lg: "85dvh" }}
+          // dvh emas, % — positioner klaviatura ochilganda qisqaradi, dialog ham u bilan qisqarib
+          // footer klaviatura ustida qoladi. Mobil bottom-sheet to'liq balandlikda (recipe'dagi
+          // `full` minH: 100dvh o'rniga).
+          maxH={centered ? "85%" : { lgDown: "100%", lg: "85%" }}
           minW={centered ? undefined : { lg: "760px" }}
-          minH={centered ? undefined : { lg: "500px" }}
+          minH={centered ? undefined : { lgDown: "100%", lg: "min(500px, 100%)" }}
           style={
             fitContent
-              ? { width: "fit-content", maxWidth: "90vw", maxHeight: "90dvh" }
+              ? { width: "fit-content", maxWidth: "90vw", maxHeight: "90%" }
               : undefined
           }
         >

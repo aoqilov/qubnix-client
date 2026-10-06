@@ -5,6 +5,7 @@ import "./api-config/interceptors";
 import "./i18n"; // App'dan oldin — birinchi render'dayoq tarjima tayyor bo'lsin.
 import { enterWay } from "./components/layout/enter-way";
 import { registerPwa } from "./pwa/registerPwa";
+import { trackKeyboardInset } from "./utils/keyboardInset";
 import App from "./App";
 import "./styles/globals.css";
 
@@ -17,6 +18,9 @@ void enterWay();
 
 // O'rnatish oynasi (beforeinstallprompt) va yangilanishlar — web'da service worker.
 registerPwa();
+
+// Klaviatura ochilganda CusDialog/CusDrawer footer'i uning ustida tursin (--keyboard-inset).
+trackKeyboardInset();
 
 const root = document.getElementById("root")!;
 createRoot(root).render(
