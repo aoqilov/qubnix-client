@@ -17,6 +17,7 @@ import { SettingsWorkspaceCard } from "./components/SettingsWorkspaceCard";
 import { SettingsMenuRow } from "./components/SettingsMenuRow";
 import {
   useOrganizationMembersCount,
+  useOrganizationRoutinesCount,
   useSelectedOrganization,
 } from "@/hooks/useApiSettings";
 import type { SettingsMenuItem } from "./types";
@@ -51,6 +52,7 @@ export default function FeatureSettings() {
   const membersCountQuery = useOrganizationMembersCount(
     isManager && !isPersonal,
   );
+  const routinesCountQuery = useOrganizationRoutinesCount(!isPersonal);
 
   // Sarlavha statik — yuklanish va xato holatida ham joyida turadi.
   const pageTitle = <CusPageTitle title={t("settings.pageTitle")} />;
@@ -106,7 +108,7 @@ export default function FeatureSettings() {
       icon: <LuRepeat size={18} />,
       title: t("settings.menu.routines"),
       subtitle: t("settings.menu.routinesHint"),
-      badgeCount: 4,
+      badgeCount: routinesCountQuery.data,
     },
     {
       to: "/settings/reminders",

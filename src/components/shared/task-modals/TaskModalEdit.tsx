@@ -39,6 +39,8 @@ export interface TaskModalEditValues {
   removedAudioFileId: string | null;
   dueDateLabel: string;
   dueAt: string | null;
+  /** Oraliq boshi (ISO, 00:00) — bitta sana yoki tezkor muddatda null (eski oraliq shu bilan tozalanadi). */
+  startAt: string | null;
   assignees: TaskCardMember[];
   priority: TaskPriority;
   subtasks: TaskModalAddSubtask[];
@@ -228,11 +230,12 @@ function TaskModalEdit({
     const firstAvailableQuickTime = QUICK_TIMES.find((t) => !isPastQuickTime(t));
     setQuickTime(firstAvailableQuickTime ?? QUICK_TIMES[0]);
     setIsCustomQuickTime(!firstAvailableQuickTime);
-    setCustomDate(
-      due
-        ? [{ year: due.getFullYear(), month: due.getMonth() + 1, day: due.getDate() } as DateValue]
-        : undefined,
-    );
+    const start = task.start_at ? new Date(task.start_at) : null;
+    const toDateValue = (d: Date) =>
+      ({ year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() }) as DateValue;
+    // Oraliqli vazifa: boshlanish va tugash kunlari — kalendarda ikkalasi ham tanlangan ko'rinadi.
+    const isRange = !!(due && start && start.toDateString() !== due.toDateString());
+    setCustomDate(due ? (isRange && start ? [toDateValue(start), toDateValue(due)] : [toDateValue(due)]) : undefined);
     setCustomTime(due ? `${pad2(due.getHours())}:${pad2(due.getMinutes())}` : "");
 
     setAssigneeIds(task.members.map((m) => String(m.user_id)));
@@ -326,6 +329,13 @@ function TaskModalEdit({
     return new Date(v.year, v.month - 1, v.day, hh, mm, 0, 0).toISOString();
   }
 
+  /** Oraliq tanlangan bo'lsa — oraliq boshi, kun boshiga (00:00); bitta sana yoki tezkor rejimda null. */
+  function buildStartAt(): string | null {
+    if (dueMode !== "custom" || !customDate || customDate.length < 2) return null;
+    const v = customDate[0];
+    return new Date(v.year, v.month - 1, v.day, 0, 0, 0, 0).toISOString();
+  }
+
   async function handleSubmit() {
     if (isSubmitting || !task) return;
     setIsSubmitting(true);
@@ -340,6 +350,7 @@ function TaskModalEdit({
           descriptionMode === "voice" && audioTouched && !voiceNote ? existingAudioFileId : null,
         dueDateLabel,
         dueAt: buildDueAt(),
+        startAt: buildStartAt(),
         assignees: selectedAssignees,
         priority,
         subtasks,

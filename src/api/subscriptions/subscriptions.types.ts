@@ -44,6 +44,22 @@ export interface RawSubscriptionPlan {
 
 export type SubscriptionStatus = "active" | "expired" | "cancelled";
 
+export interface RawLimitUsage {
+  used: number;
+  /** null — cheksiz. */
+  limit: number | null;
+  /** null — cheksiz. */
+  remaining: number | null;
+  is_unlimited: boolean;
+  is_limit_reached: boolean;
+}
+
+export interface RawSubscriptionUsage {
+  members: RawLimitUsage;
+  projects: RawLimitUsage;
+  routines: RawLimitUsage;
+}
+
 export interface RawOrganizationSubscription {
   id: number;
   organization_id: number;
@@ -54,6 +70,7 @@ export interface RawOrganizationSubscription {
   /** null — muddatsiz. */
   expires_at: string | null;
   limits: RawPlanLimits;
+  usage: RawSubscriptionUsage;
 }
 
 export type SubscriptionOrderStatus = "created" | "pending" | "paid" | "cancelled" | "failed";

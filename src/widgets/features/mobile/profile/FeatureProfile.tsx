@@ -29,10 +29,22 @@ export default function FeatureProfile() {
 
   // Telegram'dan "Открыть в браузере" → /profile?install=1 — yo'riqnoma o'zi ochiladi.
   useEffect(() => {
-    if (searchParams.get("install") !== "1") return;
-    setActiveDrawer("install-app");
+    const isInstall = searchParams.get("install") === "1";
+    const isTariffs = searchParams.get("tariffs") === "1";
+    if (!isInstall && !isTariffs) return;
+    if (isInstall) {
+      setActiveDrawer("install-app");
+    } else {
+      // "Улучшить тариф" (limit oynasidan): ?tariffs=1&renew=<orgId>&renewName=<nom> — shu tashkilot uchun.
+      const renewId = searchParams.get("renew");
+      setRenewOrg(renewId ? { id: renewId, name: searchParams.get("renewName") ?? "" } : null);
+      setActiveDrawer("tariffs-list");
+    }
     const next = new URLSearchParams(searchParams);
     next.delete("install");
+    next.delete("tariffs");
+    next.delete("renew");
+    next.delete("renewName");
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams]);
 

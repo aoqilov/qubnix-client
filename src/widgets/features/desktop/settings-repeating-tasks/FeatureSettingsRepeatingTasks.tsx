@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useLimitGuard } from "@/components/shared/limit-reached/useLimitGuard";
 import { useEffect, useMemo, useState } from "react";
 import { LuPlus, LuTriangleAlert, LuX } from "react-icons/lu";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -39,6 +40,7 @@ export default function FeatureSettingsRepeatingTasks() {
   const [projectId, setProjectId] = useState(ALL_PROJECTS_ID);
   const [frequency, setFrequency] = useState<RoutineFilter>("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const { openLimitDrawer, limitDrawer } = useLimitGuard("routines");
   const [editing, setEditing] = useState<RoutineFormInitial | null>(null);
   const [deletingRoutine, setDeletingRoutine] = useState<RoutineFormInitial | null>(null);
   const [scheduleRoutine, setScheduleRoutine] = useState<RawTaskRoutine | null>(null);
@@ -203,7 +205,9 @@ export default function FeatureSettingsRepeatingTasks() {
         }
       />
 
+      {limitDrawer}
       <RoutineFormDrawer
+        onLimitReached={openLimitDrawer}
         variant="dialog"
         open={isFormOpen}
         onClose={() => setIsFormOpen(false)}

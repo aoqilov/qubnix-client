@@ -10,11 +10,11 @@ import { daysLabel } from "@/utils/countLabels";
 import { useIntlLocale } from "@/i18n/useIntlLocale";
 import {
   orgSubscriptionQuery,
-  orgUsageQuery,
   type OrgTariff,
   type OrgTariffState,
   type TariffStatsDepth,
 } from "@/queries/profile.queries";
+import type { RawLimitUsage } from "@/api/subscriptions/subscriptions.types";
 
 const STATE_TONE: Record<OrgTariffState, BadgeTone> = {
   free: "neutral",
@@ -54,7 +54,7 @@ export function OrgTariffAccordion({ tariffs, onRenew }: OrgTariffAccordionProps
   return (
     <CusAccordion
       multiple
-      // Xodim/loyiha soni so'rovi faqat bo'lim ochilganda ketadi.
+      // Obuna (limit + usage) so'rovi faqat bo'lim ochilganda ketadi.
       lazyMount
       defaultValue={tariffs[0] ? [tariffs[0].id] : undefined}
       items={tariffs.map((tariff) => ({
@@ -84,7 +84,6 @@ function OrgTariffDetails({ tariff, onRenew }: { tariff: OrgTariff; onRenew?: (t
   const intlLocale = useIntlLocale();
   // Haqiqiy obuna: tarif nomi va limitlar (holat/muddat sarlavhadagi bilan bir manbadan — tashkilot moduli).
   const { data: subscription } = useQuery(orgSubscriptionQuery(tariff.id));
-  const usage = useQuery(orgUsageQuery(tariff.id));
   const formatDate = (iso: string) =>
     new Intl.DateTimeFormat(intlLocale, { day: "2-digit", month: "2-digit", year: "numeric" }).format(
       new Date(iso),
@@ -125,26 +124,9 @@ function OrgTariffDetails({ tariff, onRenew }: { tariff: OrgTariff; onRenew?: (t
 
       {subscription && (
         <DetailSection title={t("profile.tariffs.details.limits")} highlighted>
-          <LimitRow
-            label={t("profile.tariffs.details.members")}
-            used={usage.data?.members}
-            max={subscription.limits.members}
-            isLoading={usage.isPending}
-          />
-          <LimitRow
-            label={t("profile.tariffs.details.projects")}
-            used={usage.data?.projects}
-            max={subscription.limits.projects}
-            isLoading={usage.isPending}
-          />
-          <DetailRow
-            label={t("profile.tariffs.details.routines")}
-            value={
-              subscription.limits.routines === null
-                ? t("profile.tariffs.details.noLimit")
-                : t("profile.tariffs.details.upTo", { count: subscription.limits.routines })
-            }
-          />
+          <LimitRow label={t("profile.tariffs.details.members")} usage={subscription.usage.members} />
+          <LimitRow label={t("profile.tariffs.details.projects")} usage={subscription.usage.projects} />
+          <LimitRow label={t("profile.tariffs.details.routines")} usage={subscription.usage.routines} />
           <DetailRow label={t("profile.tariffs.details.stats")} value={t(STATS_DEPTH_KEY[subscription.limits.stats])} />
         </DetailSection>
       )}
@@ -205,42 +187,32 @@ function DetailRow({ label, value, valueClassName = "text-primary" }: DetailRowP
 
 interface LimitRowProps {
   label: string;
-  /** undefined — hali yuklanmoqda yoki so'rov xato berdi. */
-  used: number | undefined;
-  /** null — cheksiz. */
-  max: number | null;
-  isLoading: boolean;
+  usage: RawLimitUsage;
 }
 
-/** "7 / 10" + to'ldirilish chizig'i. Cheksiz limitda chiziq yo'q; son kelmasa — faqat limit. */
-function LimitRow({ label, used, max, isLoading }: LimitRowProps) {
+/** "7 / 10" + to'ldirilish chizig'i. Cheksiz limitda chiziq yo'q. */
+function LimitRow({ label, usage }: LimitRowProps) {
   const { t } = useTranslation();
-  const noLimit = t("profile.tariffs.details.noLimit");
+  const { used, limit } = usage;
 
-  if (max === null) {
-    return <DetailRow label={label} value={used === undefined ? noLimit : `${used} · ${noLimit}`} />;
+  if (limit === null) {
+    return <DetailRow label={label} value={`${used} · ${t("profile.tariffs.details.noLimit")}`} />;
   }
 
-  const pct = used === undefined ? 0 : Math.min(100, Math.round((used / max) * 100));
-  const barColor = pct >= 100 ? "bg-error" : pct >= LIMIT_WARNING_PCT ? "bg-warning" : "bg-brand";
-  const value = isLoading
-    ? "…"
-    : used === undefined
-      ? t("profile.tariffs.details.upTo", { count: max })
-      : `${used} / ${max}`;
+  const pct = Math.min(100, Math.round((used / limit) * 100));
+  const reached = usage.is_limit_reached || pct >= 100;
+  const barColor = reached ? "bg-error" : pct >= LIMIT_WARNING_PCT ? "bg-warning" : "bg-brand";
 
   return (
     <div className="flex flex-col gap-1.5">
       <DetailRow
         label={label}
-        value={value}
-        valueClassName={pct >= 100 ? "text-error-strong" : pct >= LIMIT_WARNING_PCT ? "text-warning-strong" : undefined}
+        value={`${used} / ${limit}`}
+        valueClassName={reached ? "text-error-strong" : pct >= LIMIT_WARNING_PCT ? "text-warning-strong" : undefined}
       />
-      {(isLoading || used !== undefined) && (
-        <div className={`h-1.5 overflow-hidden rounded-chip bg-surface ${isLoading ? "animate-pulse" : ""}`}>
-          <div className={`h-full rounded-chip transition-[width] ${barColor}`} style={{ width: `${pct}%` }} />
-        </div>
-      )}
+      <div className="h-1.5 overflow-hidden rounded-chip bg-surface">
+        <div className={`h-full rounded-chip transition-[width] ${barColor}`} style={{ width: `${pct}%` }} />
+      </div>
     </div>
   );
 }

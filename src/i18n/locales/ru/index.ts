@@ -13,6 +13,7 @@ import roles from "./roles";
 import projects from "./projects";
 import memberStats from "./memberStats";
 import routines from "./routines";
+import limits from "./limits";
 
 /** Asosiy manba — har bir namespace shu yerda ro'yxatga olinadi. */
 const ru = {
@@ -31,6 +32,7 @@ const ru = {
   projects,
   memberStats,
   routines,
+  limits,
 };
 
 export default ru;

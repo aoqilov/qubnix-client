@@ -13,7 +13,7 @@ import {
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { hasRole } from "@/components/shared/role-gate/RoleGate";
 import { WORKSPACE_ROLES } from "@/const/roles";
-import { useOrganizationMembersCount, useSelectedOrganization } from "@/hooks/useApiSettings";
+import { useOrganizationMembersCount, useOrganizationRoutinesCount, useSelectedOrganization } from "@/hooks/useApiSettings";
 import { CusPageTitle } from "@/components/ui/page-title/CusPageTitle";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { organizationRoleLabel } from "@/utils/roleLabels";
@@ -36,8 +36,8 @@ export default function FeatureSettings() {
   const isManager = hasRole(workspace ? [workspace.role] : [], MANAGE_VIEW_ROLES);
   const isPersonal = useWorkspaceStore((s) => s.selectedWorkspaceType) === "personal";
   const membersCountQuery = useOrganizationMembersCount(isManager && !isPersonal);
+  const routinesCountQuery = useOrganizationRoutinesCount(!isPersonal);
 
-  // Повторные задачи soni hali mock — /repeating-tasks resursi ulanmagan.
   const allItems: SettingsNavItemData[] = [
     {
       to: "/settings/members",
@@ -69,7 +69,7 @@ export default function FeatureSettings() {
       icon: <LuRepeat size={18} />,
       title: t("settings.menu.routines"),
       subtitle: t("settings.menu.routinesHint"),
-      badgeCount: 4,
+      badgeCount: routinesCountQuery.data,
     },
     {
       to: "/settings/reminders",

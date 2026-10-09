@@ -9,14 +9,17 @@ interface DayPickerDialogProps {
   onClose: () => void;
   value: Date;
   onPick: (date: Date) => void;
+  /** Tarif limiti: shu kundan oldingi kunlar tanlanmaydi. */
+  minDate?: Date | null;
 }
 
-export function DayPickerDialog({ open, onClose, value, onPick }: DayPickerDialogProps) {
+export function DayPickerDialog({ open, onClose, value, onPick, minDate }: DayPickerDialogProps) {
   const { t } = useTranslation();
   return (
     <CusDialog open={open} onClose={onClose} title={t("memberStats.pickDateTitle")} centered size="sm">
       <CusCalendar
         inline
+        min={minDate ? parseDate(toDateKey(minDate)) : undefined}
         value={[parseDate(toDateKey(value))]}
         onValueChange={({ value: picked }) => {
           const day = picked[0];

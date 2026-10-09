@@ -1,4 +1,5 @@
 import i18n from "@/i18n";
+import { useLimitGuard } from "@/components/shared/limit-reached/useLimitGuard";
 import { useTranslation } from "react-i18next";
 import { forwardRef, useMemo, useState } from "react";
 import type React from "react";
@@ -88,6 +89,7 @@ export default function FeatureSettingsMembers() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<MemberRoleFilter>("all");
   const [isInviteOpen, setInviteOpen] = useState(false);
+  const { guard: guardLimit, limitDrawer } = useLimitGuard("members");
   const [actionsMemberId, setActionsMemberId] = useState<number | null>(null);
   // Viewer ro'yxatni ko'radi, lekin taklif/rol/o'chirish amallari yo'q.
   const isViewer = useIsViewer();
@@ -160,7 +162,7 @@ export default function FeatureSettingsMembers() {
           <CusButton
             variant="subtle"
             leftIcon={<LuPlus size={16} />}
-            onClick={() => setInviteOpen(true)}
+            onClick={() => guardLimit(() => setInviteOpen(true))}
             style={{ background: "var(--brand-subtle-bg)", color: "var(--brand-default)", fontWeight: 600 }}
           >
             {t("members.invite.send")}
@@ -200,6 +202,7 @@ export default function FeatureSettingsMembers() {
         </div>
       )}
 
+      {limitDrawer}
       <InvitePersonDrawer variant="dialog" open={isInviteOpen} onClose={() => setInviteOpen(false)} />
 
       <MemberActionsDrawer

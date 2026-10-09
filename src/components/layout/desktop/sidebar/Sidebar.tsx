@@ -22,7 +22,7 @@ import { todayApiDate } from "@/utils/apiDate";
 import { CusPopover } from "@/components/ui/popover/CusPopover";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { QubnixLogoIntro } from "@/components/shared/enter-logo-page/EnterLogoPage";
-import { personalSummaryQuery, workspaceListQuery } from "@/queries/doska.queries";
+import { isWorkspaceBlocked, personalSummaryQuery, workspaceListQuery } from "@/queries/doska.queries";
 import { useProjectsByDate } from "@/queries/tasks.queries";
 import type { OrganizationType } from "@/api/organizations/organizations.types";
 
@@ -35,6 +35,7 @@ interface CurrentWorkspace {
   initials: string;
   type: OrganizationType;
   tasksCount: number;
+  blocked?: boolean;
 }
 
 function SectionLabel({ children }: { children: string }) {
@@ -99,6 +100,7 @@ export function Sidebar() {
       initials: o.initials,
       type: "organization" as const,
       tasksCount: o.tasksCount,
+      blocked: isWorkspaceBlocked(o),
     })),
   ];
   const current = allWorkspaces.find((w) => w.id === selectedWorkspaceId) ?? null;
@@ -219,11 +221,12 @@ export function Sidebar() {
                     {allWorkspaces.map((w) => (
                       <button
                         key={w.id}
+                        disabled={w.blocked}
                         onClick={() => {
                           selectWorkspace(w.id, w.type);
                           close();
                         }}
-                        className="flex w-full items-center gap-2 rounded-input px-2 py-2 text-base text-primary hover:bg-surface-secondary"
+                        className="flex w-full items-center gap-2 rounded-input px-2 py-2 text-base text-primary hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
                       >
                         <WorkspaceAvatar workspace={w} size={25} />
                         <span className="flex-1 truncate text-left">{w.name}</span>

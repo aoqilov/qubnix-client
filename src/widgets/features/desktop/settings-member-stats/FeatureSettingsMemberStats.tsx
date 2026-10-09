@@ -14,8 +14,12 @@ import { DayPickerDialog } from "@/components/shared/settings/member-stats/modal
 import {
   useMemberStatistics,
   useMemberStatsDirectory,
+  useStatsAccess,
 } from "@/components/shared/settings/member-stats/hooks/useApiMemberStats";
-import type { StatsMainTab, StatsPeriod } from "@/components/shared/settings/member-stats/types";
+import type {
+  StatsMainTab,
+  StatsPeriod,
+} from "@/components/shared/settings/member-stats/types";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { toApiDate } from "@/utils/apiDate";
 import { addDays, buildWeekDays, getWeekStart } from "@/utils/weekDays";
@@ -47,15 +51,22 @@ function EmptyState() {
       <span className="flex size-11 items-center justify-center rounded-avatar bg-surface-secondary text-secondary">
         <LuSearchX size={20} />
       </span>
-      <p className="text-sm font-medium text-primary">{t("common.states.nothingFound")}</p>
-      <p className="text-xs text-secondary">{t("common.states.nothingFoundHint")}</p>
+      <p className="text-sm font-medium text-primary">
+        {t("common.states.nothingFound")}
+      </p>
+      <p className="text-xs text-secondary">
+        {t("common.states.nothingFoundHint")}
+      </p>
     </div>
   );
 }
 
 export default function FeatureSettingsMemberStats() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<StatsMainTab>("general");
+  const access = useStatsAccess();
+  const [selectedTab, setTab] = useState<StatsMainTab>("general");
+  // Tarifda faqat bugungi statistika bo'lsa — "Общее" yo'q, doim bugungi kun.
+  const tab: StatsMainTab = access.canUseGeneral ? selectedTab : "byDay";
   const [period, setPeriod] = useState<StatsPeriod>("7");
   const [search, setSearch] = useState("");
   const [sortOrder, setSortOrder] = useState<StatsSortOrder>("most");
@@ -75,7 +86,10 @@ export default function FeatureSettingsMemberStats() {
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [direction, setDirection] = useState(0);
   const [isDayPickerOpen, setDayPickerOpen] = useState(false);
-  const weekDays = useMemo(() => buildWeekDays(weekStart, selectedDay), [weekStart, selectedDay]);
+  const weekDays = useMemo(
+    () => buildWeekDays(weekStart, selectedDay),
+    [weekStart, selectedDay],
+  );
 
   function shiftWeek(offsetDays: number) {
     setDirection(offsetDays > 0 ? 1 : -1);
@@ -93,11 +107,16 @@ export default function FeatureSettingsMemberStats() {
   const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
   const range = periodRange(period);
   // "Общее" — davr (from/to), "По дням" — faqat bitta `date`.
-  const scope = tab === "general" ? { from: range.from, to: range.to } : { date: toApiDate(selectedDay) };
+  const scope =
+    tab === "general"
+      ? { from: range.from, to: range.to }
+      : { date: toApiDate(selectedDay) };
   const directoryQuery = useMemberStatsDirectory(organizationId, scope);
   const directory = directoryQuery.data ?? [];
   // Hammasi tanlangan bo'lsa ham filtr yuborilmaydi — natija bir xil, URL qisqa.
-  const isAllSelected = selectedMemberIds.length === 0 || selectedMemberIds.length === directory.length;
+  const isAllSelected =
+    selectedMemberIds.length === 0 ||
+    selectedMemberIds.length === directory.length;
 
   const statsQuery = useMemberStatistics(organizationId, {
     ...scope,
@@ -112,23 +131,29 @@ export default function FeatureSettingsMemberStats() {
     <div className="flex flex-col gap-4">
       <SettingsSectionHeader
         title={t("memberStats.title")}
-        subtitle={tab === "general" ? range.label : formatWeekdayDate(selectedDay)}
+        subtitle={
+          tab === "general" ? range.label : formatWeekdayDate(selectedDay)
+        }
       />
 
       <div className="flex flex-col items-start gap-3">
-        <CusSegment
-          layout="inline"
-          value={tab}
-          onValueChange={(v) => setTab(v as StatsMainTab)}
-          items={[
-            { id: "general", label: t("memberStats.tabs.general") },
-            { id: "byDay", label: t("memberStats.tabs.byDay") },
-          ]}
-        />
-        {tab === "general" && <PeriodTabs value={period} onChange={setPeriod} />}
+        {access.canUseGeneral && (
+          <CusSegment
+            layout="inline"
+            value={tab}
+            onValueChange={(v) => setTab(v as StatsMainTab)}
+            items={[
+              { id: "general", label: t("memberStats.tabs.general") },
+              { id: "byDay", label: t("memberStats.tabs.byDay") },
+            ]}
+          />
+        )}
+        {tab === "general" && (
+          <PeriodTabs value={period} onChange={setPeriod} />
+        )}
       </div>
 
-      {tab === "byDay" && (
+      {tab === "byDay" && access.canPickDay && (
         <div className="flex items-center gap-2">
           <div className="min-w-0 flex-1">
             <MemberStatsDayStrip
@@ -137,6 +162,7 @@ export default function FeatureSettingsMemberStats() {
               onSelectDay={setSelectedDay}
               onPrevWeek={() => shiftWeek(-7)}
               onNextWeek={() => shiftWeek(7)}
+              minDate={access.minDate}
             />
           </div>
           <button
@@ -161,11 +187,16 @@ export default function FeatureSettingsMemberStats() {
       </div>
 
       {statsQuery.isError ? (
-        <p className="text-sm text-error-strong">{t("memberStats.loadError")}</p>
+        <p className="text-sm text-error-strong">
+          {t("memberStats.loadError")}
+        </p>
       ) : statsQuery.isPending ? (
         <div className={GRID_CLASS}>
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-[132px] animate-pulse rounded-card border border-subtle bg-surface" />
+            <div
+              key={i}
+              className="h-[132px] animate-pulse rounded-card border border-subtle bg-surface"
+            />
           ))}
         </div>
       ) : rows.length === 0 ? (
@@ -192,6 +223,7 @@ export default function FeatureSettingsMemberStats() {
         onClose={() => setDayPickerOpen(false)}
         value={selectedDay}
         onPick={pickDay}
+        minDate={access.minDate}
       />
     </div>
   );

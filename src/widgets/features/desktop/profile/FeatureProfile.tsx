@@ -61,11 +61,16 @@ export default function FeatureProfile() {
           ? "tariffs-list"
           : null;
     if (!panel) return;
+    // "Улучшить тариф" (limit oynasidan): ?tariffs=1&renew=<orgId>&renewName=<nom> — shu tashkilot uchun.
+    const renewId = searchParams.get("renew");
+    setRenewOrg(renewId ? { id: renewId, name: searchParams.get("renewName") ?? "" } : null);
     setActivePanel(panel);
     setSidebarCollapsed(true);
     const next = new URLSearchParams(searchParams);
     next.delete("install");
     next.delete("tariffs");
+    next.delete("renew");
+    next.delete("renewName");
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams, setSidebarCollapsed]);
 

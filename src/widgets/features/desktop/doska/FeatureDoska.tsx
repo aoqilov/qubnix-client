@@ -3,7 +3,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LuBell, LuBuilding2, LuPlus } from "react-icons/lu";
 import { CusPageTitle } from "@/components/ui/page-title/CusPageTitle";
-import { useWorkspaceStore } from "@/store/workspace.store";
+import { useWorkspaceStore, type WorkspaceSummary } from "@/store/workspace.store";
+import { isWorkspaceBlocked, renewPath } from "@/queries/doska.queries";
 import type { OrganizationType } from "@/api/organizations/organizations.types";
 import { formatWeekdayDate } from "@/utils/formatWeekdayDate";
 import { orgsLabel } from "@/utils/countLabels";
@@ -28,6 +29,12 @@ export default function FeatureDoska() {
     if (!id) return;
     selectWorkspace(id, type);
     navigate("/tasks");
+  };
+
+  // Tarifi tugagan tashkilotga hech kim kira olmaydi; egasi esa shu yerdan tarifni yangilaydi.
+  const openOrganization = (workspace: WorkspaceSummary) => {
+    if (!isWorkspaceBlocked(workspace)) return openWorkspace(workspace.id, "organization");
+    if (workspace.role === "owner") navigate(renewPath(workspace));
   };
 
   return (
@@ -95,7 +102,7 @@ export default function FeatureDoska() {
               <WorkspaceTile
                 key={workspace.id}
                 workspace={workspace}
-                onClick={() => openWorkspace(workspace.id, "organization")}
+                onClick={() => openOrganization(workspace)}
               />
             ))}
           </div>

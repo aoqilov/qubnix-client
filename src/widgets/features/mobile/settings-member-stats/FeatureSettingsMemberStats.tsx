@@ -4,13 +4,23 @@ import { LuCalendarDays, LuSearchX } from "react-icons/lu";
 import { CusSegment } from "@/components/ui/segment/CusSegment";
 import { SettingsBackHeader } from "@/widgets/features/mobile/settings/components/SettingsBackHeader";
 import { PeriodTabs } from "@/components/shared/settings/member-stats/components/PeriodTabs";
-import { StatsFilterRow, type StatsSortOrder } from "@/components/shared/settings/member-stats/components/StatsFilterRow";
+import {
+  StatsFilterRow,
+  type StatsSortOrder,
+} from "@/components/shared/settings/member-stats/components/StatsFilterRow";
 import { MemberPickerDrawer } from "@/components/shared/member-picker-drawer/MemberPickerDrawer";
 import { MemberStatCard } from "@/components/shared/settings/member-stats/components/MemberStatCard";
 import { MemberStatsDayStrip } from "@/components/shared/settings/member-stats/components/MemberStatsDayStrip";
 import { DayPickerDialog } from "@/components/shared/settings/member-stats/modals/DayPickerDialog";
-import { useMemberStatistics, useMemberStatsDirectory } from "@/components/shared/settings/member-stats/hooks/useApiMemberStats";
-import type { StatsMainTab, StatsPeriod } from "@/components/shared/settings/member-stats/types";
+import {
+  useMemberStatistics,
+  useMemberStatsDirectory,
+  useStatsAccess,
+} from "@/components/shared/settings/member-stats/hooks/useApiMemberStats";
+import type {
+  StatsMainTab,
+  StatsPeriod,
+} from "@/components/shared/settings/member-stats/types";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { toApiDate } from "@/utils/apiDate";
 import { addDays, buildWeekDays, getWeekStart } from "@/utils/weekDays";
@@ -33,7 +43,9 @@ function periodRange(period: StatsPeriod) {
 }
 
 function CardSkeleton() {
-  return <div className="h-[132px] animate-pulse rounded-card border border-subtle bg-surface" />;
+  return (
+    <div className="h-[132px] animate-pulse rounded-card border border-subtle bg-surface" />
+  );
 }
 
 function EmptyState() {
@@ -43,15 +55,22 @@ function EmptyState() {
       <span className="flex size-11 items-center justify-center rounded-avatar bg-surface-secondary text-secondary">
         <LuSearchX size={20} />
       </span>
-      <p className="text-sm font-medium text-primary">{t("common.states.nothingFound")}</p>
-      <p className="text-xs text-secondary">{t("common.states.nothingFoundHint")}</p>
+      <p className="text-sm font-medium text-primary">
+        {t("common.states.nothingFound")}
+      </p>
+      <p className="text-xs text-secondary">
+        {t("common.states.nothingFoundHint")}
+      </p>
     </div>
   );
 }
 
 export default function FeatureSettingsMemberStats() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<StatsMainTab>("general");
+  const access = useStatsAccess();
+  const [selectedTab, setTab] = useState<StatsMainTab>("general");
+  // Tarifda faqat bugungi statistika bo'lsa — "Общее" yo'q, doim bugungi kun.
+  const tab: StatsMainTab = access.canUseGeneral ? selectedTab : "byDay";
   const [period, setPeriod] = useState<StatsPeriod>("7");
   const [search, setSearch] = useState("");
   const [sortOrder, setSortOrder] = useState<StatsSortOrder>("most");
@@ -71,7 +90,10 @@ export default function FeatureSettingsMemberStats() {
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [direction, setDirection] = useState(0);
   const [isDayPickerOpen, setDayPickerOpen] = useState(false);
-  const weekDays = useMemo(() => buildWeekDays(weekStart, selectedDay), [weekStart, selectedDay]);
+  const weekDays = useMemo(
+    () => buildWeekDays(weekStart, selectedDay),
+    [weekStart, selectedDay],
+  );
 
   function shiftWeek(offsetDays: number) {
     setDirection(offsetDays > 0 ? 1 : -1);
@@ -90,12 +112,15 @@ export default function FeatureSettingsMemberStats() {
   const range = periodRange(period);
   // "Общее" — davr (from/to), "По дням" — faqat bitta `date`.
   const scope =
-    tab === "general" ? { from: range.from, to: range.to } : { date: toApiDate(selectedDay) };
+    tab === "general"
+      ? { from: range.from, to: range.to }
+      : { date: toApiDate(selectedDay) };
   const directoryQuery = useMemberStatsDirectory(organizationId, scope);
   const directory = directoryQuery.data ?? [];
   // Hammasi tanlangan bo'lsa ham filtr yuborilmaydi — natija bir xil, URL qisqa.
   const isAllSelected =
-    selectedMemberIds.length === 0 || selectedMemberIds.length === directory.length;
+    selectedMemberIds.length === 0 ||
+    selectedMemberIds.length === directory.length;
 
   const statsQuery = useMemberStatistics(organizationId, {
     ...scope,
@@ -114,18 +139,20 @@ export default function FeatureSettingsMemberStats() {
         {tab === "general" ? range.label : formatWeekdayDate(selectedDay)}
       </p>
 
-      <CusSegment
-        value={tab}
-        onValueChange={(v) => setTab(v as StatsMainTab)}
-        items={[
-          { id: "general", label: t("memberStats.tabs.general") },
-          { id: "byDay", label: t("memberStats.tabs.byDay") },
-        ]}
-      />
+      {access.canUseGeneral && (
+        <CusSegment
+          value={tab}
+          onValueChange={(v) => setTab(v as StatsMainTab)}
+          items={[
+            { id: "general", label: t("memberStats.tabs.general") },
+            { id: "byDay", label: t("memberStats.tabs.byDay") },
+          ]}
+        />
+      )}
 
       {tab === "general" ? (
         <PeriodTabs value={period} onChange={setPeriod} />
-      ) : (
+      ) : access.canPickDay ? (
         <div className="flex flex-col gap-2">
           <div className="flex justify-end">
             <button
@@ -143,9 +170,10 @@ export default function FeatureSettingsMemberStats() {
             onSelectDay={setSelectedDay}
             onPrevWeek={() => shiftWeek(-7)}
             onNextWeek={() => shiftWeek(7)}
+            minDate={access.minDate}
           />
         </div>
-      )}
+      ) : null}
 
       <StatsFilterRow
         value={search}
@@ -156,7 +184,9 @@ export default function FeatureSettingsMemberStats() {
       />
 
       {statsQuery.isError ? (
-        <p className="px-1 text-sm text-error-strong">{t("memberStats.loadError")}</p>
+        <p className="px-1 text-sm text-error-strong">
+          {t("memberStats.loadError")}
+        </p>
       ) : statsQuery.isPending ? (
         <div className="flex flex-col gap-3">
           <CardSkeleton />
@@ -185,6 +215,7 @@ export default function FeatureSettingsMemberStats() {
         onClose={() => setDayPickerOpen(false)}
         value={selectedDay}
         onPick={pickDay}
+        minDate={access.minDate}
       />
     </div>
   );

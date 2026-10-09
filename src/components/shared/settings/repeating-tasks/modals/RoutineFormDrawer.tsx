@@ -1,4 +1,4 @@
-import { getApiErrorMessage } from "@/utils/apiErrorMessage";
+import { getApiErrorMessage, isPlanLimitError } from "@/utils/apiErrorMessage";
 import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import type React from "react";
@@ -120,6 +120,8 @@ interface RoutineFormDrawerProps {
   /** Berilsa — tahrirlash rejimi (routine + qaysi loyihaga tegishliligi). */
   initial?: RoutineFormInitial | null;
   onError: (message: string) => void;
+  /** Server tarif limiti sababli rad etsa — forma yopilib, "лимит достигнут" oynasi ochiladi. */
+  onLimitReached?: () => void;
 }
 
 export function RoutineFormDrawer({
@@ -130,6 +132,7 @@ export function RoutineFormDrawer({
   projects,
   initial,
   onError,
+  onLimitReached,
 }: RoutineFormDrawerProps) {
   const { t } = useTranslation();
   const isEditing = !!initial;
@@ -328,7 +331,12 @@ export function RoutineFormDrawer({
       }
       onClose();
     } catch (err) {
-      onError(getApiErrorMessage(err));
+      if (onLimitReached && isPlanLimitError(err)) {
+        onClose();
+        onLimitReached();
+      } else {
+        onError(getApiErrorMessage(err));
+      }
     } finally {
       setIsSubmitting(false);
     }

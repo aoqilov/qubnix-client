@@ -23,7 +23,19 @@ export function toWorkspaceSummary(org: RawOrganization): WorkspaceSummary {
     initials: org.name.trim().charAt(0).toUpperCase() || "?",
     tasksCount: org.tasks_count ?? 0,
     role: org.role,
+    moduleStatus: org.module.status,
   };
+}
+
+/** Tarif moduli faol emas (muddati tugagan yoki ulanmagan) — barcha rollar uchun kirish yopiq. */
+export function isWorkspaceBlocked(workspace: Pick<WorkspaceSummary, "moduleStatus">): boolean {
+  return !!workspace.moduleStatus && workspace.moduleStatus !== "active";
+}
+
+/** Egasi muddati tugagan tashkilotni bossa — tarifni yangilash oynasi shu tashkilot uchun ochiladi. */
+export function renewPath(workspace: Pick<WorkspaceSummary, "id" | "name">): string {
+  const params = new URLSearchParams({ tariffs: "1", renew: workspace.id, renewName: workspace.name });
+  return `/profile?${params}`;
 }
 
 export const DOSKA_KEYS = {

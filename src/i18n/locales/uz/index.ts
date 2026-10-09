@@ -14,6 +14,7 @@ import roles from "./roles";
 import projects from "./projects";
 import memberStats from "./memberStats";
 import routines from "./routines";
+import limits from "./limits";
 
 /** `typeof ru` — kalit tushib qolsa yoki ortiqcha bo'lsa typecheck xato beradi. */
 const uz: typeof ru = {
@@ -32,6 +33,7 @@ const uz: typeof ru = {
   projects,
   memberStats,
   routines,
+  limits,
 };
 
 export default uz;

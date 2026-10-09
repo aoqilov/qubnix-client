@@ -52,6 +52,8 @@ export interface TaskModalAddValues {
   dueDateLabel: string;
   /** ISO datetime — muddatsiz bo'lsa null. */
   dueAt: string | null;
+  /** Oraliq boshi (ISO, 00:00) — bitta sana yoki tezkor muddatda null. */
+  startAt: string | null;
   assignees: TaskCardMember[];
   priority: TaskPriority;
   subtasks: TaskModalAddSubtask[];
@@ -345,6 +347,13 @@ function TaskModalAdd({
     return new Date(v.year, v.month - 1, v.day, hh, mm, 0, 0).toISOString();
   }
 
+  /** Oraliq tanlangan bo'lsa — oraliq boshi, kun boshiga (00:00); bitta sana yoki tezkor rejimda null. */
+  function buildStartAt(): string | null {
+    if (dueMode !== "custom" || !customDate || customDate.length < 2) return null;
+    const v = customDate[0];
+    return new Date(v.year, v.month - 1, v.day, 0, 0, 0, 0).toISOString();
+  }
+
   async function handleSubmit() {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -355,6 +364,7 @@ function TaskModalAdd({
         descriptionAudio: voiceNote ?? undefined,
         dueDateLabel,
         dueAt: buildDueAt(),
+        startAt: buildStartAt(),
         assignees: selectedAssignees,
         priority,
         subtasks,

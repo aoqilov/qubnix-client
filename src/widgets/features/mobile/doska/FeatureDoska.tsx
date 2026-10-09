@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useWorkspaceStore } from "@/store/workspace.store";
+import { useWorkspaceStore, type WorkspaceSummary } from "@/store/workspace.store";
+import { isWorkspaceBlocked, renewPath } from "@/queries/doska.queries";
 import type { OrganizationType } from "@/api/organizations/organizations.types";
 import { DoskaSectionHeader } from "./components/DoskaSectionHeader";
 import { PersonalTasksCard } from "./components/PersonalTasksCard";
@@ -33,6 +34,12 @@ export default function FeatureDoska() {
     if (!id) return;
     selectWorkspace(id, type);
     navigate("/tasks");
+  };
+
+  // Tarifi tugagan tashkilotga hech kim kira olmaydi; egasi esa shu yerdan tarifni yangilaydi.
+  const openOrganization = (workspace: WorkspaceSummary) => {
+    if (!isWorkspaceBlocked(workspace)) return openWorkspace(workspace.id, "organization");
+    if (workspace.role === "owner") navigate(renewPath(workspace));
   };
 
   return (
@@ -89,7 +96,7 @@ export default function FeatureDoska() {
               <WorkspaceCard
                 key={workspace.id}
                 workspace={workspace}
-                onClick={() => openWorkspace(workspace.id, "organization")}
+                onClick={() => openOrganization(workspace)}
               />
             ))
           )}

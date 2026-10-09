@@ -6,6 +6,7 @@ import { avatarColorVar } from "@/utils/avatarColor";
 import { tasksWordLabel } from "@/utils/countLabels";
 import { organizationRoleLabel } from "@/utils/roleLabels";
 import type { WorkspaceSummary } from "@/store/workspace.store";
+import { isWorkspaceBlocked } from "@/queries/doska.queries";
 
 interface WorkspaceTileProps {
   workspace: WorkspaceSummary;
@@ -14,13 +15,17 @@ interface WorkspaceTileProps {
 
 /** Tashkilot — 2 ustunli gridda keng karta: avatar, nom + rol, o'ngda vazifalar soni. */
 export function WorkspaceTile({ workspace, onClick }: WorkspaceTileProps) {
-  useTranslation(); // til almashsa rol/son matnlari qayta hisoblanadi
+  const { t } = useTranslation();
+  const blocked = isWorkspaceBlocked(workspace);
+  const status = workspace.moduleStatus ?? "active";
   return (
     <CusCardbox
       onClick={onClick}
       role="button"
       style={{ borderColor: "var(--border-subtle)" }}
-      className="flex cursor-pointer items-center gap-4 rounded-card transition-colors hover:border-focus"
+      className={`flex items-center gap-4 rounded-card transition-colors ${
+        blocked ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-focus"
+      }`}
     >
       <span
         className="flex size-12 flex-none items-center justify-center rounded-avatar text-base font-semibold text-on-brand"
@@ -31,13 +36,16 @@ export function WorkspaceTile({ workspace, onClick }: WorkspaceTileProps) {
 
       <span className="min-w-0 flex-1">
         <span className="block truncate text-base font-semibold text-primary">{workspace.name}</span>
-        {workspace.role && (
-          <span className="mt-1 block">
+        <span className="mt-1 flex flex-wrap items-center gap-1.5">
+          {workspace.role && (
             <CusBadge variant="subtle" tone="neutral" size="xs">
               {organizationRoleLabel(workspace.role)}
             </CusBadge>
-          </span>
-        )}
+          )}
+          <CusBadge variant="subtle" tone={status === "active" ? "success" : status === "expired" ? "error" : "neutral"} size="xs">
+            {t(`profile.tariffs.state.${status}`)}
+          </CusBadge>
+        </span>
       </span>
 
       <span className="flex flex-none items-center gap-3">

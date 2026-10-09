@@ -3,7 +3,6 @@ import { useSessionStore, type SessionUser } from "@/store/session.store";
 import { usersApi } from "@/api/users/users.api";
 import type { UpdateMeRequest } from "@/api/users/users.types";
 import { organizationsApi } from "@/api/organizations/organizations.api";
-import { projectsApi } from "@/api/projects/projects.api";
 import { subscriptionsApi } from "@/api/subscriptions/subscriptions.api";
 import type {
   PlanDurationMonths,
@@ -169,7 +168,6 @@ export function tariffPrice(tariff: Tariff, period: BillingPeriod): number | nul
 
 export const TARIFFS_KEYS = {
   list: () => ["tariffs"] as const,
-  usage: (organizationId: string) => ["tariffs", "usage", organizationId] as const,
   subscription: (organizationId: string) => ["tariffs", "subscription", organizationId] as const,
   order: (orderId: string) => ["tariffs", "order", orderId] as const,
 };
@@ -334,31 +332,9 @@ export const myTariffsQuery = () =>
       data.organizations.filter((org) => org.role === "owner").map(toOrgTariff),
   });
 
-/** Tashkilotning haqiqiy obunasi: tarif nomi va limitlari (karta ochilganda so'raladi). */
+/** Tashkilotning haqiqiy obunasi: tarif nomi, limitlari va hozirgi foydalanish (`usage`). */
 export const orgSubscriptionQuery = (organizationId: string) =>
   queryOptions({
     queryKey: TARIFFS_KEYS.subscription(organizationId),
     queryFn: () => subscriptionsApi.getOrganizationSubscription(organizationId),
-  });
-
-/** Tashkilotda hozir nechta xodim va loyiha bor — limit bilan solishtirish uchun. */
-export interface OrgUsage {
-  members: number;
-  projects: number;
-}
-
-/**
- * Ikki yengil so'rov (`limit=1` — faqat jami son kerak). Takroriy vazifalar sanalmaydi: ular
- * loyiha ichida, har loyihaga alohida so'rov ketardi — backend `usage` bersa, shu yerga qo'shiladi.
- */
-export const orgUsageQuery = (organizationId: string) =>
-  queryOptions({
-    queryKey: TARIFFS_KEYS.usage(organizationId),
-    queryFn: async (): Promise<OrgUsage> => {
-      const [members, projects] = await Promise.all([
-        organizationsApi.listMembers(organizationId, { limit: 1 }),
-        projectsApi.list(organizationId, { limit: 1 }),
-      ]);
-      return { members: members.members_count, projects: projects.pagination.total };
-    },
   });

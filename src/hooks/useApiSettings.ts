@@ -1,3 +1,4 @@
+import { orgSubscriptionQuery } from "@/queries/profile.queries";
 import { useQuery } from "@tanstack/react-query";
 import { organizationsApi } from "@/api/organizations/organizations.api";
 import type { OrganizationRole, RawOrganization } from "@/api/organizations/organizations.types";
@@ -48,6 +49,17 @@ export function useOrganizationMembersCount(enabled: boolean) {
     queryKey: SETTINGS_KEYS.members(organizationId ?? ""),
     queryFn: () => organizationsApi.listMembers(organizationId!),
     select: (data) => data.members.length,
+    enabled: enabled && !!organizationId,
+  });
+}
+
+/** Takroriy vazifalar soni — obunadagi `usage.routines.used` (alohida resurs so'rovi kerak emas). */
+export function useOrganizationRoutinesCount(enabled: boolean) {
+  const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
+
+  return useQuery({
+    ...orgSubscriptionQuery(organizationId ?? ""),
+    select: (subscription) => subscription.usage.routines.used,
     enabled: enabled && !!organizationId,
   });
 }

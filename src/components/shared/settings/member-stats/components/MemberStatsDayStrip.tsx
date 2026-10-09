@@ -2,7 +2,7 @@ import type React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import type { WeekDayCell } from "@/utils/weekDays";
-import { toDateKey } from "@/utils/weekDays";
+import { addDays, toDateKey } from "@/utils/weekDays";
 
 const navButtonStyle: React.CSSProperties = {
   width: 34,
@@ -18,6 +18,8 @@ interface MemberStatsDayStripProps {
   onSelectDay: (date: Date) => void;
   onPrevWeek: () => void;
   onNextWeek: () => void;
+  /** Shu kundan oldingi kunlar va undan oldingi haftaga o'tish o'chiriladi (tarif limiti). */
+  minDate?: Date | null;
 }
 
 /** "По дням" tab'i uchun kun tanlash lentasi — kalendar sahifasidagidan mustaqil. */
@@ -27,8 +29,12 @@ export function MemberStatsDayStrip({
   onSelectDay,
   onPrevWeek,
   onNextWeek,
+  minDate,
 }: MemberStatsDayStripProps) {
   const weekKey = toDateKey(days[0].date);
+  const minKey = minDate ? toDateKey(minDate) : null;
+  const isBeforeMin = (date: Date) => minKey !== null && toDateKey(date) < minKey;
+  const canGoPrev = !isBeforeMin(addDays(days[0].date, -1));
 
   return (
     <div className="flex flex-col gap-2">
@@ -49,7 +55,8 @@ export function MemberStatsDayStrip({
         <button
           type="button"
           onClick={onPrevWeek}
-          className="flex flex-none items-center justify-center text-secondary"
+          disabled={!canGoPrev}
+          className="flex flex-none items-center justify-center text-secondary disabled:opacity-40"
           style={navButtonStyle}
         >
           <LuChevronLeft size={17} />
@@ -78,9 +85,12 @@ export function MemberStatsDayStrip({
                     key={toDateKey(day.date)}
                     type="button"
                     onClick={() => onSelectDay(day.date)}
+                    disabled={isBeforeMin(day.date)}
                     className="relative flex h-11 flex-1 items-center justify-center transition-opacity"
                     // O'tgan kunlar yengil xiralashadi — tanlanganda to'liq ko'rinadi.
-                    style={{ opacity: day.isPast && !day.isSelected ? 0.5 : 1 }}
+                    style={{
+                      opacity: isBeforeMin(day.date) ? 0.25 : day.isPast && !day.isSelected ? 0.5 : 1,
+                    }}
                   >
                     {day.isSelected ? (
                       <motion.span

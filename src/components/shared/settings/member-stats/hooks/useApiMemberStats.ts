@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { orgSubscriptionQuery } from "@/queries/profile.queries";
+import { useWorkspaceStore } from "@/store/workspace.store";
 import { organizationsApi } from "@/api/organizations/organizations.api";
 import type {
   MemberStatisticsParams,
@@ -60,4 +62,38 @@ export function useMemberStatsDirectory(
       data.members.map((m) => ({ id: String(m.user_id), name: fullName(m) })),
     enabled: !!organizationId,
   });
+}
+
+export interface StatsAccess {
+  /** "Общее" (7/15/30 kun) tabi — faqat bugundan ko'proq ko'rsatadigan tarifda. */
+  canUseGeneral: boolean;
+  /** "По дням" da boshqa kunni tanlash (lenta va kalendar). */
+  canPickDay: boolean;
+  /** Eng eski ko'rish mumkin bo'lgan kun; null — cheklanmagan. */
+  minDate: Date | null;
+}
+
+const FULL_ACCESS: StatsAccess = { canUseGeneral: true, canPickDay: true, minDate: null };
+
+/**
+ * Tarifdagi `limits.stats` (`today` | `3months` | `full`) bo'yicha statistika qanchalik orqaga
+ * ochiq. Shaxsiy workspace va ma'lumot yuklanmaguncha cheklov qo'yilmaydi — baribir server tekshiradi.
+ */
+export function useStatsAccess(): StatsAccess {
+  const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
+  const isPersonal = useWorkspaceStore((s) => s.selectedWorkspaceType) === "personal";
+  const depth = useQuery({
+    ...orgSubscriptionQuery(organizationId ?? ""),
+    select: (subscription) => subscription.limits.stats,
+    enabled: !!organizationId && !isPersonal,
+  }).data;
+
+  if (depth === "today") return { canUseGeneral: false, canPickDay: false, minDate: null };
+  if (depth === "3months") {
+    const minDate = new Date();
+    minDate.setMonth(minDate.getMonth() - 3);
+    minDate.setHours(0, 0, 0, 0);
+    return { canUseGeneral: true, canPickDay: true, minDate };
+  }
+  return FULL_ACCESS;
 }

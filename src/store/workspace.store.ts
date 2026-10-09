@@ -1,5 +1,9 @@
 import { create } from "zustand";
-import type { OrganizationRole, OrganizationType } from "@/api/organizations/organizations.types";
+import type {
+  OrganizationModuleStatus,
+  OrganizationRole,
+  OrganizationType,
+} from "@/api/organizations/organizations.types";
 
 /**
  * Tanlangan workspace (tashkilot yoki personal) va desktop'dagi aktiv loyiha.
@@ -15,6 +19,8 @@ export interface WorkspaceSummary {
   tasksCount: number;
   /** Joriy foydalanuvchining shu tashkilotdagi roli. */
   role?: OrganizationRole;
+  /** Tarif moduli holati — `active` bo'lmasa (muddati tugagan) hech kim kira olmaydi. */
+  moduleStatus?: OrganizationModuleStatus;
   /**
    * Backend /organizations javobida hozircha yo'q — Sidebar
    * shu maydon borida ko'rsatadi, bo'lmasa yashiradi.

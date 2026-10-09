@@ -1,4 +1,5 @@
 import { getApiErrorMessage } from "@/utils/apiErrorMessage";
+import { useLimitGuard } from "@/components/shared/limit-reached/useLimitGuard";
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { LuPlus, LuTriangleAlert, LuX } from "react-icons/lu";
@@ -38,6 +39,7 @@ export default function FeatureSettingsRepeatingTasks() {
   const [projectId, setProjectId] = useState(ALL_PROJECTS_ID);
   const [frequency, setFrequency] = useState<RoutineFilter>("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const { openLimitDrawer, limitDrawer } = useLimitGuard("routines");
   const [editing, setEditing] = useState<RoutineFormInitial | null>(null);
   const [deletingRoutine, setDeletingRoutine] = useState<RoutineFormInitial | null>(null);
   const [scheduleRoutine, setScheduleRoutine] = useState<RawTaskRoutine | null>(null);
@@ -243,7 +245,9 @@ export default function FeatureSettingsRepeatingTasks() {
         }
       />
 
+      {limitDrawer}
       <RoutineFormDrawer
+        onLimitReached={openLimitDrawer}
         open={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         organizationId={organizationId}

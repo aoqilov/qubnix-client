@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useLimitGuard } from "@/components/shared/limit-reached/useLimitGuard";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LuPlus, LuSearch, LuSearchX } from "react-icons/lu";
@@ -46,6 +47,7 @@ export default function FeatureSettingsProjects() {
 
   const [search, setSearch] = useState("");
   const [isCreateOpen, setCreateOpen] = useState(false);
+  const { guard: guardLimit, limitDrawer } = useLimitGuard("projects");
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
 
@@ -72,7 +74,7 @@ export default function FeatureSettingsProjects() {
           !isViewer && (
             <CusButton
               leftIcon={<LuPlus size={16} />}
-              onClick={() => setCreateOpen(true)}
+              onClick={() => guardLimit(() => setCreateOpen(true))}
               style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
             >
               {t("projects.newProject")}
@@ -116,6 +118,7 @@ export default function FeatureSettingsProjects() {
         </div>
       )}
 
+      {limitDrawer}
       <CreateProjectDrawer
         variant="dialog"
         open={isCreateOpen}
