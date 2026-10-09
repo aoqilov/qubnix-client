@@ -94,9 +94,9 @@
   --border-subtle: var(--c-neutral-200);
   --border-focus: var(--c-brand-500);
 
-  --brand-default: var(--c-brand-500);
-  --brand-hover: var(--c-brand-600);
-  --brand-pressed: var(--c-brand-700);
+  --brand-default: var(--c-brand-400);
+  --brand-hover: var(--c-brand-500);
+  --brand-pressed: var(--c-brand-600);
   --brand-subtle-bg: var(--c-brand-50);
 
   --status-success-text: var(--c-success-700);

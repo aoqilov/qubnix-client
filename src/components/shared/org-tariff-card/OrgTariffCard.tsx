@@ -124,7 +124,7 @@ function OrgTariffDetails({ tariff, onRenew }: { tariff: OrgTariff; onRenew?: (t
       </DetailSection>
 
       {subscription && (
-        <DetailSection title={t("profile.tariffs.details.limits")}>
+        <DetailSection title={t("profile.tariffs.details.limits")} highlighted>
           <LimitRow
             label={t("profile.tariffs.details.members")}
             used={usage.data?.members}
@@ -168,9 +168,20 @@ function OrgTariffDetails({ tariff, onRenew }: { tariff: OrgTariff; onRenew?: (t
   );
 }
 
-function DetailSection({ title, children }: { title: string; children: ReactNode }) {
+function DetailSection({
+  title,
+  children,
+  highlighted,
+}: {
+  title: string;
+  children: ReactNode;
+  /** Fonli blok — bo'lim ajralib turishi uchun (limitlar). */
+  highlighted?: boolean;
+}) {
   return (
-    <section className="flex flex-col gap-2">
+    <section
+      className={`flex flex-col gap-2 ${highlighted ? "rounded-card bg-surface-secondary p-3" : ""}`}
+    >
       <h4 className="text-xs font-semibold uppercase tracking-wide text-secondary">{title}</h4>
       {children}
     </section>
@@ -226,7 +237,7 @@ function LimitRow({ label, used, max, isLoading }: LimitRowProps) {
         valueClassName={pct >= 100 ? "text-error-strong" : pct >= LIMIT_WARNING_PCT ? "text-warning-strong" : undefined}
       />
       {(isLoading || used !== undefined) && (
-        <div className={`h-1.5 overflow-hidden rounded-chip bg-surface-secondary ${isLoading ? "animate-pulse" : ""}`}>
+        <div className={`h-1.5 overflow-hidden rounded-chip bg-surface ${isLoading ? "animate-pulse" : ""}`}>
           <div className={`h-full rounded-chip transition-[width] ${barColor}`} style={{ width: `${pct}%` }} />
         </div>
       )}
