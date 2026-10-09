@@ -141,6 +141,7 @@ const profile: typeof ru = {
     },
     features: {
       members: "{{count}} tagacha xodim",
+      membersUnlimited: "Cheksiz xodimlar",
       projects_one: "{{count}} ta loyiha",
       projects_few: "{{count}} ta loyiha",
       projects_many: "{{count}} ta loyiha",
@@ -179,6 +180,9 @@ const profile: typeof ru = {
     payHint: "To'lov ilovasi yoki sahifasi ochiladi. To'lovdan so'ng qubnix'ga qayting — tarif avtomatik ulanadi.",
     payOpened: "{{provider}} to'lov sahifasi ochildi. To'lov tasdig'ini kutyapmiz.",
     freeDone: "«{{name}}» tashkiloti {{tariff}} tarifida yaratildi.",
+    renewDone: "«{{name}}» uchun {{tariff}} tarifi to'landi va uzaytirildi.",
+    payFailed: "To'lov amalga oshmadi. Qayta urinib ko'ring.",
+    payCancelled: "To'lov bekor qilindi. Qayta urinib ko'rishingiz mumkin.",
   },
 };
 

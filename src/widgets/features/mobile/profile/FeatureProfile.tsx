@@ -36,6 +36,9 @@ export default function FeatureProfile() {
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams]);
 
+  // "Продлить" bosilgan tashkilot; tariflar menyudan ochilsa — yo'q (yangi tashkilot).
+  const [renewOrg, setRenewOrg] = useState<{ id: string; name: string } | null>(null);
+
   function close() {
     setActiveDrawer(null);
   }
@@ -74,7 +77,10 @@ export default function FeatureProfile() {
 
       <TariffsSection
         onSelectCurrent={() => setActiveDrawer("current-tariff")}
-        onSelectList={() => setActiveDrawer("tariffs-list")}
+        onSelectList={() => {
+          setRenewOrg(null);
+          setActiveDrawer("tariffs-list");
+        }}
       />
 
       <p className="text-center text-xs text-disabled">
@@ -86,9 +92,16 @@ export default function FeatureProfile() {
       <CurrentTariffModal
         open={activeDrawer === "current-tariff"}
         onClose={close}
-        onRenew={() => setActiveDrawer("tariffs-list")}
+        onRenew={(org) => {
+          setRenewOrg({ id: org.id, name: org.name });
+          setActiveDrawer("tariffs-list");
+        }}
       />
-      <TariffsListModal open={activeDrawer === "tariffs-list"} onClose={close} />
+      <TariffsListModal
+        open={activeDrawer === "tariffs-list"}
+        onClose={close}
+        organization={renewOrg ?? undefined}
+      />
       <InstallAppModal open={activeDrawer === "install-app"} onClose={close} />
     </div>
   );

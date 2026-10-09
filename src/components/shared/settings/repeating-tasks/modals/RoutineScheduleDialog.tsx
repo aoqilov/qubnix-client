@@ -181,12 +181,8 @@ export function RoutineScheduleDialog({ routine, onClose, onEdit }: RoutineSched
               label={t("routines.schedule.startTime")}
               value={`${routine.time_of_day} (${routine.timezone})`}
             />
-            {routine.end_time && <InfoRow label={t("routines.schedule.endTime")} value={routine.end_time} />}
+            <InfoRow label={t("routines.schedule.endTime")} value={routine.end_time} />
             <InfoRow label={t("routines.schedule.startDate")} value={formatApiDate(routine.start_date)} />
-            <InfoRow
-              label={t("routines.schedule.endDate")}
-              value={routine.end_date ? formatApiDate(routine.end_date) : t("routines.schedule.unlimited")}
-            />
             <InfoRow label={t("routines.schedule.nextRun")} value={formatDateTime(routine.next_run_at)} />
             <InfoRow
               label={t("routines.schedule.lastRun")}

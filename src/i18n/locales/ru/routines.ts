@@ -74,8 +74,6 @@ const routines = {
     startTime: "Время начала",
     endTime: "Время окончания",
     startDate: "Начало",
-    endDate: "Окончание",
-    unlimited: "Без ограничений",
     nextRun: "Следующий запуск",
     lastRun: "Последний запуск",
     neverRun: "Ещё не запускалась",

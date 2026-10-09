@@ -23,10 +23,9 @@ export interface RawTaskRoutine {
   month_days: number[];
   time_of_day: string;
   /** "HH:mm" — tugash soati. */
-  end_time: string | null;
+  end_time: string;
   timezone: string;
   start_date: string;
-  end_date: string | null;
   next_run_at: string;
   last_run_at: string | null;
   active: boolean;
@@ -65,7 +64,6 @@ export interface CreateTaskRoutineRequest {
   timezone?: string;
   /** YYYY-MM-DD. */
   start_date: string;
-  end_date?: string | null;
   active?: boolean;
   /** Oldindan yuklangan attachment fayllar, 5 tagacha. */
   file_ids?: number[];

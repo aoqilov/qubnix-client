@@ -29,7 +29,11 @@ export default function FeatureProfile() {
   const [activePanel, setActivePanel] = useState<PanelId>(null);
   const setSidebarCollapsed = useUiStore((s) => s.setSidebarCollapsed);
 
+  // "Продлить" bosilgan tashkilot; tariflar menyudan ochilsa — yo'q (yangi tashkilot).
+  const [renewOrg, setRenewOrg] = useState<{ id: string; name: string } | null>(null);
+
   function select(id: PanelId) {
+    setRenewOrg(null);
     setActivePanel(id);
     setSidebarCollapsed(true);
   }
@@ -137,9 +141,14 @@ export default function FeatureProfile() {
             {activePanel === "edit-profile" && <ProfileEditCard onSaved={close} />}
             {activePanel === "settings" && <ProfileSettingsCard />}
             {activePanel === "current-tariff" && (
-              <CurrentTariffCard onRenew={() => select("tariffs-list")} />
+              <CurrentTariffCard
+                onRenew={(org) => {
+                  select("tariffs-list");
+                  setRenewOrg({ id: org.id, name: org.name });
+                }}
+              />
             )}
-            {activePanel === "tariffs-list" && <TariffsListCard onDone={() => select("current-tariff")} />}
+            {activePanel === "tariffs-list" && <TariffsListCard organization={renewOrg ?? undefined} onDone={() => select("current-tariff")} />}
             {activePanel === "install-app" && <InstallAppCard />}
           </div>
         )}

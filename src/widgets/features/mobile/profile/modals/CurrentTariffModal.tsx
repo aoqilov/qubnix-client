@@ -5,13 +5,13 @@ import {
   OrgTariffCardSkeleton,
   OrgTariffEmpty,
 } from "@/components/shared/org-tariff-card/OrgTariffCard";
-import { useMyTariffs } from "../hooks/useApiTariffs";
+import { useMyTariffs, type OrgTariff } from "../hooks/useApiTariffs";
 
 interface CurrentTariffModalProps {
   open: boolean;
   onClose: () => void;
-  /** "Продлить" — to'lov endpointi yo'q, hozircha "Тарифы и цены" drawer'ini ochadi. */
-  onRenew: () => void;
+  /** "Продлить" — "Тарифы и цены" drawer'ini shu tashkilot uchun ochadi. */
+  onRenew: (tariff: OrgTariff) => void;
 }
 
 /** "Мои тарифы" — foydalanuvchi egasi bo'lgan tashkilotlar va ularning tarif holati. */

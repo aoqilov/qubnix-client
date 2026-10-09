@@ -9,8 +9,8 @@ import { avatarColorVar } from "@/utils/avatarColor";
 import { daysLabel } from "@/utils/countLabels";
 import { useIntlLocale } from "@/i18n/useIntlLocale";
 import {
+  orgSubscriptionQuery,
   orgUsageQuery,
-  tariffsQuery,
   type OrgTariff,
   type OrgTariffState,
   type TariffStatsDepth,
@@ -40,7 +40,7 @@ const LIMIT_WARNING_PCT = 80;
 interface OrgTariffAccordionProps {
   tariffs: OrgTariff[];
   /** Berilsa — muddati tugagan/tugayotgan tarifda "Продлить" tugmasi chiqadi. */
-  onRenew?: () => void;
+  onRenew?: (tariff: OrgTariff) => void;
 }
 
 /**
@@ -79,12 +79,12 @@ export function OrgTariffAccordion({ tariffs, onRenew }: OrgTariffAccordionProps
   );
 }
 
-function OrgTariffDetails({ tariff, onRenew }: { tariff: OrgTariff; onRenew?: () => void }) {
+function OrgTariffDetails({ tariff, onRenew }: { tariff: OrgTariff; onRenew?: (tariff: OrgTariff) => void }) {
   const { t } = useTranslation();
   const intlLocale = useIntlLocale();
-  const { data: plans } = useQuery(tariffsQuery());
+  // Haqiqiy obuna: tarif nomi va limitlar (holat/muddat sarlavhadagi bilan bir manbadan — tashkilot moduli).
+  const { data: subscription } = useQuery(orgSubscriptionQuery(tariff.id));
   const usage = useQuery(orgUsageQuery(tariff.id));
-  const plan = plans?.find((item) => item.id === tariff.planId);
   const formatDate = (iso: string) =>
     new Intl.DateTimeFormat(intlLocale, { day: "2-digit", month: "2-digit", year: "numeric" }).format(
       new Date(iso),
@@ -119,33 +119,33 @@ function OrgTariffDetails({ tariff, onRenew }: { tariff: OrgTariff; onRenew?: ()
   return (
     <div className="flex flex-col gap-4 border-t border-subtle pt-3">
       <DetailSection title={t("profile.tariffs.details.term")}>
-        <DetailRow label={t("profile.tariffs.details.plan")} value={plan?.name ?? "—"} />
+        <DetailRow label={t("profile.tariffs.details.plan")} value={subscription?.plan_name ?? "—"} />
         {termRows}
       </DetailSection>
 
-      {plan && (
+      {subscription && (
         <DetailSection title={t("profile.tariffs.details.limits")}>
           <LimitRow
             label={t("profile.tariffs.details.members")}
             used={usage.data?.members}
-            max={plan.limits.members}
+            max={subscription.limits.members}
             isLoading={usage.isPending}
           />
           <LimitRow
             label={t("profile.tariffs.details.projects")}
             used={usage.data?.projects}
-            max={plan.limits.projects}
+            max={subscription.limits.projects}
             isLoading={usage.isPending}
           />
           <DetailRow
             label={t("profile.tariffs.details.routines")}
             value={
-              plan.limits.routines === null
+              subscription.limits.routines === null
                 ? t("profile.tariffs.details.noLimit")
-                : t("profile.tariffs.details.upTo", { count: plan.limits.routines })
+                : t("profile.tariffs.details.upTo", { count: subscription.limits.routines })
             }
           />
-          <DetailRow label={t("profile.tariffs.details.stats")} value={t(STATS_DEPTH_KEY[plan.limits.stats])} />
+          <DetailRow label={t("profile.tariffs.details.stats")} value={t(STATS_DEPTH_KEY[subscription.limits.stats])} />
         </DetailSection>
       )}
 
@@ -157,7 +157,7 @@ function OrgTariffDetails({ tariff, onRenew }: { tariff: OrgTariff; onRenew?: ()
             rounded="9999px"
             className="self-start"
             leftIcon={<LuRefreshCw size={14} />}
-            onClick={onRenew}
+            onClick={() => onRenew(tariff)}
             style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
           >
             {t("profile.tariffs.renew")}

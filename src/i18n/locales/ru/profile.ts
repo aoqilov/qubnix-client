@@ -140,6 +140,7 @@ const profile = {
     },
     features: {
       members: "До {{count}} сотрудников",
+      membersUnlimited: "Безлимитные сотрудники",
       projects_one: "{{count}} проект",
       projects_few: "{{count}} проекта",
       projects_many: "{{count}} проектов",
@@ -178,6 +179,9 @@ const profile = {
     payHint: "Откроется приложение или страница оплаты. После оплаты вернитесь в qubnix — тариф подключится автоматически.",
     payOpened: "Страница оплаты {{provider}} открыта. Ждём подтверждения оплаты.",
     freeDone: "Организация «{{name}}» создана на тарифе {{tariff}}.",
+    renewDone: "Тариф {{tariff}} для «{{name}}» оплачен и продлён.",
+    payFailed: "Оплата не прошла. Попробуйте ещё раз.",
+    payCancelled: "Оплата отменена. Вы можете попробовать снова.",
   },
 };
 

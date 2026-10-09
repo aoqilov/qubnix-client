@@ -14,11 +14,12 @@ import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusSegment } from "@/components/ui/segment/CusSegment";
 import { useIntlLocale } from "@/i18n/useIntlLocale";
-import type {
-  BillingPeriod,
-  Tariff,
-  TariffFeatureIcon,
-  TariffId,
+import {
+  tariffPrice,
+  type BillingPeriod,
+  type Tariff,
+  type TariffFeatureIcon,
+  type TariffId,
 } from "@/queries/profile.queries";
 
 // Pro kartasi — to'liq brend gradient; Chakra/Tailwind'da tayyor sinf yo'q, token'lar inline (hex emas).
@@ -81,10 +82,12 @@ export function PricingPlans({
             ]}
           />
         </div>
-        <span className="flex items-center gap-1.5 rounded-chip bg-success-soft px-2.5 py-1 text-xs font-semibold text-success-strong">
-          <LuGift size={12} />
-          {t("profile.pricing.yearlyBonus")}
-        </span>
+        {tariffs.some((tariff) => tariff.yearlyDiscountPercent > 0) && (
+          <span className="flex items-center gap-1.5 rounded-chip bg-success-soft px-2.5 py-1 text-xs font-semibold text-success-strong">
+            <LuGift size={12} />
+            {t("profile.pricing.yearlyBonus")}
+          </span>
+        )}
       </div>
 
       <div
@@ -125,8 +128,9 @@ function PricingCard({
   const intlLocale = useIntlLocale();
   const format = (n: number) => new Intl.NumberFormat(intlLocale).format(n);
   const highlighted = !!tariff.recommended;
-  const isFree = tariff.priceMonthly === 0;
-  const price = period === "yearly" ? tariff.priceYearly : tariff.priceMonthly;
+  const price = tariffPrice(tariff, period);
+  // Bepul tarif yoki shu davrga narx yo'q — narx o'rniga "Бесплатно".
+  const isFree = tariff.isFree || price === null;
 
   const muted = highlighted ? "text-on-brand opacity-80" : "text-secondary";
 
@@ -151,7 +155,7 @@ function PricingCard({
           >
             {tariff.name}
           </h3>
-          <p className={`mt-0.5 text-sm ${muted}`}>{t(tariff.taglineKey)}</p>
+          {tariff.taglineKey && <p className={`mt-0.5 text-sm ${muted}`}>{t(tariff.taglineKey)}</p>}
         </div>
         {highlighted && (
           <span className="flex flex-none items-center gap-1 rounded-chip bg-surface px-2.5 py-1 text-xs font-semibold text-brand">
@@ -180,7 +184,7 @@ function PricingCard({
               <span
                 className={`text-3xl font-extrabold ${highlighted ? "text-on-brand" : "text-primary"}`}
               >
-                {format(price)}
+                {format(price ?? 0)}
               </span>
               <span className={`text-sm ${muted}`}>
                 {period === "yearly"
@@ -188,7 +192,7 @@ function PricingCard({
                   : t("profile.pricing.perMonth")}
               </span>
             </div>
-            {period === "yearly" && (
+            {period === "yearly" && price !== null && (
               <p className={`mt-1 text-xs ${muted}`}>
                 {t("profile.pricing.yearlyPerMonth", {
                   price: format(Math.round(price / 12)),

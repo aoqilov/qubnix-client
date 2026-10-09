@@ -9,16 +9,18 @@ import { useTariffCheckoutSelection } from "./useTariffCheckoutSelection";
 interface TariffsListModalProps {
   open: boolean;
   onClose: () => void;
+  /** Berilsa — shu tashkilot obunasi yangilanadi (yangi tashkilot ochilmaydi). */
+  organization?: { id: string; name: string };
 }
 
 /**
  * "Тарифы и цены" — mobil'da to'liq ekran drawer, kartalar ustma-ust. Tanlov → checkout drawer.
  * Ikki joydan ochiladi: /profile ("Тарифы и цены") va /doska ("Создать организацию").
  */
-export function TariffsListModal({ open, onClose }: TariffsListModalProps) {
+export function TariffsListModal({ open, onClose, organization }: TariffsListModalProps) {
   const { t } = useTranslation();
   const { data: tariffs, isPending, isError } = useQuery(tariffsQuery());
-  const checkout = useTariffCheckoutSelection(tariffs);
+  const checkout = useTariffCheckoutSelection(tariffs, organization);
 
   function finish() {
     checkout.close();
@@ -49,6 +51,7 @@ export function TariffsListModal({ open, onClose }: TariffsListModalProps) {
           open={checkout.isOpen}
           tariff={checkout.selection.tariff}
           period={checkout.selection.period}
+          organization={checkout.selection.organization}
           onClose={checkout.close}
           onDone={finish}
         />

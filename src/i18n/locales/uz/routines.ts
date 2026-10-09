@@ -75,8 +75,6 @@ const routines: typeof ru = {
     startTime: "Boshlanish soati",
     endTime: "Tugash soati",
     startDate: "Boshlanish",
-    endDate: "Tugash",
-    unlimited: "Cheklanmagan",
     nextRun: "Keyingi ishga tushish",
     lastRun: "Oxirgi ishga tushish",
     neverRun: "Hali ishlamagan",

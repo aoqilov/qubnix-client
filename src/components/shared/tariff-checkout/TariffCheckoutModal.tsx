@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { useState, type FormEvent, type ReactNode } from "react";
-import { LuCheck, LuCircleCheck, LuExternalLink } from "react-icons/lu";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { LuCheck, LuCircleCheck } from "react-icons/lu";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
@@ -8,28 +9,32 @@ import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { useIntlLocale } from "@/i18n/useIntlLocale";
 import { getApiErrorMessage } from "@/utils/apiErrorMessage";
+import paymeLogo from "@/assets/logo/payme.png";
 import { openExternalLink } from "@/utils/telegram";
 import {
+  invalidateAfterPayment,
+  tariffOrderQuery,
+  tariffPrice,
   useCreateTariffOrderMutation,
   type BillingPeriod,
-  type PaymentProvider,
   type Tariff,
   type TariffOrder,
 } from "@/queries/profile.queries";
 
-/** confirm → organization → payment (pullik) yoki done (bepul). */
+/** confirm → organization (yangilashda yo'q) → payment → done (to'langan yoki bepul). */
 type CheckoutStep = "confirm" | "organization" | "payment" | "done";
 
-/** Brend nomlari — tarjima qilinmaydi. */
-const PROVIDERS: { id: PaymentProvider; name: string }[] = [
-  { id: "payme", name: "Payme" }, // i18n-ignore
-  { id: "click", name: "Click" }, // i18n-ignore
-];
+/** Brend nomi — tarjima qilinmaydi. */
+const PAYME_NAME = "Payme"; // i18n-ignore
+/** Payme firma rangi — uchinchi tomon brendi, dizayn tokenlari ichida yo'q. */
+const PAYME_BRAND_BG = "rgb(42 206 208)";
 
 interface TariffCheckoutModalProps {
   open: boolean;
   tariff: Tariff;
   period: BillingPeriod;
+  /** Berilsa — shu tashkilot obunasi yangilanadi: nom bosqichi o'tkazib yuboriladi. */
+  organization?: { id: string; name: string };
   onClose: () => void;
   /** Bepul tarif ulangandan keyin "Готово" — tariflar ro'yxatini ham yopadi. */
   onDone: () => void;
@@ -46,6 +51,7 @@ export function TariffCheckoutModal({
   open,
   tariff,
   period,
+  organization,
   onClose,
   onDone,
   variant = "drawer",
@@ -54,16 +60,40 @@ export function TariffCheckoutModal({
   const intlLocale = useIntlLocale();
   const createOrder = useCreateTariffOrderMutation();
   const [step, setStep] = useState<CheckoutStep>("confirm");
-  const [orgName, setOrgName] = useState("");
+  const queryClient = useQueryClient();
+  const [orgName, setOrgName] = useState(organization?.name ?? "");
   const [orgError, setOrgError] = useState<string | null>(null);
   const [order, setOrder] = useState<TariffOrder | null>(null);
-  const [openedProvider, setOpenedProvider] = useState<PaymentProvider | null>(null);
+  const [paymentOpened, setPaymentOpened] = useState(false);
 
-  const amount = period === "yearly" ? tariff.priceYearly : tariff.priceMonthly;
-  const isFree = amount === 0;
+  // Payme sahifasi ochilgach — tugallangunga qadar buyurtma holati so'raladi.
+  const paymentStatus = useQuery(tariffOrderQuery(order?.id ?? "", paymentOpened && !!order)).data?.status;
+  useEffect(() => {
+    if (paymentStatus === "paid") {
+      invalidateAfterPayment(queryClient);
+      setStep("done");
+    }
+  }, [paymentStatus, queryClient]);
+
+  const amount = tariffPrice(tariff, period) ?? 0;
+  const isFree = tariff.isFree;
   const price = new Intl.NumberFormat(intlLocale).format(amount);
   const periodLabel =
     period === "yearly" ? t("profile.checkout.periodYearly") : t("profile.checkout.periodMonthly");
+
+  function createTariffOrder(name: string) {
+    createOrder.mutate(
+      { tariff, period, organizationName: name, organizationId: organization?.id },
+      {
+        onSuccess: (created) => {
+          setOrder(created);
+          setOrgName(name);
+          setStep(created.paymentUrl ? "payment" : "done");
+        },
+        onError: (err) => setOrgError(getApiErrorMessage(err)),
+      },
+    );
+  }
 
   function saveOrganization() {
     const name = orgName.trim();
@@ -71,17 +101,13 @@ export function TariffCheckoutModal({
       setOrgError(t("profile.checkout.orgRequired"));
       return;
     }
-    createOrder.mutate(
-      { tariffId: tariff.id, period, organizationName: name },
-      {
-        onSuccess: (created) => {
-          setOrder(created);
-          setOrgName(name);
-          setStep(created.paymentUrls ? "payment" : "done");
-        },
-        onError: (err) => setOrgError(getApiErrorMessage(err)),
-      },
-    );
+    createTariffOrder(name);
+  }
+
+  // Yangilashda tashkilot allaqachon bor — "Да" darrov buyurtma ochadi.
+  function confirm() {
+    if (organization) createTariffOrder(organization.name);
+    else setStep("organization");
   }
 
   // Klaviaturadagi "Готово"/Enter — tugma bilan bir xil.
@@ -93,33 +119,29 @@ export function TariffCheckoutModal({
   // Nom o'zgarsa buyurtma ham yangidan ochiladi — eski havolada eski nom qolib ketmasin.
   function editOrganization() {
     setOrder(null);
-    setOpenedProvider(null);
+    setPaymentOpened(false);
     setStep("organization");
   }
 
-  function pay(provider: PaymentProvider) {
-    const url = order?.paymentUrls?.[provider];
-    if (!url) return;
-    openExternalLink(url);
-    setOpenedProvider(provider);
+  function pay() {
+    if (!order?.paymentUrl) return;
+    openExternalLink(order.paymentUrl);
+    setPaymentOpened(true);
   }
 
   const footer =
     step === "payment" ? (
       <div className="flex w-full flex-col gap-2">
-        {PROVIDERS.map((provider) => (
-          <CusButton
-            key={provider.id}
-            size="lg"
-            className="w-full"
-            rounded="var(--radius-button)"
-            rightIcon={<LuExternalLink size={16} />}
-            onClick={() => pay(provider.id)}
-            style={{ background: "var(--brand-default)", color: "var(--text-on-brand)", fontWeight: 700 }}
-          >
-            {provider.name}
-          </CusButton>
-        ))}
+        <CusButton
+          size="lg"
+          className="w-full"
+          rounded="var(--radius-button)"
+          onClick={pay}
+          aria-label={PAYME_NAME}
+          style={{ background: PAYME_BRAND_BG, height: 56 }}
+        >
+          <img src={paymeLogo} alt={PAYME_NAME} className="h-8 w-auto" />
+        </CusButton>
         <CusButton
           size="lg"
           className="w-full"
@@ -159,18 +181,21 @@ export function TariffCheckoutModal({
                 ? t("profile.checkout.confirmQuestionFree", { name: tariff.name })
                 : t("profile.checkout.confirmQuestion", { name: tariff.name, period: periodLabel, price })}
             </p>
+            {organization && orgError && <p className="text-sm text-error-strong">{orgError}</p>}
             <div className="grid grid-cols-2 gap-2">
               <CusButton variant="outline" colorPalette="gray" onClick={onClose}>
                 {t("common.actions.cancel")}
               </CusButton>
-              <CusButton onClick={() => setStep("organization")}>{t("profile.checkout.confirmYes")}</CusButton>
+              <CusButton isLoading={createOrder.isPending} onClick={confirm}>
+                {t("profile.checkout.confirmYes")}
+              </CusButton>
             </div>
           </>
         )}
       </CheckoutStepCard>
 
       {/* 2. Tashkilot nomi */}
-      {step !== "confirm" && (
+      {step !== "confirm" && !organization && (
         <CheckoutStepCard
           index={2}
           title={t("profile.checkout.steps.organization")}
@@ -210,14 +235,18 @@ export function TariffCheckoutModal({
 
       {/* 3. To'lov — tugmalar pastda (footer) */}
       {step === "payment" && (
-        <CheckoutStepCard index={3} title={t("profile.checkout.steps.payment")} done={false}>
+        <CheckoutStepCard index={organization ? 2 : 3} title={t("profile.checkout.steps.payment")} done={false}>
           <p className="text-sm text-secondary">{t("profile.checkout.payHint")}</p>
-          {openedProvider && (
-            <p className="rounded-input bg-info-soft px-3 py-2.5 text-sm text-info-strong">
-              {t("profile.checkout.payOpened", {
-                provider: PROVIDERS.find((p) => p.id === openedProvider)?.name,
-              })}
+          {paymentStatus === "failed" || paymentStatus === "cancelled" ? (
+            <p className="rounded-input bg-error-soft px-3 py-2.5 text-sm text-error-strong">
+              {t(paymentStatus === "failed" ? "profile.checkout.payFailed" : "profile.checkout.payCancelled")}
             </p>
+          ) : (
+            paymentOpened && (
+              <p className="rounded-input bg-info-soft px-3 py-2.5 text-sm text-info-strong">
+                {t("profile.checkout.payOpened", { provider: PAYME_NAME })}
+              </p>
+            )
           )}
         </CheckoutStepCard>
       )}
@@ -225,7 +254,10 @@ export function TariffCheckoutModal({
       {step === "done" && order && (
         <p className="flex items-start gap-2 rounded-input bg-success-soft px-3 py-2.5 text-sm text-success-strong">
           <LuCircleCheck size={18} className="mt-px flex-none" />
-          {t("profile.checkout.freeDone", { name: order.organizationName, tariff: tariff.name })}
+          {t(organization ? "profile.checkout.renewDone" : "profile.checkout.freeDone", {
+            name: order.organizationName ?? orgName,
+            tariff: tariff.name,
+          })}
         </p>
       )}
     </div>

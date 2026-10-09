@@ -1,9 +1,18 @@
-import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useSessionStore, type SessionUser } from "@/store/session.store";
 import { usersApi } from "@/api/users/users.api";
 import type { UpdateMeRequest } from "@/api/users/users.types";
 import { organizationsApi } from "@/api/organizations/organizations.api";
 import { projectsApi } from "@/api/projects/projects.api";
+import { subscriptionsApi } from "@/api/subscriptions/subscriptions.api";
+import type {
+  PlanDurationMonths,
+  PlanStatsDepth,
+  RawPlanLimits,
+  RawSubscriptionOrder,
+  RawSubscriptionPlan,
+  SubscriptionOrderStatus,
+} from "@/api/subscriptions/subscriptions.types";
 import type {
   OrganizationModuleStatus,
   RawOrganization,
@@ -15,8 +24,7 @@ import { DOSKA_KEYS } from "@/queries/doska.queries";
  * /profile — mobil va desktop uchun umumiy qatlam. Platforma feature'lari
  * (`widgets/features/<platform>/profile/hooks/*`) shu ustida yupqa hook yozadi.
  *
- * Tarif endpointlari backend'da hali yo'q — hozircha mock. Tayyor bo'lganda faqat
- * shu fayldagi queryFn/mutationFn almashtiriladi, ikkala platforma o'zgarishsiz qoladi.
+ * Tarif va to'lov (Payme) — `api/subscriptions`. Ikkala platforma shu fayldan o'qiydi.
  */
 
 /** PATCH /users/me — javobdagi foydalanuvchi sessiyaga yoziladi (header, profil karta darhol yangilanadi). */
@@ -45,25 +53,22 @@ export function useUpdateProfileMutation() {
   });
 }
 
-export type TariffId = "start" | "pro" | "business";
+/** Tarif ID'si — backend `subscription-plans.id`. */
+export type TariffId = number;
 
 /** Tarif kartasidagi imkoniyat belgisi — PricingPlans shu nomdan ikonka tanlaydi. */
 export type TariffFeatureIcon = "members" | "projects" | "routines" | "stats";
 
 /** Statistika qancha orqaga ko'rinadi. */
-export type TariffStatsDepth = "today" | "3months" | "full";
+export type TariffStatsDepth = PlanStatsDepth;
 
 /** Tarif chegaralari; null — cheksiz. Narx kartasi ham, "Мои тарифы" ham shundan o'qiydi. */
-export interface TariffLimits {
-  members: number;
-  projects: number | null;
-  routines: number | null;
-  stats: TariffStatsDepth;
-}
+export type TariffLimits = RawPlanLimits;
 
 /** `profile.pricing.features.*` kalitlari — noto'g'ri yozilsa typecheck xato beradi. */
 type TariffFeatureKey = `profile.pricing.features.${
   | "members"
+  | "membersUnlimited"
   | "projects"
   | "projectsUnlimited"
   | "routines"
@@ -79,16 +84,25 @@ export interface TariffFeature {
   count?: number;
 }
 
+/** Backend tarif nomi (kichik harfda) → tagline kaliti. Tanilmagan nomda tagline chiqmaydi. */
+const TAGLINE_KEYS = {
+  start: "profile.pricing.tagline.start",
+  pro: "profile.pricing.tagline.pro",
+  business: "profile.pricing.tagline.business",
+} as const;
+
 export interface Tariff {
   id: TariffId;
-  /** Brend nomi — tarjima qilinmaydi. */
+  /** Brend nomi — backend'dan, tarjima qilinmaydi. */
   name: string;
-  taglineKey: `profile.pricing.tagline.${TariffId}`;
-  /** so'm; 0 — bepul. */
-  priceMonthly: number;
-  /** so'm; bepul tarifda 0. */
-  priceYearly: number;
+  taglineKey?: (typeof TAGLINE_KEYS)[keyof typeof TAGLINE_KEYS];
+  /** so'm; null — shu muddatga narx yo'q (bepul tarif). */
+  priceMonthly: number | null;
+  priceYearly: number | null;
+  /** Yillik narxdagi chegirma, foiz (0 — yo'q). */
+  yearlyDiscountPercent: number;
   currency: string;
+  isFree: boolean;
   /** Kartada ajratib ko'rsatiladi ("Рекомендуем"). */
   recommended?: boolean;
   limits: TariffLimits;
@@ -105,7 +119,9 @@ const STATS_FEATURE_KEY: Record<TariffStatsDepth, TariffFeatureKey> = {
 /** Narx kartasidagi qatorlar — limitlardan, alohida qo'lda yozilmaydi (ikki joyda farq qilib qolmasin). */
 function featuresFromLimits(limits: TariffLimits): TariffFeature[] {
   return [
-    { icon: "members", labelKey: "profile.pricing.features.members", count: limits.members },
+    limits.members === null
+      ? { icon: "members", labelKey: "profile.pricing.features.membersUnlimited" }
+      : { icon: "members", labelKey: "profile.pricing.features.members", count: limits.members },
     limits.projects === null
       ? { icon: "projects", labelKey: "profile.pricing.features.projectsUnlimited" }
       : { icon: "projects", labelKey: "profile.pricing.features.projects", count: limits.projects },
@@ -116,152 +132,145 @@ function featuresFromLimits(limits: TariffLimits): TariffFeature[] {
   ];
 }
 
-/**
- * Tariflar jadvali — kartada nima ko'rinsa, hammasi shu yerda.
- * Backend `GET /plans` tayyor bo'lganda shu ro'yxat o'rniga keladi.
- *
- * | Tarif    | Oylik   | Yillik    | Xodim | Loyiha  | Takroriy | Statistika |
- * |----------|---------|-----------|-------|---------|----------|------------|
- * | Start    | bepul   | bepul     | 2     | 1       | 3        | bugun      |
- * | Pro      | 149 000 | 1 490 000 | 10    | 5       | 30       | 3 oy       |
- * | Business | 349 000 | 3 490 000 | 100   | cheksiz | cheksiz  | to'liq     |
- */
-const TARIFF_SEEDS: Omit<Tariff, "features">[] = [
-  {
-    id: "start",
-    name: "Start", // i18n-ignore
-    taglineKey: "profile.pricing.tagline.start",
-    priceMonthly: 0,
-    priceYearly: 0,
-    currency: "UZS",
-    limits: { members: 2, projects: 1, routines: 3, stats: "today" },
-  },
-  {
-    id: "pro",
-    name: "Pro", // i18n-ignore
-    taglineKey: "profile.pricing.tagline.pro",
-    priceMonthly: 149000,
-    priceYearly: 1490000,
-    currency: "UZS",
-    recommended: true,
-    limits: { members: 10, projects: 5, routines: 30, stats: "3months" },
-  },
-  {
-    id: "business",
-    name: "Business", // i18n-ignore
-    taglineKey: "profile.pricing.tagline.business",
-    priceMonthly: 349000,
-    priceYearly: 3490000,
-    currency: "UZS",
-    limits: { members: 100, projects: null, routines: null, stats: "full" },
-  },
-];
-
-const TARIFFS: Tariff[] = TARIFF_SEEDS.map((seed) => ({
-  ...seed,
-  features: featuresFromLimits(seed.limits),
-}));
-
 export type BillingPeriod = "monthly" | "yearly";
+
+/** Davr → backend `duration_months` (dizaynda faqat 1 oy va 1 yil). */
+export const PERIOD_MONTHS: Record<BillingPeriod, PlanDurationMonths> = {
+  monthly: 1,
+  yearly: 12,
+};
+
+function toTariff(plan: RawSubscriptionPlan): Tariff {
+  const activePrices = plan.prices.filter((price) => price.is_active);
+  const priceFor = (months: PlanDurationMonths) =>
+    activePrices.find((price) => price.duration_months === months);
+  const monthly = priceFor(1);
+  const yearly = priceFor(12);
+  const taglineKey = TAGLINE_KEYS[plan.name.trim().toLowerCase() as keyof typeof TAGLINE_KEYS];
+  return {
+    id: plan.id,
+    name: plan.name,
+    taglineKey,
+    priceMonthly: monthly?.amount ?? plan.price_monthly,
+    priceYearly: yearly?.amount ?? plan.price_yearly,
+    yearlyDiscountPercent: yearly?.discount_percent ?? 0,
+    currency: plan.currency,
+    isFree: plan.is_free,
+    recommended: plan.recommended,
+    limits: plan.limits,
+    features: featuresFromLimits(plan.limits),
+  };
+}
+
+/** Tanlangan davr uchun narx (so'm); davrga narx yo'q bo'lsa — null. */
+export function tariffPrice(tariff: Tariff, period: BillingPeriod): number | null {
+  return period === "yearly" ? tariff.priceYearly : tariff.priceMonthly;
+}
 
 export const TARIFFS_KEYS = {
   list: () => ["tariffs"] as const,
   usage: (organizationId: string) => ["tariffs", "usage", organizationId] as const,
+  subscription: (organizationId: string) => ["tariffs", "subscription", organizationId] as const,
+  order: (orderId: string) => ["tariffs", "order", orderId] as const,
 };
 
 export const tariffsQuery = () =>
   queryOptions({
     queryKey: TARIFFS_KEYS.list(),
-    queryFn: () => Promise.resolve(TARIFFS),
+    queryFn: () => subscriptionsApi.listPlans(),
+    select: (plans) =>
+      plans
+        .filter((plan) => plan.is_active)
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map(toTariff),
   });
 
-export type PaymentProvider = "payme" | "click";
-
 export interface CreateTariffOrderRequest {
-  tariffId: TariffId;
+  tariff: Tariff;
   period: BillingPeriod;
-  /** Tarif ulanadigan yangi tashkilot nomi. */
-  organizationName: string;
+  /** Yangi tashkilot nomi. `organizationId` berilsa (obunani yangilash) kerak emas. */
+  organizationName?: string;
+  /** Berilsa — shu tashkilot obunasi yangilanadi, yangi tashkilot ochilmaydi. */
+  organizationId?: string;
 }
+
+export type TariffOrderStatus = SubscriptionOrderStatus;
 
 export interface TariffOrder {
   id: string;
-  tariffId: TariffId;
-  period: BillingPeriod;
-  organizationName: string;
-  /** so'm; bepul tarifda 0. */
+  status: TariffOrderStatus;
+  organizationName: string | null;
+  /** so'm */
   amount: number;
-  /**
-   * To'lov havolalari — backend tayyorlab beradi (merchant ID, buyurtma ID, summa ichida).
-   * Bepul tarifda null: to'lov bosqichi bo'lmaydi.
-   */
-  paymentUrls: Record<PaymentProvider, string> | null;
+  /** Payme sahifasi. Bepul tarifda yo'q: to'lov bosqichi ham bo'lmaydi. */
+  paymentUrl: string | null;
 }
 
-// ── Mock: to'lov endpointi yo'q. Backend tayyor bo'lganda `POST /tariff-orders` javobi keladi,
-// quyidagi merchant ID'lar va havola yasash frontend'dan butunlay olib tashlanadi.
-const MOCK_PAYME_MERCHANT_ID = "mock-payme-merchant";
-const MOCK_CLICK_SERVICE_ID = "00000";
-const MOCK_CLICK_MERCHANT_ID = "00000";
-
-/** Payme checkout: `m=<merchant>;ac.order_id=<id>;a=<tiyin>;c=<qaytish>` → base64. */
-function mockPaymeUrl(orderId: string, amount: number, returnUrl: string): string {
-  const params = `m=${MOCK_PAYME_MERCHANT_ID};ac.order_id=${orderId};a=${amount * 100};c=${returnUrl}`;
-  return `https://checkout.paycom.uz/${btoa(params)}`;
-}
-
-/** Click: summa so'mda, buyurtma ID — `transaction_param`. */
-function mockClickUrl(orderId: string, amount: number, returnUrl: string): string {
-  const params = new URLSearchParams({
-    service_id: MOCK_CLICK_SERVICE_ID,
-    merchant_id: MOCK_CLICK_MERCHANT_ID,
-    amount: String(amount),
-    transaction_param: orderId,
-    return_url: returnUrl,
-  });
-  return `https://my.click.uz/services/pay?${params}`;
-}
-
-function mockTariffOrder({ tariffId, period, organizationName }: CreateTariffOrderRequest): TariffOrder {
-  const tariff = TARIFFS.find((item) => item.id === tariffId);
-  const amount = !tariff ? 0 : period === "yearly" ? tariff.priceYearly : tariff.priceMonthly;
-  const id = `mock-${Date.now()}`;
-  const returnUrl = `${window.location.origin}/profile`;
+function toTariffOrder(raw: RawSubscriptionOrder): TariffOrder {
   return {
-    id,
-    tariffId,
-    period,
-    organizationName,
-    amount,
-    paymentUrls:
-      amount === 0
-        ? null
-        : { payme: mockPaymeUrl(id, amount, returnUrl), click: mockClickUrl(id, amount, returnUrl) },
+    id: raw.id,
+    status: raw.status,
+    organizationName: raw.organization_name,
+    amount: raw.amount,
+    paymentUrl: raw.payment_url ?? null,
   };
 }
 
+/** To'lov tasdiqlangach: tashkilotlar ro'yxati va obunalar yangidan o'qiladi. */
+export function invalidateAfterPayment(queryClient: QueryClient) {
+  queryClient.invalidateQueries({ queryKey: DOSKA_KEYS.workspaces() });
+  queryClient.invalidateQueries({ queryKey: ["tariffs", "subscription"] });
+}
+
 /**
- * Tarif xaridi: tashkilot nomi saqlanganda buyurtma ochiladi va to'lov havolalari qaytadi.
- * Havolalar oldindan tayyor bo'lishi shart — Payme/Click tugmasi bosilganda `window.open`
- * sinxron chaqirilmasa, brauzer uni popup deb bloklaydi.
- *
- * Bepul tarif — to'lovsiz: tashkilot hozirgi ochiq `POST /organizations` orqali haqiqatan
- * yaratiladi (/doska'dagi "Создать организацию" shu oqimdan o'tadi, yaratish yo'qolmasin).
- * Pullik tarif — buyurtma hali mock, tashkilot to'lov tasdiqlangach backend'da yaratiladi.
+ * Tarif xaridi: buyurtma ochiladi, javobda Payme havolasi keladi. Havola oldindan tayyor
+ * bo'lishi shart — "Payme" tugmasi bosilganda `window.open` sinxron chaqirilmasa, brauzer
+ * uni popup deb bloklaydi. Yangi tashkilot to'lov tasdiqlangach backend'da yaratiladi.
  */
 export function useCreateTariffOrderMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: CreateTariffOrderRequest) => {
-      const order = mockTariffOrder(data);
-      if (!order.paymentUrls) await organizationsApi.create({ name: data.organizationName });
-      return order;
+    mutationFn: async ({
+      tariff,
+      period,
+      organizationName,
+      organizationId,
+    }: CreateTariffOrderRequest) => {
+      const body = {
+        plan_id: tariff.id,
+        duration_months: PERIOD_MONTHS[period],
+        provider: "payme" as const,
+      };
+      const raw = organizationId
+        ? await subscriptionsApi.checkoutRenew(organizationId, body)
+        : await subscriptionsApi.checkoutNewOrganization({
+            ...body,
+            organization_name: organizationName ?? "",
+          });
+      return toTariffOrder(raw);
     },
     onSuccess: (order) => {
-      if (!order.paymentUrls) queryClient.invalidateQueries({ queryKey: DOSKA_KEYS.workspaces() });
+      // To'lovsiz buyurtma (bepul tarif) darrov tayyor — ro'yxat yangilansin.
+      if (!order.paymentUrl) invalidateAfterPayment(queryClient);
     },
   });
 }
+
+/** Buyurtma tugallangan (to'langan yoki rad etilgan) holatlari. */
+const FINAL_ORDER_STATUSES: ReadonlySet<TariffOrderStatus> = new Set(["paid", "cancelled", "failed"]);
+
+/**
+ * To'lov holati. `enabled` — Payme sahifasi ochilgandan keyin; tugallangunga qadar 3 soniyada
+ * bir so'raladi (foydalanuvchi qaytganda ham — oyna fokusida — yangilanadi).
+ */
+export const tariffOrderQuery = (orderId: string, enabled: boolean) =>
+  queryOptions({
+    queryKey: TARIFFS_KEYS.order(orderId),
+    queryFn: () => subscriptionsApi.getOrder(orderId).then(toTariffOrder),
+    enabled,
+    refetchInterval: (query) =>
+      query.state.data && FINAL_ORDER_STATUSES.has(query.state.data.status) ? false : 3000,
+  });
 
 /** Shu kundan kam qolsa — "tez tugaydi" (sariq) holati. */
 export const TARIFF_WARNING_DAYS = 7;
@@ -284,11 +293,6 @@ export interface OrgTariff {
   expiresAt: string | null;
   /** `expiresAt` bo'lsa — qolgan kunlar. */
   daysLeft: number | null;
-  /**
-   * Qaysi tarif — limitlar shundan. Mock: backend `module`da tarif ID'sini hali qaytarmaydi,
-   * shuning uchun bepul → Start, pullik → Pro. `module.plan` kelganda shu yerdan o'qiladi.
-   */
-  planId: TariffId;
 }
 
 function toOrgTariff(org: RawOrganization): OrgTariff {
@@ -314,7 +318,6 @@ function toOrgTariff(org: RawOrganization): OrgTariff {
     status,
     expiresAt: expires_at,
     daysLeft,
-    planId: is_free ? "start" : "pro",
   };
 }
 
@@ -329,6 +332,13 @@ export const myTariffsQuery = () =>
     queryFn: () => organizationsApi.list({ type: "organization", limit: 100 }),
     select: (data) =>
       data.organizations.filter((org) => org.role === "owner").map(toOrgTariff),
+  });
+
+/** Tashkilotning haqiqiy obunasi: tarif nomi va limitlari (karta ochilganda so'raladi). */
+export const orgSubscriptionQuery = (organizationId: string) =>
+  queryOptions({
+    queryKey: TARIFFS_KEYS.subscription(organizationId),
+    queryFn: () => subscriptionsApi.getOrganizationSubscription(organizationId),
   });
 
 /** Tashkilotda hozir nechta xodim va loyiha bor — limit bilan solishtirish uchun. */

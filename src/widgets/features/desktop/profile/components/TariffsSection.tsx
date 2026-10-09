@@ -10,7 +10,7 @@ import {
 } from "@/components/shared/org-tariff-card/OrgTariffCard";
 import { TariffCheckoutModal } from "@/components/shared/tariff-checkout/TariffCheckoutModal";
 import { useTariffCheckoutSelection } from "@/components/shared/tariff-checkout/useTariffCheckoutSelection";
-import { useMyTariffs, useTariffs } from "../hooks/useApiTariffs";
+import { useMyTariffs, useTariffs, type OrgTariff } from "../hooks/useApiTariffs";
 
 export type TariffPanelId = "current-tariff" | "tariffs-list";
 
@@ -78,8 +78,8 @@ export function TariffsSection({ activeId, onSelect }: TariffsSectionProps) {
 }
 
 interface CurrentTariffCardProps {
-  /** "Продлить" — to'lov endpointi yo'q, hozircha "Тарифы и цены" panelini ochadi. */
-  onRenew: () => void;
+  /** "Продлить" — "Тарифы и цены" panelini shu tashkilot uchun ochadi. */
+  onRenew: (tariff: OrgTariff) => void;
 }
 
 /** "Мои тарифы" — egasi bo'lgan tashkilotlar tarifi, o'ng panelda accordion. */
@@ -109,15 +109,17 @@ export function CurrentTariffCard({ onRenew }: CurrentTariffCardProps) {
 }
 
 interface TariffsListCardProps {
+  /** Berilsa — shu tashkilot obunasi yangilanadi (yangi tashkilot ochilmaydi). */
+  organization?: { id: string; name: string };
   /** Bepul tarif ulangach "Готово" — yangi tashkilot ko'rinadigan "Мои тарифы"ga o'tadi. */
   onDone: () => void;
 }
 
 /** "Тарифы и цены" — desktop o'ng panelida, keng ekranda 3 ustun. Tanlov → checkout dialog. */
-export function TariffsListCard({ onDone }: TariffsListCardProps) {
+export function TariffsListCard({ organization, onDone }: TariffsListCardProps) {
   const { t } = useTranslation();
   const { data: tariffs, isPending, isError } = useTariffs();
-  const checkout = useTariffCheckoutSelection(tariffs);
+  const checkout = useTariffCheckoutSelection(tariffs, organization);
 
   if (isPending) return <p className="text-sm text-secondary">{t("common.states.loading")}</p>;
   if (isError) return <p className="text-sm text-error-strong">{t("profile.tariffs.loadError")}</p>;
@@ -132,6 +134,7 @@ export function TariffsListCard({ onDone }: TariffsListCardProps) {
           open={checkout.isOpen}
           tariff={checkout.selection.tariff}
           period={checkout.selection.period}
+          organization={checkout.selection.organization}
           onClose={checkout.close}
           onDone={() => {
             checkout.close();
