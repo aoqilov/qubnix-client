@@ -33,7 +33,7 @@ export const subscriptionsApi = {
       >(`/api/v1/organizations/${organizationID}/subscription/checkout`, { data: payload })
       .then((r) => r.data.data.order),
 
-  /** Yangi tashkilot — u to'lov Payme tomonidan tasdiqlangach yaratiladi. */
+  /** Yangi tashkilot — u to'lov provider (Payme/Click) tomonidan tasdiqlangach yaratiladi. */
   checkoutNewOrganization: (payload: NewOrganizationCheckoutRequest) =>
     api
       .post<

@@ -5,6 +5,7 @@ import type { UpdateMeRequest } from "@/api/users/users.types";
 import { organizationsApi } from "@/api/organizations/organizations.api";
 import { subscriptionsApi } from "@/api/subscriptions/subscriptions.api";
 import type {
+  PaymentProvider,
   PlanDurationMonths,
   PlanStatsDepth,
   RawPlanLimits,
@@ -23,7 +24,7 @@ import { DOSKA_KEYS } from "@/queries/doska.queries";
  * /profile — mobil va desktop uchun umumiy qatlam. Platforma feature'lari
  * (`widgets/features/<platform>/profile/hooks/*`) shu ustida yupqa hook yozadi.
  *
- * Tarif va to'lov (Payme) — `api/subscriptions`. Ikkala platforma shu fayldan o'qiydi.
+ * Tarif va to'lov (Payme/Click) — `api/subscriptions`. Ikkala platforma shu fayldan o'qiydi.
  */
 
 /** PATCH /users/me — javobdagi foydalanuvchi sessiyaga yoziladi (header, profil karta darhol yangilanadi). */
@@ -200,9 +201,12 @@ export interface TariffOrder {
   organizationName: string | null;
   /** so'm */
   amount: number;
-  /** Payme sahifasi. Bepul tarifda yo'q: to'lov bosqichi ham bo'lmaydi. */
+  /** Provider (Payme/Click) sahifasi. Bepul tarifda yo'q: to'lov bosqichi ham bo'lmaydi. */
   paymentUrl: string | null;
 }
+
+/** Har provider — alohida buyurtma: `payment_url` buyurtma ochilayotgan provider'ga xos. */
+export type TariffOrders = Partial<Record<PaymentProvider, TariffOrder>>;
 
 function toTariffOrder(raw: RawSubscriptionOrder): TariffOrder {
   return {
@@ -221,9 +225,10 @@ export function invalidateAfterPayment(queryClient: QueryClient) {
 }
 
 /**
- * Tarif xaridi: buyurtma ochiladi, javobda Payme havolasi keladi. Havola oldindan tayyor
- * bo'lishi shart — "Payme" tugmasi bosilganda `window.open` sinxron chaqirilmasa, brauzer
- * uni popup deb bloklaydi. Yangi tashkilot to'lov tasdiqlangach backend'da yaratiladi.
+ * Tarif xaridi: Payme va Click uchun alohida buyurtma ochiladi, har birida o'z havolasi.
+ * Havolalar oldindan tayyor bo'lishi shart — tugma bosilganda `window.open` sinxron
+ * chaqirilmasa, brauzer uni popup deb bloklaydi. Yangi tashkilot to'lov tasdiqlangach
+ * backend'da yaratiladi.
  */
 export function useCreateTariffOrderMutation() {
   const queryClient = useQueryClient();
@@ -233,23 +238,25 @@ export function useCreateTariffOrderMutation() {
       period,
       organizationName,
       organizationId,
-    }: CreateTariffOrderRequest) => {
-      const body = {
-        plan_id: tariff.id,
-        duration_months: PERIOD_MONTHS[period],
-        provider: "payme" as const,
+    }: CreateTariffOrderRequest): Promise<TariffOrders> => {
+      const checkout = (provider: PaymentProvider) => {
+        const body = { plan_id: tariff.id, duration_months: PERIOD_MONTHS[period], provider };
+        const request = organizationId
+          ? subscriptionsApi.checkoutRenew(organizationId, body)
+          : subscriptionsApi.checkoutNewOrganization({ ...body, organization_name: organizationName ?? "" });
+        return request.then(toTariffOrder);
       };
-      const raw = organizationId
-        ? await subscriptionsApi.checkoutRenew(organizationId, body)
-        : await subscriptionsApi.checkoutNewOrganization({
-            ...body,
-            organization_name: organizationName ?? "",
-          });
-      return toTariffOrder(raw);
+      // Ketma-ket: to'lovsiz buyurtma (bepul tarif) darrov bajariladi — ikkinchisi yana
+      // tashkilot ochib qo'ymasin.
+      const payme = await checkout("payme");
+      if (!payme.paymentUrl) return { payme };
+      // Click ochilmasa ham Payme bilan to'lash mumkin — butun xarid yiqilmasin.
+      const click = await checkout("click").catch(() => undefined);
+      return { payme, click };
     },
-    onSuccess: (order) => {
+    onSuccess: (orders) => {
       // To'lovsiz buyurtma (bepul tarif) darrov tayyor — ro'yxat yangilansin.
-      if (!order.paymentUrl) invalidateAfterPayment(queryClient);
+      if (!orders.payme?.paymentUrl) invalidateAfterPayment(queryClient);
     },
   });
 }
@@ -258,7 +265,7 @@ export function useCreateTariffOrderMutation() {
 const FINAL_ORDER_STATUSES: ReadonlySet<TariffOrderStatus> = new Set(["paid", "cancelled", "failed"]);
 
 /**
- * To'lov holati. `enabled` — Payme sahifasi ochilgandan keyin; tugallangunga qadar 3 soniyada
+ * To'lov holati. `enabled` — provider sahifasi ochilgandan keyin; tugallangunga qadar 3 soniyada
  * bir so'raladi (foydalanuvchi qaytganda ham — oyna fokusida — yangilanadi).
  */
 export const tariffOrderQuery = (orderId: string, enabled: boolean) =>

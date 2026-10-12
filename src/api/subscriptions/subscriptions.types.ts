@@ -77,6 +77,8 @@ export type SubscriptionOrderStatus = "created" | "pending" | "paid" | "cancelle
 
 export type SubscriptionOrderPurpose = "create_organization" | "renew_subscription";
 
+export type PaymentProvider = "payme" | "click";
+
 export interface RawSubscriptionOrder {
   id: string;
   organization_id: number | null;
@@ -88,7 +90,7 @@ export interface RawSubscriptionOrder {
   amount: number;
   currency: "UZS";
   discount_percent: number;
-  provider: "payme";
+  provider: PaymentProvider;
   status: SubscriptionOrderStatus;
   /** Bepul tarifda kelmasligi mumkin. */
   payment_url?: string;
@@ -101,7 +103,7 @@ export interface RawSubscriptionOrder {
 export interface RenewCheckoutRequest {
   plan_id: number;
   duration_months: PlanDurationMonths;
-  provider: "payme";
+  provider: PaymentProvider;
 }
 
 /** POST /organizations/subscription/checkout — tashkilot to'lov tasdiqlangach yaratiladi. */

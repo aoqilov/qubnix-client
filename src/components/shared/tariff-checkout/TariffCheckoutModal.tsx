@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { LuCheck, LuCircleCheck } from "react-icons/lu";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
@@ -10,7 +10,9 @@ import { CusInput } from "@/components/ui/inputs/CusInput";
 import { useIntlLocale } from "@/i18n/useIntlLocale";
 import { getApiErrorMessage } from "@/utils/apiErrorMessage";
 import paymeLogo from "@/assets/logo/payme.png";
+import clickLogo from "@/assets/logo/click.png";
 import { openExternalLink } from "@/utils/telegram";
+import type { PaymentProvider } from "@/api/subscriptions/subscriptions.types";
 import {
   invalidateAfterPayment,
   tariffOrderQuery,
@@ -18,16 +20,27 @@ import {
   useCreateTariffOrderMutation,
   type BillingPeriod,
   type Tariff,
-  type TariffOrder,
+  type TariffOrders,
 } from "@/queries/profile.queries";
 
 /** confirm → organization (yangilashda yo'q) → payment → done (to'langan yoki bepul). */
 type CheckoutStep = "confirm" | "organization" | "payment" | "done";
 
-/** Brend nomi — tarjima qilinmaydi. */
-const PAYME_NAME = "Payme"; // i18n-ignore
-/** Payme firma rangi — uchinchi tomon brendi, dizayn tokenlari ichida yo'q. */
+/** Brend nomlari — tarjima qilinmaydi. */
+const PROVIDER_NAMES: Record<PaymentProvider, string> = {
+  payme: "Payme", // i18n-ignore
+  click: "Click", // i18n-ignore
+};
+/** Firma ranglari — uchinchi tomon brendi, dizayn tokenlari ichida yo'q. */
 const PAYME_BRAND_BG = "rgb(42 206 208)";
+/** click.png fonining o'zi — logotip chegarasi tugmada ko'rinmasin. */
+const CLICK_BRAND_BG = "rgb(1 97 247)";
+
+/** Footer'dagi to'lov tugmalari — tartibi shu. */
+const PAYMENT_BUTTONS: { provider: PaymentProvider; logo: string; background: string }[] = [
+  { provider: "payme", logo: paymeLogo, background: PAYME_BRAND_BG },
+  { provider: "click", logo: clickLogo, background: CLICK_BRAND_BG },
+];
 
 interface TariffCheckoutModalProps {
   open: boolean;
@@ -63,17 +76,24 @@ export function TariffCheckoutModal({
   const queryClient = useQueryClient();
   const [orgName, setOrgName] = useState(organization?.name ?? "");
   const [orgError, setOrgError] = useState<string | null>(null);
-  const [order, setOrder] = useState<TariffOrder | null>(null);
-  const [paymentOpened, setPaymentOpened] = useState(false);
+  const [orders, setOrders] = useState<TariffOrders>({});
+  /** Sahifasi ochilgan provider'lar, oxirgisi — oxirida. */
+  const [openedProviders, setOpenedProviders] = useState<PaymentProvider[]>([]);
 
-  // Payme sahifasi ochilgach — tugallangunga qadar buyurtma holati so'raladi.
-  const paymentStatus = useQuery(tariffOrderQuery(order?.id ?? "", paymentOpened && !!order)).data?.status;
+  // Provider sahifasi ochilgach — tugallangunga qadar buyurtma holati so'raladi. Ikkalasi
+  // ochilgan bo'lsa ikkalasi ham: foydalanuvchi qaysi birida to'laganini bilmaymiz.
+  const openedStatuses = useQueries({
+    queries: openedProviders.map((provider) => tariffOrderQuery(orders[provider]?.id ?? "", true)),
+  }).map((query) => query.data?.status);
+  const isPaid = openedStatuses.includes("paid");
+  const lastProvider = openedProviders[openedProviders.length - 1];
+  const paymentStatus = openedStatuses[openedStatuses.length - 1];
   useEffect(() => {
-    if (paymentStatus === "paid") {
+    if (isPaid) {
       invalidateAfterPayment(queryClient);
       setStep("done");
     }
-  }, [paymentStatus, queryClient]);
+  }, [isPaid, queryClient]);
 
   const amount = tariffPrice(tariff, period) ?? 0;
   const isFree = tariff.isFree;
@@ -86,9 +106,9 @@ export function TariffCheckoutModal({
       { tariff, period, organizationName: name, organizationId: organization?.id },
       {
         onSuccess: (created) => {
-          setOrder(created);
+          setOrders(created);
           setOrgName(name);
-          setStep(created.paymentUrl ? "payment" : "done");
+          setStep(created.payme?.paymentUrl ? "payment" : "done");
         },
         onError: (err) => setOrgError(getApiErrorMessage(err)),
       },
@@ -118,30 +138,34 @@ export function TariffCheckoutModal({
 
   // Nom o'zgarsa buyurtma ham yangidan ochiladi — eski havolada eski nom qolib ketmasin.
   function editOrganization() {
-    setOrder(null);
-    setPaymentOpened(false);
+    setOrders({});
+    setOpenedProviders([]);
     setStep("organization");
   }
 
-  function pay() {
-    if (!order?.paymentUrl) return;
-    openExternalLink(order.paymentUrl);
-    setPaymentOpened(true);
+  function pay(provider: PaymentProvider) {
+    const url = orders[provider]?.paymentUrl;
+    if (!url) return;
+    openExternalLink(url);
+    setOpenedProviders((prev) => [...prev.filter((p) => p !== provider), provider]);
   }
 
   const footer =
     step === "payment" ? (
       <div className="flex w-full flex-col gap-2">
-        <CusButton
-          size="lg"
-          className="w-full"
-          rounded="var(--radius-button)"
-          onClick={pay}
-          aria-label={PAYME_NAME}
-          style={{ background: PAYME_BRAND_BG, height: 56 }}
-        >
-          <img src={paymeLogo} alt={PAYME_NAME} className="h-8 w-auto" />
-        </CusButton>
+        {PAYMENT_BUTTONS.filter(({ provider }) => orders[provider]?.paymentUrl).map(({ provider, logo, background }) => (
+          <CusButton
+            key={provider}
+            size="lg"
+            className="w-full"
+            rounded="var(--radius-button)"
+            onClick={() => pay(provider)}
+            aria-label={PROVIDER_NAMES[provider]}
+            style={{ background, height: 56 }}
+          >
+            <img src={logo} alt={PROVIDER_NAMES[provider]} className="h-8 w-auto" />
+          </CusButton>
+        ))}
         <CusButton
           size="lg"
           className="w-full"
@@ -242,20 +266,20 @@ export function TariffCheckoutModal({
               {t(paymentStatus === "failed" ? "profile.checkout.payFailed" : "profile.checkout.payCancelled")}
             </p>
           ) : (
-            paymentOpened && (
+            lastProvider && (
               <p className="rounded-input bg-info-soft px-3 py-2.5 text-sm text-info-strong">
-                {t("profile.checkout.payOpened", { provider: PAYME_NAME })}
+                {t("profile.checkout.payOpened", { provider: PROVIDER_NAMES[lastProvider] })}
               </p>
             )
           )}
         </CheckoutStepCard>
       )}
 
-      {step === "done" && order && (
+      {step === "done" && orders.payme && (
         <p className="flex items-start gap-2 rounded-input bg-success-soft px-3 py-2.5 text-sm text-success-strong">
           <LuCircleCheck size={18} className="mt-px flex-none" />
           {t(organization ? "profile.checkout.renewDone" : "profile.checkout.freeDone", {
-            name: order.organizationName ?? orgName,
+            name: orders.payme.organizationName ?? orgName,
             tariff: tariff.name,
           })}
         </p>
