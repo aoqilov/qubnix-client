@@ -214,12 +214,14 @@ function TaskCard({
               icon={<LuCirclePlay size={14} />}
               label={startLabel}
               bg="var(--bg-surface-secondary)"
+              timeTone="success"
             />
           )}
           <TaskMetaBadge
             icon={<LuClock size={14} />}
             label={dueLabel}
             bg={isOverdue ? "var(--status-error-bg)" : "var(--bg-surface-secondary)"}
+            timeTone="error"
           />
         </div>
         <div className="flex items-center gap-2">

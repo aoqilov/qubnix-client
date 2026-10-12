@@ -52,12 +52,13 @@ export function TaskTile({ task, projectName, readOnly, onStatusChange, onOpen }
 
       <div className="flex flex-wrap items-center gap-1.5">
         {startLabel && (
-          <TaskMetaBadge icon={<LuCirclePlay size={12} />} label={startLabel} bg="var(--bg-surface-secondary)" />
+          <TaskMetaBadge icon={<LuCirclePlay size={12} />} label={startLabel} bg="var(--bg-surface-secondary)" timeTone="success" />
         )}
         <TaskMetaBadge
           icon={<LuClock size={12} />}
           label={formatDueLabel(task)}
           bg={isTaskOverdue(task) ? "var(--status-error-bg)" : "var(--bg-surface-secondary)"}
+          timeTone="error"
         />
         {task.subtasks.length > 0 && (
           <TaskMetaBadge

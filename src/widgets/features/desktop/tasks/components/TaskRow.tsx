@@ -56,12 +56,13 @@ export function TaskRow({ task, projectName, readOnly, onStatusChange, onOpen }:
 
       <span className="flex flex-none items-center gap-2">
         {startLabel && (
-          <TaskMetaBadge icon={<LuCirclePlay size={12} />} label={startLabel} bg="var(--bg-surface-secondary)" />
+          <TaskMetaBadge icon={<LuCirclePlay size={12} />} label={startLabel} bg="var(--bg-surface-secondary)" timeTone="success" />
         )}
         <TaskMetaBadge
           icon={<LuClock size={12} />}
           label={formatDueLabel(task)}
           bg={isTaskOverdue(task) ? "var(--status-error-bg)" : "var(--bg-surface-secondary)"}
+          timeTone="error"
         />
         {task.subtasks.length > 0 && (
           <TaskMetaBadge
