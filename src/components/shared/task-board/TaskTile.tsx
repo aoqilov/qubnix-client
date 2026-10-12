@@ -8,7 +8,7 @@ import TaskAvatarGroup from "@/components/shared/task-card/mini-components/TaskA
 import TaskStatusLabel from "@/components/shared/task-card/mini-components/TaskStatusLabel";
 import { PRIORITY_FLAG_COLOR } from "@/components/shared/task-card/TaskCard";
 import { formatDueLabel, formatStartLabel, isTaskOverdue } from "@/utils/taskDateLabels";
-import { toTaskView } from "../lib/taskView";
+import { toTaskView } from "./taskView";
 import { TaskStatusMenu } from "./TaskStatusMenu";
 
 interface TaskTileProps {

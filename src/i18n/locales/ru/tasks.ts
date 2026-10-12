@@ -53,8 +53,6 @@ const tasks = {
   avatars: {
     more: "ещё {{count}}",
     assigned: "Назначенные сотрудники",
-    legendSent: "— задача создана",
-    legendSeen: "— сотрудник просмотрел",
   },
   assignees: {
     empty: "Сотрудники не найдены",

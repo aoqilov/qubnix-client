@@ -1,5 +1,5 @@
 import type { RawTask } from "@/api/tasks/tasks.types";
-import { toTaskMemberCard } from "../hooks/useApiTasks";
+import { toTaskMemberCard } from "@/queries/tasks.queries";
 import { TASK_STATUS_META } from "@/components/shared/task-card/taskStatusMeta";
 
 /** RawTask -> qator/karta/drawer uchun tayyor ko'rinish (fayllar ajratilgan, a'zolar kartaga aylantirilgan). */

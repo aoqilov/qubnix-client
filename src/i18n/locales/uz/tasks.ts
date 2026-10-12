@@ -55,8 +55,6 @@ const tasks: typeof ru = {
   avatars: {
     more: "yana {{count}}",
     assigned: "Biriktirilgan xodimlar",
-    legendSent: "— vazifa yaratildi",
-    legendSeen: "— xodim ko'rdi",
   },
   assignees: {
     empty: "Xodimlar topilmadi",

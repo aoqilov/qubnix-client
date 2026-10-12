@@ -9,8 +9,6 @@ import {
   LuChevronDown,
   LuClock,
   LuFolderOpen,
-  LuKanban,
-  LuList,
   LuListChecks,
   LuPlus,
   LuUsers,
@@ -51,10 +49,11 @@ import {
   useProjectsByDate,
   useTasksList,
 } from "./hooks/useApiTasks";
-import { useTasksViewMode } from "./hooks/useTasksViewMode";
+import { useTasksViewMode } from "@/hooks/useTasksViewMode";
 import { TaskRow } from "./components/TaskRow";
 import { StatusSegments } from "./components/StatusSegments";
-import { KanbanBoard } from "./components/KanbanBoard";
+import { ViewModeSwitch } from "@/components/shared/view-mode-switch/ViewModeSwitch";
+import { KanbanBoard } from "@/components/shared/task-board/KanbanBoard";
 import { TaskDetailsDrawer } from "./modals/TaskDetailsDrawer";
 
 interface TasksNavigationState {
@@ -344,25 +343,7 @@ export default function FeatureTasks() {
               width={200}
               trigger={<ToolbarButton icon={<LuArrowUpDown size={14} />} label={t(`tasks.sort.${sort}`)} />}
             />
-            <div className="flex overflow-hidden rounded-input border border-default">
-              {(["list", "board"] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  aria-label={t(`tasks.desktop.view${mode === "list" ? "List" : "Board"}`)}
-                  onClick={() => setViewMode(mode)}
-                  className="flex size-9 items-center justify-center transition-colors"
-                  // Chakra'ning button stillari bg sinfini bosadi — fon inline (token, hex emas).
-                  style={
-                    viewMode === mode
-                      ? { background: "var(--brand-default)", color: "var(--text-on-brand)" }
-                      : { background: "var(--bg-surface)", color: "var(--text-secondary)" }
-                  }
-                >
-                  {mode === "list" ? <LuList size={16} /> : <LuKanban size={16} />}
-                </button>
-              ))}
-            </div>
+            <ViewModeSwitch value={viewMode} onChange={setViewMode} />
             {canManageTasks && !isPast && (
               <CusButton
                 leftIcon={<LuPlus size={16} />}

@@ -14,8 +14,8 @@ import TaskAudioMessage from "@/components/shared/task-card/mini-components/Task
 import { PRIORITY_FLAG_COLOR } from "@/components/shared/task-card/TaskCard";
 import { avatarColorVar } from "@/utils/avatarColor";
 import { formatDayMonth, formatTime, isTaskOverdue } from "@/utils/taskDateLabels";
-import { toTaskView } from "../lib/taskView";
-import { TaskStatusMenu } from "../components/TaskStatusMenu";
+import { toTaskView } from "@/components/shared/task-board/taskView";
+import { TaskStatusMenu } from "@/components/shared/task-board/TaskStatusMenu";
 
 interface TaskDetailsDrawerProps {
   task: RawTask | null;

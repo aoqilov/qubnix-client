@@ -3,7 +3,9 @@ import { useTranslation } from "react-i18next";
 import {
   DndContext,
   DragOverlay,
+  MouseSensor,
   PointerSensor,
+  TouchSensor,
   useDraggable,
   useDroppable,
   useSensor,
@@ -21,6 +23,11 @@ interface KanbanBoardProps {
   readOnly: boolean;
   onStatusChange: (task: RawTask, nextStatusId: string) => void;
   onOpen: (task: RawTask) => void;
+  /**
+   * "wide" (default) — desktop: 300px ustunlar, sichqoncha bilan sudrash.
+   * "compact" — mobil: ekranning ~85% enidagi ustunlar (snap bilan suriladi), uzoq bosib sudrash.
+   */
+  variant?: "wide" | "compact";
 }
 
 const COLUMN_HEADER_COLOR: Record<TaskStatusMeta["color"], string> = {
@@ -68,6 +75,7 @@ function KanbanColumn({
   readOnly,
   onStatusChange,
   onOpen,
+  compact,
 }: {
   meta: TaskStatusMeta;
   tasks: RawTask[];
@@ -75,6 +83,7 @@ function KanbanColumn({
   readOnly: boolean;
   onStatusChange: (task: RawTask, nextStatusId: string) => void;
   onOpen: (task: RawTask) => void;
+  compact: boolean;
 }) {
   const { t } = useTranslation();
   const { setNodeRef, isOver } = useDroppable({ id: meta.id, disabled: readOnly });
@@ -82,7 +91,9 @@ function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className="flex w-[300px] flex-none flex-col gap-3 rounded-card border p-3 transition-colors"
+      className={`flex flex-none flex-col gap-3 rounded-card border p-3 transition-colors ${
+        compact ? "w-[85%] snap-start" : "w-[300px]"
+      }`}
       style={{
         borderColor: isOver ? "var(--border-focus)" : "var(--border-subtle)",
         background: isOver ? "var(--bg-surface-secondary)" : "var(--bg-surface)",
@@ -113,9 +124,21 @@ function KanbanColumn({
 }
 
 /** Kanban ko'rinishi — 4 status ustuni, kartalar orasida drag & drop bilan status o'zgaradi. */
-export function KanbanBoard({ tasks, projectName, readOnly, onStatusChange, onOpen }: KanbanBoardProps) {
+export function KanbanBoard({
+  tasks,
+  projectName,
+  readOnly,
+  onStatusChange,
+  onOpen,
+  variant = "wide",
+}: KanbanBoardProps) {
+  const compact = variant === "compact";
   const [activeTask, setActiveTask] = useState<RawTask | null>(null);
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+  const pointer = useSensor(PointerSensor, { activationConstraint: { distance: 8 } });
+  const mouse = useSensor(MouseSensor, { activationConstraint: { distance: 8 } });
+  // Teginishda sudrash uzoq bosishdan keyin boshlanadi — aks holda gorizontal surish va scroll bilan to'qnashadi.
+  const touch = useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } });
+  const sensors = useSensors(...(compact ? [mouse, touch] : [pointer]));
 
   const columns = TASK_STATUS_META.map((meta) => ({
     meta,
@@ -139,7 +162,11 @@ export function KanbanBoard({ tasks, projectName, readOnly, onStatusChange, onOp
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="flex gap-3 overflow-x-auto pb-2">
+      <div
+        className={`flex gap-3 overflow-x-auto pb-2 ${
+          compact ? "-mx-4 snap-x snap-proximity scroll-px-4 px-4" : ""
+        }`}
+      >
         {columns.map((col) => (
           <KanbanColumn
             key={col.meta.id}
@@ -149,6 +176,7 @@ export function KanbanBoard({ tasks, projectName, readOnly, onStatusChange, onOp
             readOnly={readOnly}
             onStatusChange={onStatusChange}
             onOpen={onOpen}
+            compact={compact}
           />
         ))}
       </div>
@@ -158,7 +186,10 @@ export function KanbanBoard({ tasks, projectName, readOnly, onStatusChange, onOp
           ishlagani uchun bu animatsiya shart emas. */}
       <DragOverlay dropAnimation={null}>
         {activeTask ? (
-          <div className="w-[276px]">
+          <div
+            className={compact ? undefined : "w-[276px]"}
+            style={compact ? { width: "calc((100vw - 32px) * 0.85 - 24px)" } : undefined}
+          >
             <TaskTile task={activeTask} projectName={projectName} readOnly onStatusChange={() => {}} onOpen={() => {}} />
           </div>
         ) : null}

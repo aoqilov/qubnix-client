@@ -54,6 +54,9 @@ function TaskAvatarGroup({ members, overflowCount, max = 3 }: TaskAvatarGroupPro
   const visible = members.slice(0, max);
 
   return (
+    // Karta bosilganda tafsilot ochiladi (mobil — kengayadi, desktop — drawer). Popover (va portaldagi
+    // mazmuni ham — React daraxtida u shu yerning avlodi) bosilishi kartaga o'tmasin.
+    <span className="inline-flex" onClick={(e) => e.stopPropagation()}>
     <CusPopover
       trigger={
         <button type="button" className="flex items-center gap-2">
@@ -130,26 +133,9 @@ function TaskAvatarGroup({ members, overflowCount, max = 3 }: TaskAvatarGroupPro
             </div>
           ))}
         </div>
-
-        <div
-          className="flex flex-col gap-1 border-t pt-2"
-          style={{ borderColor: "var(--border-subtle)" }}
-        >
-          <span
-            className="flex items-center gap-1.5"
-            style={{ fontSize: "var(--text-caption, 12px)", color: "var(--text-secondary)" }}
-          >
-            <LuCheck size={12} /> {t("tasks.avatars.legendSent")}
-          </span>
-          <span
-            className="flex items-center gap-1.5"
-            style={{ fontSize: "var(--text-caption, 12px)", color: "var(--text-secondary)" }}
-          >
-            <LuCheckCheck size={12} color="var(--status-success-solid)" /> {t("tasks.avatars.legendSeen")}
-          </span>
-        </div>
       </div>
     </CusPopover>
+    </span>
   );
 }
 

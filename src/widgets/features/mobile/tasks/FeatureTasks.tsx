@@ -37,6 +37,10 @@ import PageTitleDynamic from "@/components/shared/page-title-dynamic/PageTitleDy
 import StatusTab from "@/components/shared/status-tab/StatusTab";
 import TaskCard from "@/components/shared/task-card/TaskCard";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
+import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
+import { KanbanBoard } from "@/components/shared/task-board/KanbanBoard";
+import { ViewModeSwitch } from "@/components/shared/view-mode-switch/ViewModeSwitch";
+import { useTasksViewMode } from "@/hooks/useTasksViewMode";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import FilterSectionTask from "./components/FilterSectionTask";
 import MembersFilterButton from "./components/MembersFilterButton";
@@ -105,7 +109,7 @@ function TaskCardSkeleton() {
   return <div className="h-[132px] animate-pulse rounded-input border border-subtle bg-surface" />;
 }
 
-function TasksEmptyState({ statusLabel }: { statusLabel: string }) {
+function TasksEmptyState({ statusLabel, isBoard }: { statusLabel: string; isBoard?: boolean }) {
   const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center gap-2 py-12 text-center">
@@ -113,7 +117,7 @@ function TasksEmptyState({ statusLabel }: { statusLabel: string }) {
         <LuListChecks size={20} />
       </span>
       <p className="text-sm font-medium text-primary">
-        {t("tasks.page.empty", { status: statusLabel })}
+        {isBoard ? t("tasks.page.emptyBoard") : t("tasks.page.empty", { status: statusLabel })}
       </p>
       <p className="text-xs text-secondary">
         {t("tasks.page.emptyHint")}
@@ -251,6 +255,9 @@ export default function FeatureTasks() {
   }));
 
   const [sort, setSort] = useState<keyof typeof SORT_TO_API>("deadline");
+  // Ro'yxat / kanban — desktop bilan umumiy tanlov (localStorage'da eslab qolinadi).
+  const [viewMode, setViewMode] = useTasksViewMode();
+  const isBoard = viewMode === "board";
   const [statusId, setStatusId] = useState(() => (isPast ? "failed" : "assigned"));
   // O'tgan kunda avval bajarilmaganlar qiziqtiradi; bugunga qaytilsa — "Berildi".
   useEffect(() => {
@@ -305,7 +312,8 @@ export default function FeatureTasks() {
   const activeProjectMembers = (activeProject?.members ?? []).map(toTaskMemberCard);
 
   const tasksQuery = useTasksList(organizationId, activeTabId, {
-    status: activeStatusMeta?.countKey as TaskStatus | undefined,
+    // Kanban'da barcha statuslar bir vaqtda ustunlarga bo'linadi — status filtri qo'llanmaydi.
+    status: isBoard ? undefined : (activeStatusMeta?.countKey as TaskStatus | undefined),
     sort_by: SORT_TO_API[sort],
     date: selectedDate,
     member_ids:
@@ -474,6 +482,91 @@ export default function FeatureTasks() {
     ? tasks.find((t) => String(t.id) === pendingStatusChange.taskId)
     : undefined;
 
+  const renderTaskCard = (task: RawTask, forceExpanded = false) => {
+      const expanded = forceExpanded || expandedIds.has(task.id);
+      const meta = STATUS_META.find((m) => m.countKey === task.status);
+      const descriptionAudioFile = task.files.find(
+        (f) => f.kind === "description_audio",
+      );
+      const attachments = task.files.filter((f) => f.kind === "attachment");
+      const imageAttachments = attachments.filter((f) =>
+        f.mime_type.startsWith("image/"),
+      );
+      const nonImageAttachments = attachments.filter(
+        (f) => !f.mime_type.startsWith("image/"),
+      );
+      return (
+        <TaskCard
+          key={task.id}
+          title={task.title}
+          statusOptions={buildStatusMenuOptions()}
+          statusId={meta?.id ?? "assigned"}
+          onStatusChange={(nextStatusId) => requestStatusChange(task, nextStatusId)}
+          priority={task.priority}
+          dueLabel={formatDueLabel(task)}
+          startLabel={formatStartLabel(task)}
+          readOnly={isPast || isViewer}
+          dimmed={isPast}
+          canManage={canManageTasks}
+          isOverdue={
+            task.status !== "done" && !!task.due_at && new Date(task.due_at) < new Date()
+          }
+          subtaskCountLabel={`${task.subtasks.filter((s) => s.checked).length}/${task.subtasks.length}`}
+          fileCount={attachments.length}
+          members={task.members.map(toTaskMemberCard)}
+          statusLabel={meta ? t(meta.labelKey) : ""}
+          statusColor={meta?.color ?? "gray"}
+          expanded={expanded}
+          onToggleExpanded={() => toggleExpanded(task.id)}
+          description={task.description_type === "text" ? (task.description ?? "") : ""}
+          descriptionAudio={
+            descriptionAudioFile
+              ? { url: descriptionAudioFile.url, durationLabel: "0:00" }
+              : undefined
+          }
+          projectTag={projects.find((p) => p.id === task.project_id)?.name ?? ""}
+          subtasks={task.subtasks.map((s) => ({
+            id: String(s.id),
+            label: s.name,
+            checked: s.checked,
+          }))}
+          onSubtaskChange={(id, checked) =>
+            updateTask.mutate(
+              {
+                taskId: String(task.id),
+                payload: {
+                  subtasks: task.subtasks.map((s) => ({
+                    name: s.name,
+                    checked: String(s.id) === id ? checked : s.checked,
+                  })),
+                },
+              },
+              { onError: (err) => errorToast.show(getApiErrorMessage(err)) },
+            )
+          }
+          photos={imageAttachments.map((f) => ({
+            id: String(f.id),
+            url: f.url,
+          }))}
+          files={nonImageAttachments.map((f) => ({
+            id: String(f.id),
+            name: f.file_name,
+            sizeLabel: `${Math.round(f.size_bytes / 1024)} KB`,
+          }))}
+          onDownloadFile={(id) => {
+            const file = task.files.find((f) => String(f.id) === id);
+            if (file) window.open(file.url, "_blank", "noopener,noreferrer");
+          }}
+          onAttachFile={() => {}}
+          onDelete={() => setDeletingTaskId(String(task.id))}
+          onEdit={() => setEditingTaskId(String(task.id))}
+        />
+      );
+  };
+
+  const [boardTaskId, setBoardTaskId] = useState<string | null>(null);
+  const boardTask = tasks.find((task) => String(task.id) === boardTaskId);
+
   return (
     <div>
       <div
@@ -565,19 +658,23 @@ export default function FeatureTasks() {
           />
           {canFilterByEmployee && (
             <MembersFilterButton
+              iconOnly
               selectedCount={selectedMemberIds.length}
               onClick={() => setIsMembersFilterOpen(true)}
             />
           )}
+          <ViewModeSwitch size="sm" value={viewMode} onChange={setViewMode} />
         </div>
-        <StatusTab
-          items={statusTabs}
-          activeId={statusId}
-          onChange={setStatusId}
-          className="sticky top-0 z-sticky -mx-4 bg-canvas px-4 py-2"
-        />
+        {!isBoard && (
+          <StatusTab
+            items={statusTabs}
+            activeId={statusId}
+            onChange={setStatusId}
+            className="sticky top-0 z-sticky -mx-4 bg-canvas px-4 py-2"
+          />
+        )}
 
-        <motion.div {...swipeProps} className="flex min-h-[50dvh] flex-col gap-3">
+        <motion.div {...(isBoard ? {} : swipeProps)} className="flex min-h-[50dvh] flex-col gap-3">
         {tasksQuery.isPending ? (
           <>
             <TaskCardSkeleton />
@@ -588,94 +685,33 @@ export default function FeatureTasks() {
             {t("tasks.page.loadError")}
           </p>
         ) : tasks.length === 0 ? (
-          <TasksEmptyState statusLabel={activeStatusMeta ? t(activeStatusMeta.labelKey) : ""} />
+          <TasksEmptyState statusLabel={activeStatusMeta ? t(activeStatusMeta.labelKey) : ""} isBoard={isBoard} />
+        ) : isBoard ? (
+          <KanbanBoard
+            variant="compact"
+            tasks={tasks}
+            projectName={activeProject?.name ?? ""}
+            readOnly={isPast || isViewer}
+            onStatusChange={(task, next) => requestStatusChange(task, next)}
+            onOpen={(task) => setBoardTaskId(String(task.id))}
+          />
         ) : (
-          tasks.map((task) => {
-            const expanded = expandedIds.has(task.id);
-            const meta = STATUS_META.find((m) => m.countKey === task.status);
-            const descriptionAudioFile = task.files.find(
-              (f) => f.kind === "description_audio",
-            );
-            const attachments = task.files.filter((f) => f.kind === "attachment");
-            const imageAttachments = attachments.filter((f) =>
-              f.mime_type.startsWith("image/"),
-            );
-            const nonImageAttachments = attachments.filter(
-              (f) => !f.mime_type.startsWith("image/"),
-            );
-            return (
-              <TaskCard
-                key={task.id}
-                title={task.title}
-                statusOptions={buildStatusMenuOptions()}
-                statusId={meta?.id ?? "assigned"}
-                onStatusChange={(nextStatusId) => requestStatusChange(task, nextStatusId)}
-                priority={task.priority}
-                dueLabel={formatDueLabel(task)}
-                startLabel={formatStartLabel(task)}
-                readOnly={isPast || isViewer}
-                dimmed={isPast}
-                canManage={canManageTasks}
-                isOverdue={
-                  task.status !== "done" && !!task.due_at && new Date(task.due_at) < new Date()
-                }
-                subtaskCountLabel={`${task.subtasks.filter((s) => s.checked).length}/${task.subtasks.length}`}
-                fileCount={attachments.length}
-                members={task.members.map(toTaskMemberCard)}
-                statusLabel={meta ? t(meta.labelKey) : ""}
-                statusColor={meta?.color ?? "gray"}
-                expanded={expanded}
-                onToggleExpanded={() => toggleExpanded(task.id)}
-                description={task.description_type === "text" ? (task.description ?? "") : ""}
-                descriptionAudio={
-                  descriptionAudioFile
-                    ? { url: descriptionAudioFile.url, durationLabel: "0:00" }
-                    : undefined
-                }
-                projectTag={projects.find((p) => p.id === task.project_id)?.name ?? ""}
-                subtasks={task.subtasks.map((s) => ({
-                  id: String(s.id),
-                  label: s.name,
-                  checked: s.checked,
-                }))}
-                onSubtaskChange={(id, checked) =>
-                  updateTask.mutate(
-                    {
-                      taskId: String(task.id),
-                      payload: {
-                        subtasks: task.subtasks.map((s) => ({
-                          name: s.name,
-                          checked: String(s.id) === id ? checked : s.checked,
-                        })),
-                      },
-                    },
-                    { onError: (err) => errorToast.show(getApiErrorMessage(err)) },
-                  )
-                }
-                photos={imageAttachments.map((f) => ({
-                  id: String(f.id),
-                  url: f.url,
-                }))}
-                files={nonImageAttachments.map((f) => ({
-                  id: String(f.id),
-                  name: f.file_name,
-                  sizeLabel: `${Math.round(f.size_bytes / 1024)} KB`,
-                }))}
-                onDownloadFile={(id) => {
-                  const file = task.files.find((f) => String(f.id) === id);
-                  if (file) window.open(file.url, "_blank", "noopener,noreferrer");
-                }}
-                onAttachFile={() => {}}
-                onDelete={() => setDeletingTaskId(String(task.id))}
-                onEdit={() => setEditingTaskId(String(task.id))}
-              />
-            );
-          })
+          tasks.map((task) => renderTaskCard(task))
         )}
         </motion.div>
         </>
         )}
       </div>
+
+      {/* Kanban'da karta bosilganda — to'liq TaskCard pastdan chiqadi */}
+      <CusDrawer
+        open={boardTaskId !== null}
+        onClose={() => setBoardTaskId(null)}
+        placement="bottom"
+        title={boardTask?.title}
+      >
+        {boardTask && renderTaskCard(boardTask, true)}
+      </CusDrawer>
 
       <CusDialog
         open={pendingStatusChange !== null}
