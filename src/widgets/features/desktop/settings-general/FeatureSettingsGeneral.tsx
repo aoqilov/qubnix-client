@@ -3,14 +3,12 @@ import { useState } from "react";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
 import { CusButton } from "@/components/ui/buttons/CusButton";
-import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { RoleGate } from "@/components/shared/role-gate/RoleGate";
 import { useRenameOrganization } from "@/components/shared/settings/general/hooks/useApiSettingsGeneral";
-import { MOCK_PRO_STATUS } from "@/components/shared/settings/general/lib/mockGeneralSettings";
+import { OrgSubscriptionCard } from "@/components/shared/settings/general/OrgSubscriptionCard";
 import { WORKSPACE_ROLES } from "@/const/roles";
 import { useSelectedOrganization, type SettingsWorkspace } from "@/hooks/useApiSettings";
 import { useWorkspaceStore } from "@/store/workspace.store";
-import { daysLabel } from "@/utils/countLabels";
 import { SettingsSectionHeader } from "@/widgets/features/desktop/settings/components/SettingsSectionHeader";
 
 const CARD_STYLE = { borderColor: "var(--border-subtle)" };
@@ -67,33 +65,12 @@ export default function FeatureSettingsGeneral() {
           )}
         </RoleGate>
 
-        {!isPersonal && (
-          <CusCardbox className="flex flex-col gap-3 rounded-card bg-surface" style={CARD_STYLE}>
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-base font-semibold text-primary">{t("settings.general.proMode")}</span>
-              <CusBadge tone="success">{t("settings.general.active")}</CusBadge>
-            </div>
-
-            <span className="text-sm text-secondary">
-              {t("settings.general.remaining", {
-                label: daysLabel(MOCK_PRO_STATUS.daysLeft),
-                date: MOCK_PRO_STATUS.untilDate,
-              })}
-            </span>
-
-            <div className="h-2 w-full overflow-hidden rounded-full bg-surface-secondary">
-              <div className="h-full rounded-full bg-brand" style={{ width: `${MOCK_PRO_STATUS.percent}%` }} />
-            </div>
-
-            {/* Tarif uzaytirish oqimi hali ulanmagan — mobile'dagi kabi tugma ishlamaydi. */}
-            <RoleGate roles={ownerRoles} allow={[WORKSPACE_ROLES.OWNER]}>
-              <div>
-                <CusButton style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}>
-                  {t("settings.general.extend")}
-                </CusButton>
-              </div>
-            </RoleGate>
-          </CusCardbox>
+        {!isPersonal && organizationQuery.data && (
+          <OrgSubscriptionCard
+            key={organizationQuery.data.id}
+            organization={organizationQuery.data}
+            variant="dialog"
+          />
         )}
       </div>
     </div>

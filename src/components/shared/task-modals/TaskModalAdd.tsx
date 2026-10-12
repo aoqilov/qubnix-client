@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import type React from "react";
 import { Drawer } from "@chakra-ui/react";
@@ -27,6 +28,11 @@ import {
   type VoiceNoteValue,
 } from "./components/VoiceNoteRecorder";
 import { AssigneeChecklist } from "./components/AssigneeChecklist";
+import { parseDate } from "@internationalized/date";
+import { getDayKind } from "@/utils/apiDate";
+import { DueRangeSummary } from "./components/DueRangeSummary";
+import { buildTaskStartAt } from "@/utils/taskStartAt";
+import { IconSegment } from "@/components/shared/icon-segment/IconSegment";
 
 export type TaskPriority = "high" | "medium" | "low";
 
@@ -74,6 +80,11 @@ interface TaskModalAddProps {
    * "split" — desktop: markazdagi keng dialog, ikkala qism yonma-yon, qadamlarsiz.
    */
   layout?: "steps" | "split";
+  /**
+   * `YYYY-MM-DD` — kalendarda tanlangan kun. Kelajak kuni bo'lsa forma "sana tanlash" rejimida shu sana
+   * bilan ochiladi (`start_at` ham shundan yoziladi); bugun/o'tgan kunda e'tiborga olinmaydi.
+   */
+  initialDate?: string;
 }
 
 const QUICK_TIMES = ["09:00", "12:00", "15:00", "18:00", "21:00"];
@@ -94,37 +105,6 @@ const PRIORITY_OPTIONS: {
 ];
 
 const PRIORITY_ICON = <IoFlagSharp size={14} />;
-
-function IconToggle({
-  icon,
-  active,
-  ariaLabel,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  active: boolean;
-  ariaLabel: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={ariaLabel}
-      onClick={onClick}
-      className="flex size-9 items-center justify-center rounded-full"
-      style={
-        active
-          ? {
-              background: "var(--brand-default)",
-              color: "var(--text-on-brand)",
-            }
-          : { color: "var(--text-secondary)" }
-      }
-    >
-      {icon}
-    </button>
-  );
-}
 
 function Pill({
   label,
@@ -200,8 +180,10 @@ function TaskModalAdd({
   isLoadingMembers,
   hideMembers = false,
   layout = "steps",
+  initialDate,
 }: TaskModalAddProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [step, setStep] = useState<1 | 2>(1);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const descriptionInputRef = useRef<HTMLTextAreaElement>(null);
@@ -245,11 +227,12 @@ function TaskModalAdd({
     setDescriptionMode("text");
     setDescription("");
     setVoiceNote(null);
-    setDueMode("quick");
+    const presetDate = initialDate && getDayKind(initialDate) === "future" ? parseDate(initialDate) : null;
+    setDueMode(presetDate ? "custom" : "quick");
     const firstAvailableQuickTime = QUICK_TIMES.find((t) => !isPastQuickTime(t));
     setQuickTime(firstAvailableQuickTime ?? QUICK_TIMES[0]);
     setIsCustomQuickTime(!firstAvailableQuickTime);
-    setCustomDate(undefined);
+    setCustomDate(presetDate ? [presetDate] : undefined);
     setCustomTime("");
     setAssigneeIds([]);
     setPriority("medium");
@@ -257,6 +240,7 @@ function TaskModalAdd({
     setSubtasks([]);
     setFiles([]);
     setIsSubmitting(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- forma faqat ochilganda qayta boshlanadi
   }, [open]);
 
   const selectedAssignees = members.filter((m) => assigneeIds.includes(m.id));
@@ -333,6 +317,11 @@ function TaskModalAdd({
     onClose();
   }
 
+  function handleAddMember() {
+    handleClose();
+    navigate("/settings/members");
+  }
+
   function buildDueAt(): string | null {
     if (dueMode === "quick") {
       const [hh, mm] = quickTime.split(":").map(Number);
@@ -347,11 +336,8 @@ function TaskModalAdd({
     return new Date(v.year, v.month - 1, v.day, hh, mm, 0, 0).toISOString();
   }
 
-  /** Oraliq tanlangan bo'lsa — oraliq boshi, kun boshiga (00:00); bitta sana yoki tezkor rejimda null. */
   function buildStartAt(): string | null {
-    if (dueMode !== "custom" || !customDate || customDate.length < 2) return null;
-    const v = customDate[0];
-    return new Date(v.year, v.month - 1, v.day, 0, 0, 0, 0).toISOString();
+    return buildTaskStartAt(dueMode, customDate);
   }
 
   async function handleSubmit() {
@@ -400,20 +386,14 @@ function TaskModalAdd({
                 <span className="text-xs font-medium uppercase tracking-wide text-secondary">
                   {t(DUE_SECTION_LABEL[activeDueIcon])}
                 </span>
-                <div className="flex gap-1 rounded-full border border-default bg-surface p-1">
-                  <IconToggle
-                    icon={<LuCalendar size={16} />}
-                    ariaLabel={t("tasks.modal.pickDate")}
-                    active={activeDueIcon === "custom"}
-                    onClick={() => setDueMode("custom")}
-                  />
-                  <IconToggle
-                    icon={<LuClock size={16} />}
-                    ariaLabel={t("tasks.modal.quickTime")}
-                    active={activeDueIcon === "quick"}
-                    onClick={() => setDueMode("quick")}
-                  />
-                </div>
+                <IconSegment
+                  value={activeDueIcon}
+                  onChange={setDueMode}
+                  options={[
+                    { value: "custom", icon: <LuCalendar size={16} />, ariaLabel: t("tasks.modal.pickDate") },
+                    { value: "quick", icon: <LuClock size={16} />, ariaLabel: t("tasks.modal.quickTime") },
+                  ]}
+                />
               </div>
               {activeDueIcon === "quick" && (
                 <>
@@ -462,7 +442,7 @@ function TaskModalAdd({
                     modalTitle={t("tasks.modal.pickDateTitle")}
                   />
                   <CusTimepicker
-                    label={t("tasks.modal.time")}
+                    label={t("tasks.modal.endTime")}
                     placeholder={t("ui.timepicker.placeholder")}
                     value={customTime}
                     onChange={setCustomTime}
@@ -470,6 +450,7 @@ function TaskModalAdd({
                     modalTitle={t("tasks.modal.pickTimeTitle")}
                     minTime={customMinTime}
                   />
+                  <DueRangeSummary startAt={buildStartAt()} endAt={buildDueAt()} />
                 </div>
               )}
             </div>
@@ -485,6 +466,7 @@ function TaskModalAdd({
                   selectedIds={assigneeIds}
                   onToggle={toggleAssignee}
                   isLoading={isLoadingMembers}
+                  onAddMember={handleAddMember}
                 />
               </div>
             )}

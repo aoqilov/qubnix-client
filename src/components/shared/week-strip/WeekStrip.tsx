@@ -1,8 +1,7 @@
 import type React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
-import type { CalendarDayCell } from "../types";
-import { toDateKey } from "@/utils/weekDays";
+import { toDateKey, type WeekDayCell } from "@/utils/weekDays";
 
 const navButtonStyle: React.CSSProperties = {
   width: 34,
@@ -12,21 +11,22 @@ const navButtonStyle: React.CSSProperties = {
   background: "var(--bg-surface)",
 };
 
-interface CalendarWeekStripProps {
-  days: CalendarDayCell[];
+interface WeekStripProps {
+  days: WeekDayCell[];
   direction: number;
   onSelectDay: (date: Date) => void;
   onPrevWeek: () => void;
   onNextWeek: () => void;
 }
 
-export function CalendarWeekStrip({
+/** Haftalik kun lentasi (mobil) — /calendar va /tasks umumiy. */
+export function WeekStrip({
   days,
   direction,
   onSelectDay,
   onPrevWeek,
   onNextWeek,
-}: CalendarWeekStripProps) {
+}: WeekStripProps) {
   const weekKey = toDateKey(days[0].date);
 
   return (

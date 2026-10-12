@@ -5,7 +5,7 @@ import { useIntlLocale } from "@/i18n/useIntlLocale";
 import type { WeekDayCell } from "@/utils/weekDays";
 import { toDateKey } from "@/utils/weekDays";
 
-interface CalendarWeekStripProps {
+interface WeekStripWideProps {
   days: WeekDayCell[];
   onSelectDay: (date: Date) => void;
   onPrevWeek: () => void;
@@ -24,7 +24,7 @@ const weekVariants = {
   exit: (direction: number) => ({ x: direction * -48, opacity: 0 }),
 };
 
-export function CalendarWeekStrip({ days, onSelectDay, onPrevWeek, onNextWeek }: CalendarWeekStripProps) {
+export function WeekStripWide({ days, onSelectDay, onPrevWeek, onNextWeek }: WeekStripWideProps) {
   const intlLocale = useIntlLocale();
   const weekdayName = (date: Date) => {
     const name = new Intl.DateTimeFormat(intlLocale, { weekday: "long" }).format(date);

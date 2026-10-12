@@ -98,6 +98,16 @@ export function useProjectsByDate(organizationId: string | null, date: string) {
   });
 }
 
+/** Sanaga bog'lanmagan to'liq loyihalar ro'yxati (a'zolari bilan) — vazifa qo'shishda loyiha tanlash uchun. */
+export function useAllProjects(organizationId: string | null) {
+  return useQuery({
+    queryKey: ["organizations", organizationId, "projects", "all"] as const,
+    queryFn: () => projectsApi.list(organizationId!, { limit: 100 }),
+    select: (data) => data.projects,
+    enabled: !!organizationId,
+  });
+}
+
 export function useTasksList(
   organizationId: string | null,
   projectId: string,

@@ -2,8 +2,13 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { parseDate } from "@internationalized/date";
-import { LuCalendarDays } from "react-icons/lu";
+import { LuCalendarDays, LuPlus } from "react-icons/lu";
+import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
+import { CusToasterFull, useToasterFull } from "@/components/ui/toaster/CusToasterFull";
+import { ProjectPickerDrawer } from "@/components/shared/project-picker/ProjectPickerDrawer";
+import TaskModalAdd from "@/components/shared/task-modals/TaskModalAdd";
+import { useCalendarAddTask } from "@/hooks/useCalendarAddTask";
 import { CusPageTitle } from "@/components/ui/page-title/CusPageTitle";
 import { CusCalendar } from "@/components/ui/calendar/CusCalendar";
 import { useCalendarDay } from "@/hooks/useApiCalendar";
@@ -23,7 +28,7 @@ import {
   CalendarProjectsGrid,
   type CalendarProjectSummary,
 } from "./components/CalendarProjectsGrid";
-import { CalendarWeekStrip } from "./components/CalendarWeekStrip";
+import { WeekStripWide } from "@/components/shared/week-strip/WeekStripWide";
 
 const EMPTY_TOTALS: TaskStatusTotals = {
   total: 0,
@@ -40,6 +45,13 @@ export default function FeatureCalendar() {
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [isCalendarOpen, setCalendarOpen] = useState(false);
+
+  const toaster = useToasterFull();
+  const addTask = useCalendarAddTask({
+    organizationId,
+    date: selectedDate,
+    onError: (message) => toaster.show(message, "error"),
+  });
 
   const days = useMemo(
     () => buildWeekDays(weekStart, selectedDate),
@@ -87,6 +99,15 @@ export default function FeatureCalendar() {
         subtitle={formatMonthLabel(weekStart)}
         action={
           <div className="flex items-center gap-2">
+            {addTask.canAdd && (
+              <CusButton
+                leftIcon={<LuPlus size={16} />}
+                onClick={addTask.start}
+                style={{ background: "var(--brand-default)", color: "var(--text-on-brand)" }}
+              >
+                {t("tasks.card.addTask")}
+              </CusButton>
+            )}
             {!isTodayView && (
               <button
                 type="button"
@@ -107,7 +128,7 @@ export default function FeatureCalendar() {
         }
       />
 
-      <CalendarWeekStrip
+      <WeekStripWide
         days={days}
         onSelectDay={setSelectedDate}
         onPrevWeek={() => setWeekStart((prev) => addDays(prev, -7))}
@@ -145,6 +166,11 @@ export default function FeatureCalendar() {
           }}
         />
       </CusDialog>
+
+      <ProjectPickerDrawer variant="dialog" {...addTask.picker} />
+      <TaskModalAdd layout="split" {...addTask.modal} />
+
+      <CusToasterFull items={toaster.items} onRemove={toaster.remove} />
     </div>
   );
 }

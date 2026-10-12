@@ -5,10 +5,13 @@ interface PageTitleDynamicProps {
   title: string;
   /** Tayyor formatlangan sana matni — masalan "СРЕДА - 14.09.2026". Boshqa sana tanlanganda badge (yopish tugmasi bilan) ham berilishi mumkin. */
   date: ReactNode;
-  doneCount: number;
-  totalCount: number;
+  /** Berilmasa o'ng tomondagi "0/0 Выполнено" hisoblagichi chiqmaydi (sahifa uni boshqa joyda ko'rsatadi). */
+  doneCount?: number;
+  totalCount?: number;
   /** Masalan "Выполнено" — holat matni. */
-  statusLabel: string;
+  statusLabel?: string;
+  /** O'ng yuqori burchakdagi qo'shimcha element (masalan sana rejimi toggle'i). Hisoblagich bilan birga berilmaydi. */
+  action?: ReactNode;
   /** Holat rangi — default muvaffaqiyat (yashil); kechikkan/ogohlantirish holatlari uchun status token'laridan biri beriladi. */
   statusColor?: string;
 }
@@ -19,6 +22,7 @@ function PageTitleDynamic({
   doneCount,
   totalCount,
   statusLabel,
+  action,
   statusColor = "var(--status-success-solid, #10B981)",
 }: PageTitleDynamicProps) {
   return (
@@ -46,6 +50,8 @@ function PageTitleDynamic({
         </span>
       </div>
 
+      {action}
+      {doneCount !== undefined && totalCount !== undefined && (
       <div className="flex flex-col items-end gap-1">
         <span
           style={{
@@ -68,6 +74,7 @@ function PageTitleDynamic({
           {statusLabel}
         </span>
       </div>
+      )}
     </div>
   );
 }

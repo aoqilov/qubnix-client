@@ -17,6 +17,9 @@ const calendar = {
     left: "Осталось — {{count}}",
     planned: "Запланировано задач — {{count}}",
   },
+  addTask: {
+    pickProject: "Выберите проект",
+  },
   projects: {
     title: "Проекты",
     overdue: "Просрочено",

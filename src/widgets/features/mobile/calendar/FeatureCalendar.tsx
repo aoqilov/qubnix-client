@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type React from "react";
 import { useNavigate } from "react-router-dom";
 import { parseDate } from "@internationalized/date";
@@ -8,11 +8,17 @@ import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusCalendar } from "@/components/ui/calendar/CusCalendar";
 import { CalendarDayInfoBox } from "./components/CalendarDayInfoBox";
 import { CalendarProjectsCard } from "./components/CalendarProjectsCard";
-import { CalendarWeekStrip } from "./components/CalendarWeekStrip";
-import { addDays, buildWeekDays, formatMonthLabel, getWeekStart, toDateKey } from "@/utils/weekDays";
+import { WeekStrip } from "@/components/shared/week-strip/WeekStrip";
+import { useWeekStrip } from "@/components/shared/week-strip/useWeekStrip";
+import { formatMonthLabel, toDateKey } from "@/utils/weekDays";
 import { useCalendarDay } from "@/hooks/useApiCalendar";
 import type { CalendarProjectSummary, DayTaskStats } from "./types";
 import { getDayKind, toApiDate } from "@/utils/apiDate";
+import { useCalendarAddTask } from "@/hooks/useCalendarAddTask";
+import { ProjectPickerDrawer } from "@/components/shared/project-picker/ProjectPickerDrawer";
+import TaskAddButton, { TASK_ADD_BUTTON_OFFSET } from "@/components/shared/task-button/TaskAddButton";
+import TaskModalAdd from "@/components/shared/task-modals/TaskModalAdd";
+import { ErrorToast, useErrorToast } from "@/components/shared/error-toast/ErrorToast";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { initialsOf, toDayStats } from "@/utils/calendarDay";
 
@@ -31,11 +37,8 @@ export default function FeatureCalendar() {
   const navigate = useNavigate();
   const organizationId = useWorkspaceStore((s) => s.selectedWorkspaceId);
   const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
-  const [direction, setDirection] = useState(0);
   const [isCalendarOpen, setCalendarOpen] = useState(false);
-
-  const days = useMemo(() => buildWeekDays(weekStart, selectedDate), [weekStart, selectedDate]);
+  const { days, direction, weekStart, shiftWeek, showWeekOf } = useWeekStrip(selectedDate);
 
   const dayQuery = useCalendarDay(organizationId, toApiDate(selectedDate));
   const dayStats = dayQuery.data ? toDayStats(dayQuery.data.totals) : EMPTY_STATS;
@@ -51,10 +54,12 @@ export default function FeatureCalendar() {
     isOverdue: p.totals.not_done > 0,
   }));
 
-  function shiftWeek(offsetDays: number) {
-    setDirection(offsetDays > 0 ? 1 : -1);
-    setWeekStart((prev) => addDays(prev, offsetDays));
-  }
+  const errorToast = useErrorToast();
+  const addTask = useCalendarAddTask({
+    organizationId,
+    date: selectedDate,
+    onError: errorToast.show,
+  });
 
   // Loyiha ustiga bosilganda /tasks'ga shu kun va shu loyiha tab'i bilan
   // o'tadi — ro'yxat "bugun"/birinchi loyiha emas, tanlangan kontekstda ochiladi.
@@ -63,17 +68,16 @@ export default function FeatureCalendar() {
   }
 
   function handlePickDate(date: Date) {
-    const newWeekStart = getWeekStart(date);
-    setDirection(
-      newWeekStart.getTime() === weekStart.getTime() ? 0 : newWeekStart.getTime() > weekStart.getTime() ? 1 : -1
-    );
+    showWeekOf(date);
     setSelectedDate(date);
-    setWeekStart(newWeekStart);
     setCalendarOpen(false);
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div
+      className="flex flex-col gap-4 p-4"
+      style={{ paddingBottom: addTask.canAdd ? `calc(${TASK_ADD_BUTTON_OFFSET} + 56px + 12px)` : undefined }}
+    >
       {/* title */}
       <div className="flex items-end justify-between gap-3">
         <div>
@@ -91,7 +95,7 @@ export default function FeatureCalendar() {
       </div>
 
       {/* calendar content */}
-      <CalendarWeekStrip
+      <WeekStrip
         days={days}
         direction={direction}
         onSelectDay={setSelectedDate}
@@ -110,6 +114,14 @@ export default function FeatureCalendar() {
         isLoading={dayQuery.isPending && !!organizationId}
         isError={dayQuery.isError}
       />
+
+      {addTask.canAdd && <TaskAddButton onClick={addTask.start} />}
+
+      <ProjectPickerDrawer {...addTask.picker} />
+
+      <TaskModalAdd {...addTask.modal} />
+
+      <ErrorToast message={errorToast.message} onClose={errorToast.hide} />
 
       <CusDialog open={isCalendarOpen} onClose={() => setCalendarOpen(false)} title={t("calendar.pickDate")} centered size="sm">
         <CusCalendar

@@ -37,8 +37,7 @@ const settings: typeof ru = {
   },
   general: {
     orgName: "Tashkilot nomi",
-    proMode: "PRO rejim",
-    active: "Faol",
+    subscriptionError: "Obunani yuklab bo'lmadi",
     remaining: "{{label}} qoldi — {{date}} gacha",
     extend: "Obunani uzaytirish",
   },

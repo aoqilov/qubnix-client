@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useState, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useSwipeNav } from "@/hooks/useSwipeNav";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { useSessionStore } from "@/store/session.store";
@@ -19,18 +19,22 @@ import {
   LuPlus,
   LuListChecks,
   LuTriangleAlert,
-  LuX,
+  LuCalendar,
+  LuClock,
 } from "react-icons/lu";
 import type { TaskStatusColor } from "@/components/shared/task-card/mini-components/TaskStatusLabel";
 import { projectsApi } from "@/api/projects/projects.api";
 import type { RawTask, TaskStatus } from "@/api/tasks/tasks.types";
-import { fromApiDate, getDayKind, todayApiDate } from "@/utils/apiDate";
+import { fromApiDate, getDayKind, toApiDate, todayApiDate } from "@/utils/apiDate";
+import { useDateMode } from "@/hooks/useDateMode";
+import { IconSegment } from "@/components/shared/icon-segment/IconSegment";
+import { WeekStrip } from "@/components/shared/week-strip/WeekStrip";
+import { useWeekStrip } from "@/components/shared/week-strip/useWeekStrip";
 import { isTaskOverdue } from "@/utils/taskDateLabels";
 import { formatWeekdayDate } from "@/utils/formatWeekdayDate";
 import ProjectsTabs from "@/components/shared/project-tab/ProjectsTabs";
 import PageTitleDynamic from "@/components/shared/page-title-dynamic/PageTitleDynamic";
 import StatusTab from "@/components/shared/status-tab/StatusTab";
-import { CusBadge } from "@/components/ui/badge/CusBadge";
 import TaskCard from "@/components/shared/task-card/TaskCard";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -40,12 +44,13 @@ import { MembersFilterDrawer } from "./modals/MembersFilterDrawer";
 import TaskAddButton, {
   TASK_ADD_BUTTON_OFFSET,
 } from "@/components/shared/task-button/TaskAddButton";
+import { useTaskSubmit } from "@/hooks/useTaskSubmit";
+import { ErrorToast, useErrorToast } from "@/components/shared/error-toast/ErrorToast";
 import TaskModalAdd, { type TaskModalAddValues } from "@/components/shared/task-modals/TaskModalAdd";
 import TaskModalEdit, { type TaskModalEditValues } from "@/components/shared/task-modals/TaskModalEdit";
 import TaskModalDelete from "@/components/shared/task-modals/TaskModalDelete";
 import {
   toTaskMemberCard,
-  useCreateTask,
   useDeleteTask,
   useOrganizationRole,
   useProjectMembersForTask,
@@ -198,7 +203,9 @@ export default function FeatureTasks() {
 
   // Kalendardan aniq sana bilan kelinishi mumkin — bo'lmasa bugungi kun.
   const [selectedDate, setSelectedDate] = useState(() => navigationDate ?? todayApiDate());
-  const isToday = selectedDate === todayApiDate();
+  // Toggle: soat — bugun, kalendar — haftalik lenta (tanlov localStorage'da eslab qolinadi).
+  const { dateMode, showToday, onModeChange } = useDateMode(selectedDate, setSelectedDate);
+  const weekStrip = useWeekStrip(fromApiDate(selectedDate));
   // O'tgan kun — faqat ko'rish rejimi: vazifa qo'shish/o'zgartirish yopiq.
   const isPast = getDayKind(selectedDate) === "past";
 
@@ -335,66 +342,24 @@ export default function FeatureTasks() {
       !isPersonal && (isAddOpen || editingTaskId !== null),
     );
 
-  const [errorToast, setErrorToast] = useState<string | null>(null);
-  useEffect(() => {
-    if (!errorToast) return;
-    const t = setTimeout(() => setErrorToast(null), 4000);
-    return () => clearTimeout(t);
-  }, [errorToast]);
+  const errorToast = useErrorToast();
 
-  const createTask = useCreateTask(organizationId, activeTabId);
   const updateTask = useUpdateTask(organizationId, activeTabId);
   const deleteTask = useDeleteTask(organizationId, activeTabId);
   const uploadFile = useUploadTaskFile(organizationId, activeTabId);
   const removeFile = useRemoveTaskFile(organizationId, activeTabId);
 
+  const { addTask: submitNewTask } = useTaskSubmit({
+    organizationId,
+    projectId: activeTabId,
+    isPersonal,
+    currentUserId,
+  });
   const addTask = async (values: TaskModalAddValues) => {
-    if (!organizationId || !activeTabId) return;
     try {
-      let descriptionPayload: string | { type: "audio"; file_id: number } | undefined;
-      if (values.descriptionAudio) {
-        const audioFile = new File(
-          [values.descriptionAudio.blob],
-          "voice-note.webm",
-          { type: values.descriptionAudio.blob.type || "audio/webm" },
-        );
-        const uploaded = await uploadFile.mutateAsync({
-          file: audioFile,
-          kind: "description_audio",
-        });
-        descriptionPayload = { type: "audio", file_id: uploaded[0].id };
-      } else if (values.description) {
-        descriptionPayload = values.description;
-      }
-
-      let fileIds: number[] | undefined;
-      if (values.files.length > 0) {
-        const uploads = await Promise.all(
-          values.files.map((f) => uploadFile.mutateAsync({ file: f.file, kind: "attachment" })),
-        );
-        fileIds = uploads.flatMap((uploadedFiles) => uploadedFiles.map((f) => f.id));
-      }
-
-      // Personal workspace'da xodim tanlanmaydi — vazifa foydalanuvchining o'ziga biriktiriladi.
-      const members = isPersonal
-        ? currentUserId
-          ? [{ user_id: Number(currentUserId) }]
-          : []
-        : values.assignees.map((a) => ({ user_id: Number(a.id) }));
-      const subtasks = values.subtasks.map((s) => ({ name: s.label, checked: s.checked }));
-
-      await createTask.mutateAsync({
-        title: values.title,
-        members,
-        description: descriptionPayload,
-        priority: values.priority,
-        start_at: values.startAt,
-        due_at: values.dueAt,
-        file_ids: fileIds,
-        subtasks,
-      });
+      await submitNewTask(values);
     } catch (err) {
-      setErrorToast(getApiErrorMessage(err));
+      errorToast.show(getApiErrorMessage(err));
       // Qayta tashlanadi — TaskModalAdd shuni ko'rib, drawer'ni yopmay ochiq qoldiradi.
       throw err;
     }
@@ -457,7 +422,7 @@ export default function FeatureTasks() {
         },
       });
     } catch (err) {
-      setErrorToast(getApiErrorMessage(err));
+      errorToast.show(getApiErrorMessage(err));
       throw err;
     }
   };
@@ -470,7 +435,7 @@ export default function FeatureTasks() {
     if (!meta) return;
     updateTask.mutate(
       { taskId, payload: { status: meta.countKey } },
-      { onError: (err) => setErrorToast(getApiErrorMessage(err)) },
+      { onError: (err) => errorToast.show(getApiErrorMessage(err)) },
     );
   };
 
@@ -494,7 +459,7 @@ export default function FeatureTasks() {
   const requestStatusChange = (task: RawTask, nextStatusId: string) => {
     const blocked = blockedStatusReason(task, nextStatusId);
     if (blocked) {
-      setErrorToast(blocked);
+      errorToast.show(blocked);
       return;
     }
     const hasUnfinishedSubtasks = task.subtasks.some((s) => !s.checked);
@@ -509,27 +474,6 @@ export default function FeatureTasks() {
     ? tasks.find((t) => String(t.id) === pendingStatusChange.taskId)
     : undefined;
 
-  // Bugungi kun bo'lsa — oddiy matn; kalendardan boshqa sana bilan kelingan
-  // bo'lsa — yopish (X) tugmali badge, bosilsa yana bugunga qaytaradi.
-  const dateLabel = isToday ? (
-    formatWeekdayDate()
-  ) : (
-    <CusBadge
-      tone="brand"
-      variant="subtle"
-      size="lg"
-      rightIcon={
-        <LuX
-          size={14}
-          className="cursor-pointer"
-          onClick={() => setSelectedDate(todayApiDate())}
-        />
-      }
-    >
-      {formatWeekdayDate(fromApiDate(selectedDate))}
-    </CusBadge>
-  );
-
   return (
     <div>
       <div
@@ -540,10 +484,18 @@ export default function FeatureTasks() {
       >
         <PageTitleDynamic
           title={t("tasks.page.title")}
-          date={dateLabel}
-          doneCount={activeProjectCounts?.done ?? 0}
-          totalCount={activeProjectCounts?.total ?? 0}
-          statusLabel={t("common.taskStatus.done")}
+          date={formatWeekdayDate(fromApiDate(selectedDate))}
+          action={
+            <IconSegment
+              size="sm"
+              value={dateMode}
+              onChange={onModeChange}
+              options={[
+                { value: "calendar", icon: <LuCalendar size={14} />, ariaLabel: t("tasks.page.modeCalendar") },
+                { value: "today", icon: <LuClock size={14} />, ariaLabel: t("tasks.page.modeToday") },
+              ]}
+            />
+          }
         />
         {isPast && (
           <div
@@ -560,7 +512,7 @@ export default function FeatureTasks() {
               variant="outline"
               size="xs"
               rounded="9999px"
-              onClick={() => setSelectedDate(todayApiDate())}
+              onClick={showToday}
               style={{
                 borderColor: "var(--status-warning-text)",
                 color: "var(--status-warning-text)",
@@ -574,15 +526,38 @@ export default function FeatureTasks() {
           <NoProjectsState isPersonal={isPersonal} />
         ) : (
         <>
+        <AnimatePresence initial={false}>
+          {dateMode === "calendar" && (
+            <motion.div
+              key="week-strip"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              <WeekStrip
+                days={weekStrip.days}
+                direction={weekStrip.direction}
+                onSelectDay={(day) => setSelectedDate(toApiDate(day))}
+                onPrevWeek={() => weekStrip.shiftWeek(-7)}
+                onNextWeek={() => weekStrip.shiftWeek(7)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
         <ProjectsTabs
           tabs={projectTabs}
           activeId={activeTabId}
           onChange={setActiveTabId}
         />
         <div className="flex items-center gap-2">
-          <span className="mr-auto text-xs font-medium uppercase tracking-wide text-secondary">
-            {t("tasks.page.filter")}
-          </span>
+          <div className="mr-auto flex flex-col">
+            <span className="text-lg font-semibold leading-tight text-primary">
+              {activeProjectCounts?.done ?? 0}/{activeProjectCounts?.total ?? 0}
+            </span>
+            <span className="text-xs text-success">{t("common.taskStatus.done")}</span>
+          </div>
           <FilterSectionTask
             value={sort}
             onValueChange={(v) => setSort(v as keyof typeof SORT_TO_API)}
@@ -674,7 +649,7 @@ export default function FeatureTasks() {
                         })),
                       },
                     },
-                    { onError: (err) => setErrorToast(getApiErrorMessage(err)) },
+                    { onError: (err) => errorToast.show(getApiErrorMessage(err)) },
                   )
                 }
                 photos={imageAttachments.map((f) => ({
@@ -814,36 +789,13 @@ export default function FeatureTasks() {
         onConfirm={() => {
           if (deletingTaskId) {
             deleteTask.mutate(deletingTaskId, {
-              onError: (err) => setErrorToast(getApiErrorMessage(err)),
+              onError: (err) => errorToast.show(getApiErrorMessage(err)),
             });
           }
         }}
       />
 
-      {errorToast && (
-        <div
-          className="fixed inset-x-4 z-toast flex items-center gap-2 rounded-card border px-4 py-3 shadow-md"
-          style={{
-            // Telegram notch/header ostiga tushmasligi uchun safe-area + 16px
-            // (oddiy brauzerda o'zgaruvchilar yo'q — 16px qoladi).
-            top: "calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px) + 16px)",
-            background: "var(--status-error-bg)",
-            borderColor: "var(--status-error-text)",
-            color: "var(--status-error-text)",
-          }}
-        >
-          <LuTriangleAlert size={16} className="flex-none" />
-          <span className="flex-1 text-sm font-medium">{errorToast}</span>
-          <button
-            type="button"
-            aria-label={t("common.actions.close")}
-            onClick={() => setErrorToast(null)}
-            className="flex-none"
-          >
-            <LuX size={14} />
-          </button>
-        </div>
-      )}
+      <ErrorToast message={errorToast.message} onClose={errorToast.hide} />
     </div>
   );
 }

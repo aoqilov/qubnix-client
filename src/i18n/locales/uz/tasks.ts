@@ -2,6 +2,8 @@ import type ru from "../ru/tasks";
 
 const tasks: typeof ru = {
   page: {
+    modeToday: "Bugun",
+    modeCalendar: "Sanani tanlash",
     title: "Mening vazifalarim",
     pastBanner: "O'tgan kun — faqat ko'rish uchun",
     filter: "Filtr",
@@ -58,6 +60,7 @@ const tasks: typeof ru = {
   },
   assignees: {
     empty: "Xodimlar topilmadi",
+    addMember: "Xodim qo'shish",
   },
   steps: {
     step: "{{step}}/2-qadam",
@@ -83,6 +86,9 @@ const tasks: typeof ru = {
     datePlaceholder: "Sana",
     pickDateTitle: "Sanani tanlang",
     time: "Vaqt",
+    endTime: "Tugash vaqti",
+    startLabel: "Boshlanish",
+    endLabel: "Tugash",
     members: "Xodimlar",
     priority: "Muhimlik",
     subtasks: "Qo'shimcha vazifalar - sub-task",
@@ -115,7 +121,6 @@ const tasks: typeof ru = {
     doneOf: "bajarildi",
     viewList: "Ro'yxat",
     viewBoard: "Doska",
-    backToToday: "Bugunga qaytish",
   },
   details: {
     title: "Vazifa",

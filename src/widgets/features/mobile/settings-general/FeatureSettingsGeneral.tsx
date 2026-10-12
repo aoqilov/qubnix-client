@@ -1,17 +1,13 @@
-import { daysLabel } from "@/utils/countLabels";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { LuCheck } from "react-icons/lu";
 import { CusInput } from "@/components/ui/inputs/CusInput";
-import { CusCardbox } from "@/components/ui/cardbox/CusCardbox";
-import { CusButton } from "@/components/ui/buttons/CusButton";
-import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { SettingsBackHeader } from "@/widgets/features/mobile/settings/components/SettingsBackHeader";
 import { useSelectedOrganization } from "@/hooks/useApiSettings";
 import type { SettingsWorkspace } from "@/hooks/useApiSettings";
 import { useRenameOrganization } from "@/components/shared/settings/general/hooks/useApiSettingsGeneral";
-import { MOCK_PRO_STATUS } from "@/components/shared/settings/general/lib/mockGeneralSettings";
+import { OrgSubscriptionCard } from "@/components/shared/settings/general/OrgSubscriptionCard";
 import { RoleGate } from "@/components/shared/role-gate/RoleGate";
 import { WORKSPACE_ROLES } from "@/const/roles";
 
@@ -83,41 +79,8 @@ export default function FeatureSettingsGeneral() {
         )}
       </RoleGate>
 
-      {!isPersonal && (
-        <CusCardbox className="flex flex-col gap-3 rounded-input">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-base font-semibold text-primary">{t("settings.general.proMode")}</span>
-            <CusBadge tone="success">{t("settings.general.active")}</CusBadge>
-          </div>
-
-          <span className="text-sm text-secondary">
-            {t("settings.general.remaining", {
-              label: daysLabel(MOCK_PRO_STATUS.daysLeft),
-              date: MOCK_PRO_STATUS.untilDate,
-            })}
-          </span>
-
-          <div className="h-2 w-full overflow-hidden rounded-full bg-surface-secondary">
-            <div
-              className="h-full rounded-full bg-brand"
-              style={{ width: `${MOCK_PRO_STATUS.percent}%` }}
-            />
-          </div>
-
-          <RoleGate roles={ownerRoles} allow={[WORKSPACE_ROLES.OWNER]}>
-            <CusButton
-              className="w-full"
-              size="lg"
-              rounded="9999px"
-              style={{
-                background: "var(--brand-default)",
-                color: "var(--text-on-brand)",
-              }}
-            >
-              {t("settings.general.extend")}
-            </CusButton>
-          </RoleGate>
-        </CusCardbox>
+      {!isPersonal && organizationQuery.data && (
+        <OrgSubscriptionCard key={organizationQuery.data.id} organization={organizationQuery.data} />
       )}
     </div>
   );

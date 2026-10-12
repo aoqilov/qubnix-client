@@ -2,9 +2,12 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState, forwardRef } from "react";
 import type React from "react";
 import { useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   LuArrowUpDown,
+  LuCalendar,
   LuChevronDown,
+  LuClock,
   LuFolderOpen,
   LuKanban,
   LuList,
@@ -35,7 +38,11 @@ import { useTaskPermissions } from "@/hooks/useTaskPermissions";
 import { useTaskSubmit } from "@/hooks/useTaskSubmit";
 import { useIntlLocale } from "@/i18n/useIntlLocale";
 import { getApiErrorMessage } from "@/utils/apiErrorMessage";
-import { fromApiDate, getDayKind, todayApiDate } from "@/utils/apiDate";
+import { fromApiDate, getDayKind, toApiDate, todayApiDate } from "@/utils/apiDate";
+import { useDateMode } from "@/hooks/useDateMode";
+import { IconSegment } from "@/components/shared/icon-segment/IconSegment";
+import { WeekStripWide } from "@/components/shared/week-strip/WeekStripWide";
+import { useWeekStrip } from "@/components/shared/week-strip/useWeekStrip";
 import { isTaskOverdue } from "@/utils/taskDateLabels";
 import {
   toTaskMemberCard,
@@ -98,6 +105,9 @@ export default function FeatureTasks() {
   // Sana /calendar'dan keladi; bo'lmasa — bugun.
   const [selectedDate, setSelectedDate] = useState(() => navigationState?.date ?? todayApiDate());
   const isToday = selectedDate === todayApiDate();
+  // Toggle: soat — bugun, kalendar — haftalik lenta (tanlov localStorage'da eslab qolinadi).
+  const { dateMode, onModeChange } = useDateMode(selectedDate, setSelectedDate);
+  const weekStrip = useWeekStrip(fromApiDate(selectedDate));
   const isPast = getDayKind(selectedDate) === "past";
 
   // ── Loyihalar (tanlangan sana bo'yicha task_counts) ─────────────────────────
@@ -252,23 +262,18 @@ export default function FeatureTasks() {
         title={isToday ? t("tasks.desktop.titleToday") : t("tasks.desktop.titleDate", { date: dateLabel })}
         subtitle={
           <>
-            {counts?.done ?? 0}/{counts?.total ?? 0} {t("tasks.desktop.doneOf")}
+            {dateLabel} · <span className="uppercase">{weekday}</span>
           </>
         }
         action={
-          <div className="flex flex-col items-end gap-1 text-right">
-            <span className="text-2xl font-bold text-primary">{dateLabel}</span>
-            <span className="text-xs uppercase tracking-wide text-secondary">{weekday}</span>
-            {!isToday && (
-              <button
-                type="button"
-                onClick={() => setSelectedDate(todayApiDate())}
-                className="text-xs font-semibold text-brand hover:underline"
-              >
-                {t("tasks.desktop.backToToday")}
-              </button>
-            )}
-          </div>
+          <IconSegment
+            value={dateMode}
+            onChange={onModeChange}
+            options={[
+              { value: "calendar", icon: <LuCalendar size={16} />, ariaLabel: t("tasks.page.modeCalendar") },
+              { value: "today", icon: <LuClock size={16} />, ariaLabel: t("tasks.page.modeToday") },
+            ]}
+          />
         }
       />
 
@@ -286,6 +291,26 @@ export default function FeatureTasks() {
         />
       ) : (
         <>
+          <AnimatePresence initial={false}>
+            {dateMode === "calendar" && (
+              <motion.div
+                key="week-strip"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                <WeekStripWide
+                  days={weekStrip.days}
+                  onSelectDay={(day) => setSelectedDate(toApiDate(day))}
+                  onPrevWeek={() => weekStrip.shiftWeek(-7)}
+                  onNextWeek={() => weekStrip.shiftWeek(7)}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <ProjectsTabs
             tabs={projects.map((p) => ({
               id: String(p.id),
@@ -296,10 +321,10 @@ export default function FeatureTasks() {
             onChange={setActiveTabId}
           />
 
-          {/* Asboblar qatori: chapda saralash nomi, o'ngda filtrlar, ko'rinish va "+ Задача" */}
+          {/* Asboblar qatori: chapda bajarilgan/jami, o'ngda filtrlar, ko'rinish va "+ Задача" */}
           <div className="flex items-center gap-2">
-            <span className="mr-auto text-xs font-medium uppercase tracking-wide text-secondary">
-              {t(`tasks.sort.${sort}`)}
+            <span className="mr-auto text-base font-semibold text-brand">
+              {counts?.done ?? 0}/{counts?.total ?? 0} {t("tasks.desktop.doneOf")}
             </span>
             {canFilterByEmployee && (
               <ToolbarButton

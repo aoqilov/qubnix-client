@@ -18,6 +18,9 @@ const calendar: typeof ru = {
     left: "Qoldi — {{count}}",
     planned: "Rejalashtirilgan vazifalar — {{count}}",
   },
+  addTask: {
+    pickProject: "Loyihani tanlang",
+  },
   projects: {
     title: "Loyihalar",
     overdue: "Muddati o'tgan",

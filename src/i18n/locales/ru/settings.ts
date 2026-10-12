@@ -36,8 +36,7 @@ const settings = {
   },
   general: {
     orgName: "Название организации",
-    proMode: "PRO режим",
-    active: "Активно",
+    subscriptionError: "Не удалось загрузить подписку",
     remaining: "Осталось {{label}} — до {{date}}",
     extend: "Продлить подписку",
   },

@@ -18,6 +18,8 @@ import type { RawTask } from "@/api/tasks/tasks.types";
 import { StepIndicator } from "./components/StepIndicator";
 import { VoiceNoteRecorder, type VoiceNoteValue } from "./components/VoiceNoteRecorder";
 import { AssigneeChecklist } from "./components/AssigneeChecklist";
+import { DueRangeSummary } from "./components/DueRangeSummary";
+import { buildTaskStartAt } from "@/utils/taskStartAt";
 import type { TaskModalAddSubtask, TaskPriority } from "./TaskModalAdd";
 
 export interface ExistingTaskFile {
@@ -329,11 +331,8 @@ function TaskModalEdit({
     return new Date(v.year, v.month - 1, v.day, hh, mm, 0, 0).toISOString();
   }
 
-  /** Oraliq tanlangan bo'lsa — oraliq boshi, kun boshiga (00:00); bitta sana yoki tezkor rejimda null. */
   function buildStartAt(): string | null {
-    if (dueMode !== "custom" || !customDate || customDate.length < 2) return null;
-    const v = customDate[0];
-    return new Date(v.year, v.month - 1, v.day, 0, 0, 0, 0).toISOString();
+    return buildTaskStartAt(dueMode, customDate);
   }
 
   async function handleSubmit() {
@@ -448,7 +447,7 @@ function TaskModalEdit({
                     modalTitle={t("tasks.modal.pickDateTitle")}
                   />
                   <CusTimepicker
-                    label={t("tasks.modal.time")}
+                    label={t("tasks.modal.endTime")}
                     placeholder={t("ui.timepicker.placeholder")}
                     value={customTime}
                     onChange={setCustomTime}
@@ -456,6 +455,7 @@ function TaskModalEdit({
                     modalTitle={t("tasks.modal.pickTimeTitle")}
                     minTime={customMinTime}
                   />
+                  <DueRangeSummary startAt={buildStartAt()} endAt={buildDueAt()} />
                 </div>
               )}
             </div>

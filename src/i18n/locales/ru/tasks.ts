@@ -1,6 +1,8 @@
 // Vazifa kartasi, vazifa modallari (qo'shish/tahrirlash/o'chirish) va /tasks sahifasi.
 const tasks = {
   page: {
+    modeToday: "Сегодня",
+    modeCalendar: "Выбрать дату",
     title: "Мои задачи",
     pastBanner: "Прошедший день — только просмотр",
     filter: "Фильтр",
@@ -56,6 +58,7 @@ const tasks = {
   },
   assignees: {
     empty: "Сотрудники не найдены",
+    addMember: "Добавить сотрудника",
   },
   steps: {
     step: "Шаг {{step}}/2",
@@ -81,6 +84,9 @@ const tasks = {
     datePlaceholder: "Дата",
     pickDateTitle: "Выберите дату",
     time: "Время",
+    endTime: "Время окончания",
+    startLabel: "Начало",
+    endLabel: "Окончание",
     members: "Сотрудники",
     priority: "Приоритет",
     subtasks: "Дополнительные задачи - sub-task",
@@ -113,7 +119,6 @@ const tasks = {
     doneOf: "выполнено",
     viewList: "Список",
     viewBoard: "Доска",
-    backToToday: "К сегодняшнему дню",
   },
   details: {
     title: "Задача",

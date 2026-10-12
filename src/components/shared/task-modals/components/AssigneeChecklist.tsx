@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
+import { LuUserPlus } from "react-icons/lu";
+import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusCheckbox } from "@/components/ui/inputs/CusCheckbox";
 import { avatarColorVar } from "@/utils/avatarColor";
 import type { TaskCardMember } from "@/components/shared/task-card/mini-components/TaskAvatarGroup";
@@ -32,6 +34,8 @@ interface AssigneeChecklistProps {
   selectedIds: string[];
   onToggle: (id: string) => void;
   isLoading?: boolean;
+  /** Berilsa va ro'yxat bo'sh bo'lsa — "Odam qo'shish" tugmasi chiqadi. */
+  onAddMember?: () => void;
 }
 
 export function AssigneeChecklist({
@@ -39,6 +43,7 @@ export function AssigneeChecklist({
   selectedIds,
   onToggle,
   isLoading = false,
+  onAddMember,
 }: AssigneeChecklistProps) {
   const { t } = useTranslation();
   if (isLoading) {
@@ -46,7 +51,27 @@ export function AssigneeChecklist({
   }
 
   if (members.length === 0) {
-    return <p className="py-3 text-center text-sm text-secondary">{t("tasks.assignees.empty")}</p>;
+    return (
+      <div className="flex flex-col items-center gap-2 py-3">
+        <p className="text-center text-sm text-secondary">{t("tasks.assignees.empty")}</p>
+        {onAddMember && (
+          <CusButton
+            variant="outline"
+            size="sm"
+            rounded="9999px"
+            leftIcon={<LuUserPlus size={16} />}
+            onClick={onAddMember}
+            style={{
+              borderColor: "var(--border-default)",
+              background: "var(--bg-surface)",
+              color: "var(--text-primary)",
+            }}
+          >
+            {t("tasks.assignees.addMember")}
+          </CusButton>
+        )}
+      </div>
+    );
   }
 
   return (
