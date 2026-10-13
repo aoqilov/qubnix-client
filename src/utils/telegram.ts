@@ -13,11 +13,14 @@ const TG_CHROME_COLOR = {
 // Header/body fonini joriy mavzuga (dark/light) moslab qo'yamiz, aks holda
 // Telegram status-bar soat/ikonalari kontrast rangini noto'g'ri (masalan
 // qorong'u fonda qora matn) tanlab, ko'rinmay qolishi mumkin (Bot API 6.1+).
+// Bottom bar rangi Telegram Android'da tizim navigation bar'ining (gesture/3 tugma) rangi ham —
+// berilmasa Telegram'ning o'z mavzusidan oladi, dark ilovada oq bo'lib qoladi (Bot API 7.10+).
 export function syncTelegramChrome(isDark: boolean): void {
   const tg = webApp();
   const color = isDark ? TG_CHROME_COLOR.dark : TG_CHROME_COLOR.light;
   tg?.setHeaderColor?.(color);
   tg?.setBackgroundColor?.(color);
+  tg?.setBottomBarColor?.(color);
 }
 
 export function initTelegramWebApp(): void {

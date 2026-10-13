@@ -17,6 +17,8 @@ declare global {
         exitFullscreen?: () => void;
         setHeaderColor?: (color: string) => void;
         setBackgroundColor?: (color: string) => void;
+        /** Bot API 7.10+ — Android'da tizim navigation bar rangi ham shu. */
+        setBottomBarColor?: (color: string) => void;
         isVerticalSwipesEnabled?: boolean;
         enableVerticalSwipes?: () => void;
         disableVerticalSwipes?: () => void;
