@@ -19,7 +19,7 @@ const SAFE_TOP =
 const SAFE_BOTTOM =
   "calc(var(--tg-safe-area-inset-bottom, 0px) + var(--tg-content-safe-area-inset-bottom, 0px))";
 // Klaviatura ochiq bo'lsa home-indicator uning ostida qoladi — footer klaviaturaga yopishib tursin.
-const SAFE_BOTTOM_ABOVE_KEYBOARD = `max(0px, ${SAFE_BOTTOM} - var(--keyboard-inset, 0px))`;
+const SAFE_BOTTOM_ABOVE_KEYBOARD = `calc(${SAFE_BOTTOM} * (1 - var(--keyboard-open, 0)))`;
 
 interface CusDrawerProps {
   open: boolean;
