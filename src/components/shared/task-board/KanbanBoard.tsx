@@ -26,6 +26,8 @@ interface KanbanBoardProps {
   /**
    * "wide" (default) — desktop: 300px ustunlar, sichqoncha bilan sudrash.
    * "compact" — mobil: ekranning ~85% enidagi ustunlar (snap bilan suriladi), uzoq bosib sudrash.
+   * Board ota elementning balandligini to'liq egallaydi (ota balandligi aniq bo'lsin), har ustun
+   * o'zi alohida scroll bo'ladi — sarlavhasi tepada qoladi.
    */
   variant?: "wide" | "compact";
 }
@@ -107,7 +109,9 @@ function KanbanColumn({
           {tasks.length}
         </span>
       </div>
-      <div className="flex min-h-[80px] flex-col gap-2 overflow-y-auto">
+      <div
+        className={`flex flex-col gap-2 overflow-y-auto ${compact ? "min-h-0 flex-1" : "min-h-[80px]"}`}
+      >
         {tasks.map((task) => (
           <KanbanCard
             key={task.id}
@@ -164,7 +168,7 @@ export function KanbanBoard({
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div
         className={`flex gap-3 overflow-x-auto pb-2 ${
-          compact ? "-mx-4 snap-x snap-proximity scroll-px-4 px-4" : ""
+          compact ? "-mx-4 h-full snap-x snap-proximity scroll-px-4 px-4" : ""
         }`}
       >
         {columns.map((col) => (

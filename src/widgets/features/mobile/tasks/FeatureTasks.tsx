@@ -566,13 +566,23 @@ export default function FeatureTasks() {
 
   const [boardTaskId, setBoardTaskId] = useState<string | null>(null);
   const boardTask = tasks.find((task) => String(task.id) === boardTaskId);
+  const showAddButton = !isPast && canManageTasks && !hasNoProjects;
 
   return (
-    <div>
+    // Kanban'da sahifa scroll bo'lmaydi: board filtrlar ostidagi joyni to'liq egallaydi, ustunlar
+    // o'zi scroll bo'ladi. Boshqa bloklar qisqarmaydi (shrink-0); joy yetmasa board 280px'dan
+    // kichraymaydi — shunda sahifa scroll bo'ladi.
+    <div className={isBoard ? "h-full" : undefined}>
       <div
-        className="flex flex-col gap-3 p-4"
+        className={`flex flex-col gap-3 p-4 ${isBoard ? "h-full [&>*]:shrink-0" : ""}`}
         style={{
-          paddingBottom: `calc(${TASK_ADD_BUTTON_OFFSET} + 56px + 12px)`,
+          // Kanban'da ota sahifa qatlami tab bar joyini o'zi qoldiradi (PAGE_STYLE) — bu yerda faqat
+          // "Добавить задачу" tugmasi (56px) va uning ikki tomonidagi 12px bo'shliq.
+          paddingBottom: isBoard
+            ? showAddButton
+              ? "calc(12px + 56px + 12px)"
+              : undefined
+            : `calc(${TASK_ADD_BUTTON_OFFSET} + 56px + 12px)`,
         }}
       >
         <PageTitleDynamic
@@ -674,7 +684,10 @@ export default function FeatureTasks() {
           />
         )}
 
-        <motion.div {...(isBoard ? {} : swipeProps)} className="flex min-h-[50dvh] flex-col gap-3">
+        <motion.div
+          {...(isBoard ? {} : swipeProps)}
+          className={`flex flex-col gap-3 ${isBoard ? "min-h-[280px] flex-1" : "min-h-[50dvh]"}`}
+        >
         {tasksQuery.isPending ? (
           <>
             <TaskCardSkeleton />
@@ -797,7 +810,7 @@ export default function FeatureTasks() {
         onApply={setSelectedMemberIds}
       />
 
-      {!isPast && canManageTasks && !hasNoProjects && <TaskAddButton onClick={() => setIsAddOpen(true)} />}
+      {showAddButton && <TaskAddButton onClick={() => setIsAddOpen(true)} />}
 
       <TaskModalAdd
         open={isAddOpen}
